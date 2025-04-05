@@ -1,0 +1,16 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
+
+@import "tailwindcss";
+
+@font-face {
+	font-family: "Old English Text MT";
+	font-style: normal;
+	font-weight: 200 700;
+	font-display: swap;
+	src: url("/fonts/oldenglishtextmt.ttf") format("truetype");
+}
+
+@theme {
+	--font-sans: "Outfit", sans-serif;
+	--font-decor: "Old English Text MT", serif;
+}
