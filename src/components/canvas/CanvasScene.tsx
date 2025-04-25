@@ -1,20 +1,39 @@
-import React from "react";
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 import AnimatedText from "./AnimatedText";
 import HeroObject from "./HeroObject";
+import { memo } from "react";
+import { Canvas } from "@react-three/fiber";
+import { Stats } from "@react-three/drei";
 
-const CanvasScene = React.memo(() => {
+const CanvasScene = memo(() => {
 	return (
-		<Canvas camera={{ fov: 75, near: 0.1, far: 50, position: [0, 0, 5] }} style={{ width: "100vw", height: "100vh" }}>
-			<OrbitControls />
-			<gridHelper args={[10, 10]} position={[0, 0, 0]} />
-
-			<HeroObject />
+		<Canvas
+			style={{
+				width: "100vw",
+				height: "100vh",
+				position: "fixed"
+			}}
+			camera={{
+				fov: 75,
+				near: 0.1,
+				far: 10,
+				position: [0, 0, 5]
+			}}
+			dpr={[1, 2]}
+			gl={{
+				antialias: true,
+				powerPreference: "high-performance"
+			}}
+		>
+			<color attach="background" args={["#121212"]} />
 
 			<AnimatedText />
+			<HeroObject />
+
+			<Stats />
 		</Canvas>
 	);
 });
+
+CanvasScene.displayName = "CanvasScene";
 
 export default CanvasScene;
