@@ -22,8 +22,6 @@ interface InfiniteTextProps extends BaseInfiniteTextProps {
 	direction?: number;
 }
 
-interface ScrollInfiniteTextProps extends BaseInfiniteTextProps {}
-
 const useInfiniteTextAnimation = (
 	baseVelocity: number,
 	direction: number | ((delta: number) => number),
@@ -54,7 +52,7 @@ const useInfiniteTextAnimation = (
 
 	useAnimationFrame((_, delta) => {
 		if (childRef.current) {
-			const moveBy = (typeof direction === 'function' ? direction(delta) : direction) * baseVelocity * (delta / 1000);
+			const moveBy = (typeof direction === "function" ? direction(delta) : direction) * baseVelocity * (delta / 1000);
 			baseX.set(baseX.get() + moveBy);
 
 			if (childWidth.get() !== childRef.current.offsetWidth) {
@@ -74,22 +72,18 @@ export function InfiniteText({
 	textStyle = ""
 }: InfiniteTextProps) {
 	const childRef = useRef<HTMLElement | null>(null);
-	const { containerRef, childMultiply, x } = useInfiniteTextAnimation(
-		baseVelocity,
-		direction,
-		childRef
-	);
+	const { containerRef, childMultiply, x } = useInfiniteTextAnimation(baseVelocity, direction, childRef);
 
 	return (
 		<div ref={containerRef} className="w-full overflow-x-clip">
 			<motion.div className={`transform-gpu whitespace-nowrap ${containerStyle}`} style={{ x }}>
 				<span ref={childRef} className={textStyle}>
-					{typeof children === 'string' ? `${children} ` : children}
+					{typeof children === "string" ? `${children} ` : children}
 				</span>
 
 				{Array.from({ length: childMultiply }).map((_, i) => (
 					<span key={i} className={textStyle}>
-						{typeof children === 'string' ? `${children} ` : children}
+						{typeof children === "string" ? `${children} ` : children}
 					</span>
 				))}
 			</motion.div>
@@ -102,7 +96,7 @@ export function ScrollInfiniteText({
 	baseVelocity = 10,
 	containerStyle = "",
 	textStyle = ""
-}: ScrollInfiniteTextProps) {
+}: BaseInfiniteTextProps) {
 	const { scrollY } = useScroll();
 	const scrollVelocity = useVelocity(scrollY);
 	const smoothVelocity = useSpring(scrollVelocity, { damping: 100, stiffness: 700 });
@@ -131,12 +125,12 @@ export function ScrollInfiniteText({
 		<div ref={containerRef} className="w-full overflow-x-clip">
 			<motion.div className={`${containerStyle} whitespace-nowrap transform-gpu`} style={{ x }}>
 				<span ref={childRef} className={textStyle}>
-					{typeof children === 'string' ? `${children} ` : children}
+					{typeof children === "string" ? `${children} ` : children}
 				</span>
 
 				{Array.from({ length: childMultiply }).map((_, i) => (
 					<span key={i} className={textStyle}>
-						{typeof children === 'string' ? `${children} ` : children}
+						{typeof children === "string" ? `${children} ` : children}
 					</span>
 				))}
 			</motion.div>

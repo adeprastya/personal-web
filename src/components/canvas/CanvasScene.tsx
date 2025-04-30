@@ -26,8 +26,10 @@ const CanvasScene = memo(() => {
 		>
 			<color attach="background" args={["#121212"]} />
 
-			<AnimatedText />
-			<HeroObject />
+			<group position={[0, 0, 0]}>
+				<AnimatedText />
+				<HeroObject />
+			</group>
 
 			<Stats />
 		</Canvas>

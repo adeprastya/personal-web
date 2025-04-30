@@ -2,42 +2,50 @@ import { useRef } from "react";
 import * as THREE from "three";
 import { useFrame, useThree, extend } from "@react-three/fiber";
 import { shaderMaterial } from "@react-three/drei";
-import morphing from "../../shaders/vertices/morphing.glsl";
-import hologram from "../../shaders/fragments/hologram.glsl";
+import vs from "../../shaders/hero/vs.glsl";
+import fs from "../../shaders/hero/fs.glsl";
+import { useScroll, useSpring } from "motion/react";
 
-const HologramMaterial = shaderMaterial(
+const HeroMaterial = shaderMaterial(
 	{
-		time: 0,
-		resolution: new THREE.Vector2(),
-		mouse: new THREE.Vector2(),
-		morphSpeed: 0.5,
-		morphIntensity: 0.2,
-		scanLineSpeed: 1.0,
-		glitchIntensity: 0.1
+		uTime: 0.0,
+		uFrequency: 0.0
 	},
-	morphing,
-	hologram
+	vs,
+	fs
 );
-extend({ HologramMaterial });
+extend({ HeroMaterial });
 
 export default function HeroObject() {
-	const { width, size } = useThree((state) => ({
-		width: state.viewport.width,
-		size: state.size
+	const { width } = useThree((state) => ({
+		width: state.viewport.width
 	}));
 
-	const materialRef = useRef<any>(null);
+	const { scrollYProgress } = useScroll();
+	const smoothScrollY = useSpring(scrollYProgress, {
+		stiffness: 15,
+		damping: 15
+	});
+
+	const meshRef = useRef<THREE.Mesh>(null);
+	const materialRef = useRef<THREE.ShaderMaterial & { uTime: number; uFrequency: number }>(null);
 	useFrame(({ clock }) => {
 		if (materialRef.current) {
-			materialRef.current.time = clock.getElapsedTime();
+			materialRef.current.uTime = clock.getElapsedTime();
+			materialRef.current.uFrequency = 1.0 - smoothScrollY.get();
+		}
+
+		if (meshRef.current) {
+			meshRef.current.rotation.y += 0.0005;
+			meshRef.current.rotation.x += 0.0005;
 		}
 	});
 
 	return (
-		<mesh scale={0.5 + width * 0.05}>
-			<sphereGeometry args={[1, 64, 64]} />
-			{/* @ts-ignore */}
-			<hologramMaterial ref={materialRef} side={THREE.DoubleSide} resolution={new THREE.Vector2(size.width, size.height)}	 />
+		<mesh ref={meshRef} scale={0.6 + width * 0.06}>
+			<sphereGeometry args={[1, 128, 128]} />
+			{/* @ts-expect-error: maybe @types/three is outdated */}
+			<heroMaterial ref={materialRef} side={THREE.DoubleSide} wireframe={true} />
 		</mesh>
 	);
 }
