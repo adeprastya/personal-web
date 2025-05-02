@@ -1,10 +1,10 @@
-import { InfiniteText } from "./InfiniteText";
+import { InfiniteText } from "../../components/InfiniteText";
 import { useRef } from "react";
-import { useInView, motion, AnimatePresence } from "framer-motion";
-import { FeGaussianBlur } from "./SvgFilters";
-import { HoverShiftText } from "./HoverShiftText";
+import { useInView, motion, AnimatePresence } from "motion/react";
+import { FeGaussianBlur } from "../../components/SvgFilters";
+import { HoverShiftText } from "../../components/HoverShiftText";
 
-export default function Main() {
+export default function Home() {
 	return (
 		<main>
 			<FeGaussianBlur x={40} y={1} id="section-blur" />
@@ -31,8 +31,8 @@ export default function Main() {
 					</button>
 
 					<p className="font-sans uppercase text-xs tracking-wider text-neutral-300">
-						Pleased to Meet You, I'm Ade, dedicated to crafting solutions that not only work seamlessly but also leave a
-						lasting impression
+						Pleased to Meet You, I'm Ade, dedicated to crafting solutions that work seamlessly and also leave a lasting
+						impression
 					</p>
 				</Section>
 

@@ -1,7 +1,7 @@
-import type { MotionValue } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import {
 	motion,
+	MotionValue,
 	useScroll,
 	useSpring,
 	useTransform,
@@ -9,7 +9,7 @@ import {
 	useVelocity,
 	useAnimationFrame,
 	wrap
-} from "framer-motion";
+} from "motion/react";
 
 interface BaseInfiniteTextProps {
 	children: string;
@@ -48,6 +48,7 @@ const useInfiniteTextAnimation = (
 
 		window.addEventListener("resize", calcChildMultiply);
 		return () => window.removeEventListener("resize", calcChildMultiply);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	useAnimationFrame((_, delta) => {

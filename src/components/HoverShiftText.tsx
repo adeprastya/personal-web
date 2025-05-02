@@ -8,7 +8,7 @@ interface HoverShiftTextProps {
 export function HoverShiftText({ children, className }: HoverShiftTextProps) {
 	return (
 		<motion.span
-			className={`${className} overflow-clip block`}
+			className={`overflow-clip block ${className}`}
 			whileHover="hover"
 			initial="initial"
 			animate="initial"
