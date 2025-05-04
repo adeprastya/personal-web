@@ -1,10 +1,10 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useFrame, useThree, extend } from "@react-three/fiber";
 import { shaderMaterial } from "@react-three/drei";
 import vs from "../../shaders/hero/vs.glsl";
 import fs from "../../shaders/hero/fs.glsl";
-import { useScroll, useSpring } from "motion/react";
+import { AnimationOptions, useAnimate, useScroll, useSpring } from "motion/react";
 
 const HeroMaterial = shaderMaterial(
 	{
@@ -17,17 +17,15 @@ const HeroMaterial = shaderMaterial(
 extend({ HeroMaterial });
 
 export default function HeroObject() {
-	const { width } = useThree((state) => ({
-		width: state.viewport.width
-	}));
+	const { width } = useThree((state) => state.viewport);
 
 	const { scrollYProgress } = useScroll();
 	const smoothScrollY = useSpring(scrollYProgress, {
-		stiffness: 15,
-		damping: 15
+		bounce: 0
 	});
 
-	const meshRef = useRef<THREE.Mesh>(null);
+	// infinite rotation & update uniforms
+	const [scope, animate] = useAnimate();
 	const materialRef = useRef<THREE.ShaderMaterial & { uTime: number; uFrequency: number }>(null);
 	useFrame(({ clock }) => {
 		if (materialRef.current) {
@@ -35,15 +33,29 @@ export default function HeroObject() {
 			materialRef.current.uFrequency = 1.0 - smoothScrollY.get();
 		}
 
-		if (meshRef.current) {
-			meshRef.current.rotation.y += 0.0005;
-			meshRef.current.rotation.x += 0.0005;
+		if (scope.current) {
+			scope.current.rotation.y += 0.0005;
+			scope.current.rotation.x += 0.0005;
 		}
 	});
 
+	// enter animation
+	useEffect(() => {
+		if (!scope.current) return;
+
+		const transition: AnimationOptions = { duration: 3, ease: "circInOut" };
+		animate(scope.current.position, { z: 0 }, transition);
+		animate(scope.current.rotation, { x: 0, y: 0, z: 0 }, transition);
+	});
+
 	return (
-		<mesh ref={meshRef} scale={0.6 + width * 0.06}>
-			<sphereGeometry args={[1, 128, 128]} />
+		<mesh
+			ref={scope}
+			scale={0.6 + width * 0.06}
+			position={[0, 0, 5]}
+			rotation={[-Math.PI / 2, -Math.PI / 2, -Math.PI / 2]}
+		>
+			<sphereGeometry args={[1, 256, 128]} />
 			{/* @ts-expect-error: maybe @types/three is outdated */}
 			<heroMaterial ref={materialRef} side={THREE.DoubleSide} wireframe={true} />
 		</mesh>

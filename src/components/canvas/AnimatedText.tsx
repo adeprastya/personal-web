@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { useFrame, useThree } from "@react-three/fiber";
+import { AnimationOptions, useAnimate } from "motion/react";
 
 const texts = [
 	" ADE FATHONI PRASTYA  ADE FATHONI PRASTYA ",
@@ -12,8 +13,9 @@ const texts = [
 ];
 
 export default function AnimatedText() {
-	const { width } = useThree((state) => state.viewport);
+	const { width, height } = useThree((state) => state.viewport);
 
+	// material & font loading
 	const material = useMemo(() => new THREE.MeshBasicMaterial({ color: "#999999" }), []);
 	const [charGeometries, setCharGeometries] = useState<THREE.BufferGeometry[][]>([]);
 	useEffect(() => {
@@ -38,37 +40,53 @@ export default function AnimatedText() {
 		});
 	}, []);
 
-	const groupRef = useRef<THREE.Group>(null);
-	useFrame(() => {
-		if (groupRef.current) {
-			groupRef.current.children.forEach((child) => {
-				child.rotation.y += 0.001;
-			});
-		}
-	});
-
-	const verticalSpace = 0.4 + width * 0.0085;
 	const circleRadius = 1.0 + width * 0.1;
 	const textScale = 0.13 + width * 0.004;
 
-	return (
-		<group ref={groupRef}>
-			{charGeometries.length &&
-				charGeometries.map((lineGeometries, lineIndex) => {
-					const normalizedIndex = lineIndex - charGeometries.length / 2 + 0.5;
-					const lineY = normalizedIndex * verticalSpace;
+	const [scope, animate] = useAnimate();
+	// start animation
+	useEffect(() => {
+		if (!scope.current) return;
 
+		const meshes: THREE.Mesh[] = scope.current.children;
+		const balanceIdx = (i: number) => i - charGeometries.length / 2 + 0.5;
+		const transition: AnimationOptions = { duration: 3, ease: "easeInOut" };
+		meshes.forEach((mesh, i) =>
+			animate(
+				mesh.position,
+				{
+					y: balanceIdx(i) * 0.2 + (balanceIdx(i) < 0 ? -0.4 : 0.4) + (balanceIdx(i) < 0 ? -1 : 1) * width * 0.0085
+				},
+				transition
+			)
+		);
+	});
+	// infinite rotation
+	useFrame(() => {
+		if (!scope.current) return;
+
+		scope.current.children.forEach((mesh: THREE.Mesh) => (mesh.rotation.y += 0.001));
+	});
+
+	return (
+		<group ref={scope}>
+			{charGeometries.length &&
+				charGeometries.map((lineGeometries, lineIdx) => {
 					return (
-						<group key={lineIndex} position={[0, lineY, 0]} rotation={[lineIndex % 2 ? Math.PI : 0, 0, 0]}>
-							{lineGeometries.map((geometry, charIndex) => {
-								const angle = (-charIndex / lineGeometries.length) * Math.PI * 2;
+						<group
+							key={lineIdx}
+							rotation={[lineIdx % 2 ? 0 : Math.PI, 0, 0]}
+							position={[0, lineIdx % 2 ? height : -height, 0]}
+						>
+							{lineGeometries.map((geometry, charIdx) => {
+								const angle = (-charIdx / lineGeometries.length) * Math.PI * 2;
 								const x = circleRadius * Math.cos(angle);
 								const z = circleRadius * Math.sin(angle);
 								const yRotation = Math.PI / 2 - angle;
 
 								return (
 									<mesh
-										key={charIndex}
+										key={charIdx}
 										geometry={geometry}
 										material={material}
 										scale={textScale}
