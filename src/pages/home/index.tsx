@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useId, useRef } from "react";
 import { useInView, motion, AnimatePresence } from "motion/react";
 import { FeGaussianBlur } from "../../components/SvgFilters";
 import { HoverShiftText } from "../../components/HoverShiftText";
@@ -6,8 +6,6 @@ import { HoverShiftText } from "../../components/HoverShiftText";
 export default function Home() {
 	return (
 		<main className="pointer-events-none">
-			<FeGaussianBlur x={40} y={1} id="section-blur" />
-
 			<div className="absolute z-20 top-0 left-0 w-full min-h-screen">
 				<Section className="pointer-events-auto">
 					<button className="overflow-clip relative w-full border-b font-decor tracking-wider italic text-3xl/relaxed text-start text-neutral-200 group">
@@ -64,20 +62,23 @@ export default function Home() {
 function Section({ children, className }: { children: React.ReactNode; className?: string }) {
 	const ref = useRef(null);
 	const inView = useInView(ref, { amount: 0.5 });
+	const id = useId();
 
 	return (
 		<section ref={ref} className={`w-full h-screen ${className}`}>
-			<AnimatePresence>
+			<AnimatePresence mode="sync">
 				{inView && (
-					<motion.div
-						initial={{ opacity: 0, filter: "url(#section-blur)" }}
-						animate={{ opacity: 1, filter: "none" }}
-						exit={{ opacity: 0, filter: "url(#section-blur)" }}
-						transition={{ duration: 1, ease: "easeInOut" }}
-						className="fixed top-0 w-full h-screen py-36 px-6 sm:px-12 lg:px-20 flex items-end justify-start"
-					>
-						<div className="w-xs flex flex-col gap-4">{children}</div>
-					</motion.div>
+					<>
+						<FeGaussianBlur id={`section-blur-${id}`} x={40} y={2} animate={true} />
+
+						<motion.div
+							key={id}
+							style={{ filter: `url(#section-blur-${id})` }}
+							className="fixed top-0 w-full h-screen py-36 px-6 sm:px-12 lg:px-20 flex items-end justify-start"
+						>
+							<div className="w-xs flex flex-col gap-4">{children}</div>
+						</motion.div>
+					</>
 				)}
 			</AnimatePresence>
 		</section>
