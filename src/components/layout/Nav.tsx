@@ -2,22 +2,15 @@ import { HoverShiftText } from "../HoverShiftText";
 import { NavLink } from "react-router";
 import { useState } from "react";
 
-const nav: Record<string, string> = {
-	home: "/",
-	about: "/about",
-	work: "/work",
-	contact: "/contact",
-	credit: "/credit"
-};
-
-export default function Nav({ navigations = nav }: { navigations?: Record<string, string> }) {
+export default function Nav({ routes }: { routes: Array<{ path: string; label: string; bgText: string }> }) {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<nav className="fixed z-50 right-0 top-0 h-full py-20 flex items-start sm:items-center">
+		<nav className="pointer-events-none fixed z-50 right-0 top-0 h-full py-20 flex items-start sm:items-center">
+			{/* Mobile Nav Toggle */}
 			<button
 				onClick={() => setIsOpen(!isOpen)}
-				className="overflow-hidden absolute right-0 top-0 m-2 px-2 block sm:hidden"
+				className="pointer-events-auto overflow-hidden absolute right-0 top-0 m-2 px-2 block sm:hidden"
 			>
 				<span className="realtive font-decor font-medium text-xl tracking-tighter uppercase text-neutral-200">
 					///
@@ -34,18 +27,18 @@ export default function Nav({ navigations = nav }: { navigations?: Record<string
 					isOpen ? "opacity-100" : "pointer-events-none sm:pointer-events-auto opacity-0 sm:opacity-100"
 				}`}
 			>
-				{Object.entries(navigations).map(([key, value], i) => (
-					<NavItem key={i} label={key} href={value} />
+				{routes.map(({ path, label }, i) => (
+					<NavItem key={i} label={label} path={path} />
 				))}
 			</ul>
 		</nav>
 	);
 }
 
-function NavItem({ label, href }: { label: string; href: string }) {
+function NavItem({ label, path }: { label: string; path: string }) {
 	return (
 		<li>
-			<NavLink to={href} className="relative cursor-pointer">
+			<NavLink to={path} className="pointer-events-auto relative cursor-pointer">
 				{({ isActive }) => (
 					<>
 						<HoverShiftText

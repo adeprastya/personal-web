@@ -8,9 +8,12 @@ const CanvasScene = memo(() => {
 	return (
 		<Canvas
 			style={{
+				position: "fixed",
+				zIndex: -0,
+				top: 0,
+				left: 0,
 				width: "100vw",
-				height: "100vh",
-				position: "fixed"
+				height: "100vh"
 			}}
 			camera={{
 				fov: 75,

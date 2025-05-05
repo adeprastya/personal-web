@@ -1,4 +1,3 @@
-import { InfiniteText } from "../../components/InfiniteText";
 import { useRef } from "react";
 import { useInView, motion, AnimatePresence } from "motion/react";
 import { FeGaussianBlur } from "../../components/SvgFilters";
@@ -6,13 +5,11 @@ import { HoverShiftText } from "../../components/HoverShiftText";
 
 export default function Home() {
 	return (
-		<main>
+		<main className="pointer-events-none">
 			<FeGaussianBlur x={40} y={1} id="section-blur" />
 
-			<TextBg />
-
 			<div className="absolute z-20 top-0 left-0 w-full min-h-screen">
-				<Section>
+				<Section className="pointer-events-auto">
 					<button className="overflow-clip relative w-full border-b font-decor tracking-wider italic text-3xl/relaxed text-start text-neutral-200 group">
 						<HoverShiftText className="px-6">Bonjour</HoverShiftText>
 						<div className="pointer-events-none absolute top-0 left-0 w-full h-full -translate-x-[120%] skew-x-52 backdrop-invert group-hover:translate-x-0 group-hover:skew-x-0 transition-all duration-1300" />
@@ -24,7 +21,7 @@ export default function Home() {
 					</p>
 				</Section>
 
-				<Section>
+				<Section className="pointer-events-auto">
 					<button className="overflow-clip relative w-full border-b font-decor tracking-wider italic text-3xl/relaxed text-start text-neutral-200 group">
 						<HoverShiftText className="px-6">About Me</HoverShiftText>
 						<div className="pointer-events-none absolute top-0 left-0 w-full h-full -translate-x-[120%] skew-x-52 backdrop-invert group-hover:translate-x-0 group-hover:skew-x-0 transition-all duration-1300" />
@@ -36,7 +33,7 @@ export default function Home() {
 					</p>
 				</Section>
 
-				<Section>
+				<Section className="pointer-events-auto">
 					<button className="overflow-clip relative w-full border-b font-decor tracking-wider italic text-3xl/relaxed text-start text-neutral-200 group">
 						<HoverShiftText className="px-6">My Works</HoverShiftText>
 						<div className="pointer-events-none absolute top-0 left-0 w-full h-full -translate-x-[120%] skew-x-52 backdrop-invert group-hover:translate-x-0 group-hover:skew-x-0 transition-all duration-1300" />
@@ -48,7 +45,7 @@ export default function Home() {
 					</p>
 				</Section>
 
-				<Section>
+				<Section className="pointer-events-auto">
 					<button className="overflow-clip relative w-full border-b font-decor tracking-wider italic text-3xl/relaxed text-start text-neutral-200 group">
 						<HoverShiftText className="px-6">Lets Connect</HoverShiftText>
 						<div className="pointer-events-none absolute top-0 left-0 w-full h-full -translate-x-[120%] skew-x-52 backdrop-invert group-hover:translate-x-0 group-hover:skew-x-0 transition-all duration-1300" />
@@ -64,12 +61,12 @@ export default function Home() {
 	);
 }
 
-function Section({ children }: { children: React.ReactNode }) {
+function Section({ children, className }: { children: React.ReactNode; className?: string }) {
 	const ref = useRef(null);
 	const inView = useInView(ref, { amount: 0.5 });
 
 	return (
-		<section ref={ref} className="w-full h-screen">
+		<section ref={ref} className={`w-full h-screen ${className}`}>
 			<AnimatePresence>
 				{inView && (
 					<motion.div
@@ -84,36 +81,5 @@ function Section({ children }: { children: React.ReactNode }) {
 				)}
 			</AnimatePresence>
 		</section>
-	);
-}
-
-function TextBg() {
-	return (
-		<div className="fixed z-10 top-0 left-0 w-screen h-screen font-decor font-regular leading-none">
-			<InfiniteText
-				baseVelocity={-25}
-				containerStyle="absolute top-0 translate-y-7/8 text-[3.5rem] text-transparent bg-clip-text bg-gradient-to-t from-neutral-600 to-neutral-950"
-			>
-				{" ADE FATHONI PRASTYA -"}
-			</InfiniteText>
-			<InfiniteText
-				baseVelocity={25}
-				containerStyle="absolute top-0 text-[5rem] text-transparent bg-clip-text bg-gradient-to-t from-neutral-400 to-neutral-950"
-			>
-				{" ADE FATHONI PRASTYA -"}
-			</InfiniteText>
-			<InfiniteText
-				baseVelocity={25}
-				containerStyle="absolute bottom-0 -translate-y-7/8 text-[3.5rem] text-transparent bg-clip-text bg-gradient-to-b from-neutral-600 to-neutral-950"
-			>
-				{" ADE FATHONI PRASTYA -"}
-			</InfiniteText>
-			<InfiniteText
-				baseVelocity={-25}
-				containerStyle="absolute bottom-0 text-[5rem] text-transparent bg-clip-text bg-gradient-to-b from-neutral-400 to-neutral-950"
-			>
-				{" ADE FATHONI PRASTYA -"}
-			</InfiniteText>
-		</div>
 	);
 }
