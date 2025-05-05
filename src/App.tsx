@@ -7,7 +7,7 @@ import BackgroundText from "./components/layout/BackgroundText";
 const routes = [
 	{ path: "/", label: "home", bgText: "BONJOUR" },
 	{ path: "/about", label: "about", bgText: "ABOUT ME" },
-	{ path: "/work", label: "work", bgText: "MY WORK" },
+	{ path: "/work", label: "work", bgText: "MY WORKS" },
 	{ path: "/contact", label: "contact", bgText: "LET'S TALK" },
 	{ path: "/credit", label: "credit", bgText: "CHEERS" }
 ];

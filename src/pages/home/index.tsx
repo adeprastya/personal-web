@@ -1,17 +1,14 @@
 import { useId, useRef } from "react";
 import { useInView, motion, AnimatePresence } from "motion/react";
 import { FeGaussianBlur } from "../../components/SvgFilters";
-import { HoverShiftText } from "../../components/HoverShiftText";
+import AnimatedButton from "../../components/AnimatedButton";
 
 export default function Home() {
 	return (
-		<main className="pointer-events-none">
-			<div className="absolute z-20 top-0 left-0 w-full min-h-screen">
-				<Section className="pointer-events-auto">
-					<button className="overflow-clip relative w-full border-b font-decor tracking-wider italic text-3xl/relaxed text-start text-neutral-200 group">
-						<HoverShiftText className="px-6">Bonjour</HoverShiftText>
-						<div className="pointer-events-none absolute top-0 left-0 w-full h-full -translate-x-[120%] skew-x-52 backdrop-invert group-hover:translate-x-0 group-hover:skew-x-0 transition-all duration-1300" />
-					</button>
+		<main>
+			<div className="absolute z-0 top-0 left-0 w-full min-h-screen">
+				<Section>
+					<AnimatedButton>Bonjour</AnimatedButton>
 
 					<p className="font-sans uppercase text-xs tracking-wider text-neutral-300">
 						Welcome to my digital realm, Where functionality meets beauty, innovation fuels design, and passion powers
@@ -19,11 +16,8 @@ export default function Home() {
 					</p>
 				</Section>
 
-				<Section className="pointer-events-auto">
-					<button className="overflow-clip relative w-full border-b font-decor tracking-wider italic text-3xl/relaxed text-start text-neutral-200 group">
-						<HoverShiftText className="px-6">About Me</HoverShiftText>
-						<div className="pointer-events-none absolute top-0 left-0 w-full h-full -translate-x-[120%] skew-x-52 backdrop-invert group-hover:translate-x-0 group-hover:skew-x-0 transition-all duration-1300" />
-					</button>
+				<Section>
+					<AnimatedButton>About Me</AnimatedButton>
 
 					<p className="font-sans uppercase text-xs tracking-wider text-neutral-300">
 						Pleased to Meet You, I'm Ade, dedicated to crafting solutions that work seamlessly and also leave a lasting
@@ -31,11 +25,8 @@ export default function Home() {
 					</p>
 				</Section>
 
-				<Section className="pointer-events-auto">
-					<button className="overflow-clip relative w-full border-b font-decor tracking-wider italic text-3xl/relaxed text-start text-neutral-200 group">
-						<HoverShiftText className="px-6">My Works</HoverShiftText>
-						<div className="pointer-events-none absolute top-0 left-0 w-full h-full -translate-x-[120%] skew-x-52 backdrop-invert group-hover:translate-x-0 group-hover:skew-x-0 transition-all duration-1300" />
-					</button>
+				<Section>
+					<AnimatedButton>My Works</AnimatedButton>
 
 					<p className="font-sans uppercase text-xs tracking-wider text-neutral-300">
 						Here, you will find projects that I've built with intention, enriched through curiosity, and fueled by
@@ -43,11 +34,8 @@ export default function Home() {
 					</p>
 				</Section>
 
-				<Section className="pointer-events-auto">
-					<button className="overflow-clip relative w-full border-b font-decor tracking-wider italic text-3xl/relaxed text-start text-neutral-200 group">
-						<HoverShiftText className="px-6">Lets Connect</HoverShiftText>
-						<div className="pointer-events-none absolute top-0 left-0 w-full h-full -translate-x-[120%] skew-x-52 backdrop-invert group-hover:translate-x-0 group-hover:skew-x-0 transition-all duration-1300" />
-					</button>
+				<Section>
+					<AnimatedButton>Let's Connect</AnimatedButton>
 
 					<p className="font-sans uppercase text-xs tracking-wider text-neutral-300">
 						Looking to collaborate, bounce around ideas, or simply talk about the latest in tech, I'd love to hear from
@@ -59,13 +47,13 @@ export default function Home() {
 	);
 }
 
-function Section({ children, className }: { children: React.ReactNode; className?: string }) {
+function Section({ children }: { children: React.ReactNode }) {
 	const ref = useRef(null);
 	const inView = useInView(ref, { amount: 0.5 });
 	const id = useId();
 
 	return (
-		<section ref={ref} className={`w-full h-screen ${className}`}>
+		<section ref={ref} className="w-full h-screen">
 			<AnimatePresence mode="sync">
 				{inView && (
 					<>

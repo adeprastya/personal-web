@@ -19,17 +19,17 @@ export default function BackgroundText({ routes }: { routes: Array<{ path: strin
 		<AnimatePresence mode="sync">
 			<div
 				key={text}
-				className="pointer-events-none fixed z-40 top-0 left-0 w-screen h-screen font-decor font-regular leading-tight text-4xl text-zinc-950"
+				className="pointer-events-none fixed z-50 top-0 left-0 w-screen h-screen font-decor font-regular leading-tight text-4xl text-neutral-900"
 			>
 				<FeGaussianBlur id="background-text-blur" x={60} y={2} animate={true} />
 
-				<InfiniteElement baseVelocity={-25} className="pointer-events-auto absolute top-0 bg-zinc-400">
+				<InfiniteElement baseVelocity={-25} className="pointer-events-auto absolute top-0 bg-neutral-400">
 					<span style={{ filter: "url(#background-text-blur)" }} className="p-4">
 						{text}
 					</span>
 				</InfiniteElement>
 
-				<InfiniteElement baseVelocity={25} className="pointer-events-auto absolute bottom-0 bg-zinc-400">
+				<InfiniteElement baseVelocity={25} className="pointer-events-auto absolute bottom-0 bg-neutral-400">
 					<span style={{ filter: "url(#background-text-blur)" }} className="p-4">
 						{text}
 					</span>
