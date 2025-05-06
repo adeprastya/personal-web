@@ -10,16 +10,14 @@ export default function Nav({ routes }: { routes: Array<{ path: string; label: s
 			{/* Mobile Nav Toggle */}
 			<button
 				onClick={() => setIsOpen(!isOpen)}
-				className="pointer-events-auto overflow-clip absolute right-0 top-0 m-2 px-2 block sm:hidden"
+				className="pointer-events-auto overflow-clip absolute right-0 top-0 m-2 px-2 visible sm:hidden"
 			>
-				<span className="realtive font-sans font-black uppercase text-2xl text-neutral-200">
-					///
-					<div
-						className={`pointer-events-none absolute top-0 left-0 w-full h-full backdrop-invert transition-all duration-1300 ${
-							isOpen ? "translate-x-0 skew-x-0" : "-translate-x-[150%] skew-x-52"
-						}`}
-					/>
-				</span>
+				<span className="font-sans font-black uppercase text-2xl text-neutral-200">///</span>
+				<div
+					className={`pointer-events-none absolute top-0 left-0 w-full h-full backdrop-invert transition-all duration-1300 ${
+						isOpen ? "translate-x-0 skew-x-0" : "-translate-x-[150%] skew-x-52"
+					}`}
+				/>
 			</button>
 
 			<ul
