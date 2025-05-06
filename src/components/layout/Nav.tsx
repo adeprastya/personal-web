@@ -6,11 +6,11 @@ export default function Nav({ routes }: { routes: Array<{ path: string; label: s
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<nav className="pointer-events-none fixed z-50 right-0 top-0 h-full py-20 flex items-start sm:items-center">
+		<nav className="pointer-events-none fixed z-50 right-0 top-0 h-full py-12 flex items-start sm:items-center">
 			{/* Mobile Nav Toggle */}
 			<button
 				onClick={() => setIsOpen(!isOpen)}
-				className="pointer-events-auto overflow-hidden absolute right-0 top-0 m-2 px-2 block sm:hidden"
+				className="pointer-events-auto overflow-clip absolute right-0 top-0 m-2 px-2 block sm:hidden"
 			>
 				<span className="realtive font-sans font-black uppercase text-2xl text-neutral-200">
 					///
@@ -23,8 +23,8 @@ export default function Nav({ routes }: { routes: Array<{ path: string; label: s
 			</button>
 
 			<ul
-				className={`relative p-4 flex flex-col gap-4 items-end group transition-all duration-800 ease-in-out ${
-					isOpen ? "opacity-100" : "pointer-events-none sm:pointer-events-auto opacity-0 sm:opacity-100"
+				className={`pointer-events-none sm:pointer-events-auto relative p-4 flex flex-col gap-4 items-end group transition-all duration-800 ease-in-out ${
+					isOpen ? "opacity-100" : "opacity-0 sm:opacity-100"
 				}`}
 			>
 				{routes.map(({ path, label }, i) => (

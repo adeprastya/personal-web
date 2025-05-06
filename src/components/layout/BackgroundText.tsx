@@ -19,7 +19,7 @@ export default function BackgroundText({ routes }: { routes: Array<{ path: strin
 		<AnimatePresence mode="sync">
 			<div
 				key={text}
-				className="pointer-events-none fixed z-50 top-0 left-0 w-screen h-screen font-decor font-regular leading-tight text-4xl text-neutral-900"
+				className="pointer-events-none fixed z-40 top-0 left-0 w-screen h-screen font-decor font-regular leading-tight text-4xl text-neutral-900"
 			>
 				<FeGaussianBlur id="background-text-blur" x={60} y={2} animate={true} />
 

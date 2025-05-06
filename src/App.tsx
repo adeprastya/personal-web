@@ -1,23 +1,23 @@
 import { BrowserRouter, Routes, Route } from "react-router";
 import Nav from "./components/layout/Nav";
+import BackgroundText from "./components/layout/BackgroundText";
 import CanvasScene from "./components/canvas/CanvasScene";
 import Home from "./pages/home";
-import BackgroundText from "./components/layout/BackgroundText";
 
 const routes = [
-	{ path: "/", label: "home", bgText: "BONJOUR" },
-	{ path: "/about", label: "about", bgText: "ABOUT ME" },
-	{ path: "/work", label: "work", bgText: "MY WORKS" },
-	{ path: "/contact", label: "contact", bgText: "LET'S TALK" },
-	{ path: "/credit", label: "credit", bgText: "CHEERS" }
+	{ path: "/", label: "home", bgText: "START HERE" },
+	{ path: "/about", label: "about", bgText: "BEHIND THE SCENES" },
+	{ path: "/work", label: "works", bgText: "WHAT I DO" },
+	{ path: "/contact", label: "contact", bgText: "REACH OUT" },
+	{ path: "/credit", label: "credit", bgText: "HIGH FIVES" }
 ];
 
 export default function App() {
 	return (
 		<BrowserRouter>
-			<CanvasScene />
-			<BackgroundText routes={routes} />
 			<Nav routes={routes} />
+			<BackgroundText routes={routes} />
+			<CanvasScene />
 
 			<Routes>
 				<Route path="/" element={<Home />} />
