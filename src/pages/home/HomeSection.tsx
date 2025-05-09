@@ -1,4 +1,4 @@
-import { FeGaussianBlur } from "../../components/SvgFilters";
+import { FilterEffect, FeGaussianBlur } from "../../components/SvgFilters";
 import { useId, useRef } from "react";
 import { motion, AnimatePresence, useInView } from "motion/react";
 
@@ -12,11 +12,12 @@ export default function HomeSection({ children }: { children: React.ReactNode })
 			<AnimatePresence mode="sync">
 				{inView && (
 					<>
-						<FeGaussianBlur id={`section-blur-${id}`} x={40} y={2} animate={true} />
+						<FilterEffect id={`fe-home-section-${id}`}>
+							<FeGaussianBlur x={40} y={2} animate={true} />
+						</FilterEffect>
 
 						<motion.div
-							key={id}
-							style={{ filter: `url(#section-blur-${id})` }}
+							style={{ filter: `url(#fe-home-section-${id})` }}
 							className="fixed top-0 w-full h-screen py-28 px-6 sm:px-12 lg:px-20 flex items-end justify-start"
 						>
 							<div className="w-full max-w-xs flex flex-col gap-4">{children}</div>

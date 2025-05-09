@@ -1,5 +1,5 @@
 import { InfiniteElement } from "../../components/InfiniteElement";
-import { FeGaussianBlur } from "../../components/SvgFilters";
+import { FilterEffect, FeGaussianBlur } from "../../components/SvgFilters";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import { AnimatePresence } from "motion/react";
@@ -19,20 +19,21 @@ export default function BackgroundText({ routes }: { routes: Array<{ path: strin
 		<AnimatePresence mode="sync">
 			<div
 				key={text}
-				className="pointer-events-none fixed z-40 top-0 left-0 w-screen h-screen font-decor font-regular leading-tight text-4xl text-neutral-900"
+				style={{ filter: "url(#fe-background-text)" }}
+				className="pointer-events-none fixed z-40 top-0 left-0 w-screen h-screen"
 			>
-				<FeGaussianBlur id="background-text-blur" x={60} y={2} animate={true} />
+				<FilterEffect id="fe-background-text">
+					<FeGaussianBlur x={50} y={2} animate={true} transition={{ ease: "circOut", duration: 0.3 }} />
+				</FilterEffect>
 
-				<InfiniteElement baseVelocity={-25} className="pointer-events-auto absolute top-0 bg-neutral-400">
-					<span style={{ filter: "url(#background-text-blur)" }} className="p-4">
-						{text}
-					</span>
+				<InfiniteElement baseVelocity={20} className="pointer-events-auto absolute top-0 bg-neutral-400">
+					<span className="px-4 font-decor font-regular text-4xl/snug text-neutral-700">{text}</span>
+					<div className="inline-block size-2 bg-neutral-700" />
 				</InfiniteElement>
 
-				<InfiniteElement baseVelocity={25} className="pointer-events-auto absolute bottom-0 bg-neutral-400">
-					<span style={{ filter: "url(#background-text-blur)" }} className="p-4">
-						{text}
-					</span>
+				<InfiniteElement baseVelocity={-20} className="pointer-events-auto absolute bottom-0 bg-neutral-400">
+					<span className="px-4 font-decor font-regular text-4xl/snug text-neutral-700">{text}</span>
+					<div className="inline-block size-2 bg-neutral-700" />
 				</InfiniteElement>
 			</div>
 		</AnimatePresence>

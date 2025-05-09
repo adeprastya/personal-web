@@ -64,10 +64,14 @@ export function InfiniteElement({ children, baseVelocity = 10, className = "" }:
 	return (
 		<div ref={containerRef} className="w-full overflow-x-clip">
 			<motion.div style={{ x }} className={`${className} whitespace-nowrap flex`}>
-				<div ref={childRef}>{children}</div>
+				<div ref={childRef} className="flex items-center">
+					{children}
+				</div>
 
 				{Array.from({ length: childMultiply }).map((_, i) => (
-					<div key={i}>{children}</div>
+					<div key={i} className="flex items-center">
+						{children}
+					</div>
 				))}
 			</motion.div>
 		</div>
@@ -97,10 +101,14 @@ export function ScrollInfiniteElement({ children, baseVelocity = 10, className =
 	return (
 		<div ref={containerRef} className="w-full overflow-x-clip">
 			<motion.div style={{ x }} className={`${className} whitespace-nowrap flex`}>
-				<div ref={childRef}>{children}</div>
+				<div ref={childRef} className="flex items-center">
+					{children}
+				</div>
 
 				{Array.from({ length: childMultiply }).map((_, i) => (
-					<div key={i}>{children}</div>
+					<div key={i} className="flex items-center">
+						{children}
+					</div>
 				))}
 			</motion.div>
 		</div>

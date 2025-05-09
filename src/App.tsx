@@ -5,7 +5,7 @@ import CanvasScene from "./components/canvas/CanvasScene";
 import Home from "./pages/home";
 
 const routes = [
-	{ path: "/", label: "home", bgText: "START HERE" },
+	{ path: "/", label: "home", bgText: "DO IT YOURSELF" },
 	{ path: "/about", label: "about", bgText: "BEHIND THE SCENES" },
 	{ path: "/work", label: "works", bgText: "WHAT I DO" },
 	{ path: "/contact", label: "contact", bgText: "REACH OUT" },
