@@ -10,4 +10,7 @@ declare global {
 	}
 }
 
+// @poppanator/sveltekit-svg support (e.g. import Logo from '$lib/assets/icons/logo.svg?component')
+import '@poppanator/sveltekit-svg/dist/svg.d.ts';
+
 export {};
