@@ -2,35 +2,53 @@
 	import '../app.css';
 	import AppFrame from '$lib/components/frame/AppFrame.svelte';
 	import WebGLCanvas from '$lib/components/3d-threejs/Canvas.svelte';
-
-	const title = 'Ade Prastya';
-	const description =
-		"Hi! I'm Ade Fathoni Prastya — a passionate web developer. Explore my portfolio, the stories behind my work, and connect with me.";
-	const url = 'https://adefathoniprastya.vercel.app';
-	const image = 'https://adefathoniprastya.vercel.app/og-image.jpg';
-	const lang = 'en';
+	import { afterNavigate } from '$app/navigation';
+	import { typingAnimation } from "$lib/utils/textAnimation";
 
 	let { children } = $props();
+
+	const TITLE = 'Ade Prastya';
+	const DESC =
+		"Hi! I'm Ade Fathoni Prastya — a passionate web developer. Explore my portfolio, the stories behind my work, and connect with me.";
+	const URL = 'https://adefathoniprastya.vercel.app';
+	const IMG = 'https://adefathoniprastya.vercel.app/og-image.jpg';
+	const LANG = 'en';
+
+	const routeTitles: Record<string, string> = {
+		"/": "Ade Prastya",
+		"/about": "Don't know me?",
+		"/works": "Hope you like it!",
+	};
+	afterNavigate(({ to, from }) => {
+		const init = routeTitles[from?.url.pathname || "/"] ?? ""
+		const final = routeTitles[to?.url.pathname || "/"] ?? ""
+		typingAnimation(
+			init,
+			final,
+			(s: string) => document.title = s || "|",
+			{ delay: 100 }
+		);
+	});
 </script>
 
 <svelte:head>
-	<title>{title}</title>
-	<meta name="description" content={description} />
+	<title>{TITLE}</title>
+	<meta name="description" content={DESC} />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<meta name="robots" content="index, follow" />
-	<meta name="language" content={lang} />
-	<link rel="canonical" href={url} />
+	<meta name="language" content={LANG} />
+	<link rel="canonical" href={URL} />
 
-	<meta property="og:title" content={title} />
-	<meta property="og:description" content={description} />
+	<meta property="og:title" content={TITLE} />
+	<meta property="og:description" content={DESC} />
 	<meta property="og:type" content="website" />
-	<meta property="og:url" content={url} />
-	<meta property="og:image" content={image} />
+	<meta property="og:url" content={URL} />
+	<meta property="og:image" content={IMG} />
 
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content={title} />
-	<meta name="twitter:description" content={description} />
-	<meta name="twitter:image" content={image} />
+	<meta name="twitter:title" content={TITLE} />
+	<meta name="twitter:description" content={DESC} />
+	<meta name="twitter:image" content={IMG} />
 
 	<script type="application/ld+json">
 		{
@@ -52,6 +70,7 @@
 	<WebGLCanvas />
 	<AppFrame />
 </div>
+
 <main class="bg-zinc-900 text-zinc-300">
 	{@render children()}
 </main>
