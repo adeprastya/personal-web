@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import AppFrame from '$lib/components/frame/AppFrame.svelte';
+	import WebGLCanvas from '$lib/components/3d-threejs/Canvas.svelte';
 
 	const title = 'Ade Prastya';
 	const description =
@@ -47,7 +48,10 @@
 	</script>
 </svelte:head>
 
-<AppFrame />
+<div class="w-full h-screen">
+	<WebGLCanvas />
+	<AppFrame />
+</div>
 <main class="bg-zinc-900 text-zinc-300">
 	{@render children()}
 </main>

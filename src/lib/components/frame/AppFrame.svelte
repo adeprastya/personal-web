@@ -79,7 +79,7 @@
 					? 'bg-green-600'
 					: 'bg-red-600'}"
 			></span>
-			<span class="font-heading text-[18px] tracking-wide lowercase sm:text-[22px]"
+			<span class="font-heading text-[18px] lowercase sm:text-[22px]"
 				>{isAvailable ? 'Open for work' : 'Currently working on'}</span
 			>
 		</p>
