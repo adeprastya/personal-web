@@ -1,17 +1,14 @@
 <script lang="ts">
   import * as THREE from 'three'
-  import { useThrelte } from '@threlte/core'
+  import { T } from '@threlte/core'
 
-  export let radius = 1
-  export let segments = 64
-  export let color = '#ffffff'
-  export let y = 0
-  export let rotation = 0
-
-  const { scene } = useThrelte()
+  export let radius: number = 1
+  export let segments: number = 64
+  export let color: string = '#ffffff'
+  export let y: number = 0
+  export let rotation: number = 0
 
   const points: THREE.Vector3[] = []
-
   for (let i = 0; i <= segments; i++) {
     const theta = (i / segments) * Math.PI * 2
     points.push(
@@ -22,12 +19,7 @@
       )
     )
   }
-
   const geometry = new THREE.BufferGeometry().setFromPoints(points)
-  const circle = new THREE.LineLoop(geometry, new THREE.LineBasicMaterial({ color }))
-
-  circle.rotation.x = rotation
-  circle.position.y = y
-
-  scene.add(circle)
 </script>
+
+<T.LineLoop geometry={geometry} material={new THREE.LineBasicMaterial({ color })} position={[0, y, 0]} rotation={[rotation, 0, 0]} />

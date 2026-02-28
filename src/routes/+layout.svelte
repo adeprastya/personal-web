@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import AppFrame from '$lib/components/frame/AppFrame.svelte';
-	import WebGLCanvas from '$lib/components/3d-threejs/Canvas.svelte';
+	import WebGLCanvas from '$lib/components/3d-scene/Canvas.svelte';
 	import { afterNavigate } from '$app/navigation';
 	import { typingAnimation } from "$lib/utils/textAnimation";
 
@@ -66,11 +66,11 @@
 	</script>
 </svelte:head>
 
-<div class="w-full h-screen">
+<div class="fixed z-50 w-full h-screen overflow-hidden">
 	<WebGLCanvas />
 	<AppFrame />
 </div>
 
-<main class="bg-zinc-900 text-zinc-300">
+<main id="smooth-content" class="h-[600vh] bg-zinc-900 text-zinc-300 absolute -z-50 inset-0 opacity-0 pointer-events-none">
 	{@render children()}
 </main>

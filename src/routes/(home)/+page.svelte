@@ -1,5 +1,9 @@
-<script lang="ts"></script>
+<section>
+	<h1>Ade Prastya</h1>
 
-<section class="flex min-h-screen w-full flex-col">
-	<h1>Home Page</h1>
+	<div>
+    <p>Designing Ideas That Resonate Beyond Vision</p>
+    <p>Blending Logic and Intuition with Function and Beauty</p>
+    <p>A Pursuit of Knowledge Fuelled by Endless Curiosity</p>
+  </div>
 </section>

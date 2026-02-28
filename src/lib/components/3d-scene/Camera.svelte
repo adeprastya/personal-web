@@ -9,24 +9,21 @@
   let t = 0
 
   onMount(() => {
+    // Mouse camera movement
     if (!$camera) return
-
     $camera.position.z = 2.5
-
     const onMouseMove = (e: MouseEvent) => {
       mouseX = (e.clientX / window.innerWidth) * 2 - 1
       mouseY = -(e.clientY / window.innerHeight) * 2 + 1
     }
 
     window.addEventListener('mousemove', onMouseMove)
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove)
-    }
+    return () => window.removeEventListener('mousemove', onMouseMove)
   })
 
   useTask((delta) => {
+    // Static camera movement
     if (!$camera) return
-
     const targetX = mouseX * 0.5
     const targetY = mouseY * 0.5
     $camera.position.x += (targetX - $camera.position.x) * 0.05

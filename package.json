@@ -38,6 +38,7 @@
 	},
 	"dependencies": {
 		"@threlte/core": "^8.1.5",
+		"@threlte/extras": "^9.8.1",
 		"clsx": "^2.1.1",
 		"gsap": "^3.13.0",
 		"tailwind-merge": "^3.3.1",
