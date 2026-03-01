@@ -15,8 +15,8 @@
   let group: THREE.Group | undefined = undefined;
   let centerLineRef: THREE.Line
 
-  const bracketMat = new THREE.LineBasicMaterial({ color: color, linewidth: 1 });
-  const lineMat = new THREE.LineBasicMaterial({ color: color, linewidth: 1, opacity: 0.5, transparent: true });
+  const bracketMat = new THREE.LineBasicMaterial({ color: color, linewidth: 1, side: THREE.FrontSide });
+  const lineMat = new THREE.LineBasicMaterial({ color: color, linewidth: 1, opacity: 0.5, transparent: true, side: THREE.FrontSide });
 
   const bracketL = new THREE.BufferGeometry().setFromPoints([
     new THREE.Vector3(-width/2, -height/2, 0),
@@ -44,7 +44,7 @@
 
   useTask(() => {
     // Billboard effect
-    if (!group) return;
+    if (!group || !camera.current) return;
     const camPos = camera.current.position;
     group.lookAt(camPos.x, camPos.y, camPos.z)
 

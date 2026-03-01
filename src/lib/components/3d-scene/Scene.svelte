@@ -1,65 +1,116 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { T, useTask, useThrelte } from '@threlte/core';
+	import { T, useThrelte } from '@threlte/core';
 	import * as THREE from 'three';
 	import gsap from 'gsap';
 	import { ScrollTrigger } from 'gsap/ScrollTrigger';
 	import { ScrollSmoother } from 'gsap/ScrollSmoother';
-	gsap.registerPlugin(ScrollSmoother, ScrollTrigger);
-	
 	// Global
 	import Camera from './Camera.svelte';
+	import LaserCrosshair from "./LaserCrosshair.svelte";
 	import HeroModel from './HeroModel.svelte';
   import CircleLine from './CircleLine.svelte';
 	// Home
 	import BracketText from './BracketText.svelte';
 
-	const { scene, camera } = useThrelte();
+	const { scene } = useThrelte();
 	scene.background = new THREE.Color('#09090b');
 
-  function circPos(i: number, y: number): [number, number, number] {
-		const startAngle = 0.1
-		const radius = 1.25
-    const angle = startAngle + (i * Math.PI * 2) / 3
-    return [radius * Math.cos(angle), y, radius * Math.sin(angle)]
-  }
+	const SCROLL_CONFIG = {
+		smooth: 2,
+		smoothTouch: 0.05
+	}
+
+	const CIRCLE_CONFIGS = [
+		{ radius: 0.5, segments: 32, color: "#777777" },
+		{ radius: 0.9, segments: 44, color: "#666666" },
+		{ radius: 1.4, segments: 60, color: "#555555" },
+		{ radius: 2.0, segments: 64, color: "#444444" }
+	]
+
+	const TEXT_CONFIGS = [
+		{ text: "DESIGNING IDEAS THAT RESONATE BEYOND VISION", index: 1, y: 1 },
+		{ text: "BLENDING LOGIC AND INTUITION WITH FUNCTION AND BEAUTY", index: 2, y: 0 },
+		{ text: "A PURSUIT OF KNOWLEDGE FUELLED BY ENDLESS CURIOUSITY", index: 3, y: -1 }
+	]
+
+	const circPositions = new Map<string, [number, number, number]>()
+	function getCircPos(i: number, y: number): [number, number, number] {
+		const key = `${i}-${y}`
+		if (!circPositions.has(key)) {
+			const startAngle = 0.1
+			const radius = 1.25
+			const angle = startAngle + (i * Math.PI * 2) / 3
+			circPositions.set(key, [
+				radius * Math.cos(angle), 
+				y, 
+				radius * Math.sin(angle)
+			])
+		}
+		return circPositions.get(key)!
+	}
 
 	let scrollY = $state(0)
+	let scrollTrigger: ScrollTrigger | null = null
+
 	onMount(() => {
-		ScrollSmoother.create({ smooth: 4, effects: true, smoothTouch: 0.1 });
-		const trigger = ScrollTrigger.create({
+		gsap.registerPlugin(ScrollSmoother, ScrollTrigger);
+
+		ScrollSmoother.create(SCROLL_CONFIG);
+		
+		scrollTrigger = ScrollTrigger.create({
 			start: 0,
 			end: "max",
-			scrub: true,
-			onUpdate: (self) => scrollY = self.progress
+			scrub: 1,
+			onUpdate: (self) => {
+				const newProgress = Math.round(self.progress * 1000) / 1000
+				if (Math.abs(newProgress - scrollY) > 0.0001) {
+					scrollY = newProgress
+				}
+			}
 		})
 
-		return () => trigger.kill()
+		return () => {
+			scrollTrigger?.kill()
+			ScrollSmoother.get()?.kill()
+		}
 	})
 
-	let rotate = $derived(scrollY * Math.PI * 2)
-	let posY = $derived(-1.0 + scrollY * 2)
+	let rotate = $derived(Math.round(scrollY * Math.PI * 2 * 100) / 100)
+	let posY = $derived(Math.round((-1.0 + scrollY * 2) * 500) / 500)
+
+	const worldCenterOffset = 0.2
+	let worldCenter = $derived<[number, number, number]>([0, posY + worldCenterOffset, 0])
 </script>
 
 <Camera />
 
-<T.Group rotation={[0, rotate, 0]} position={[0, posY, 0]}>
+<T.AmbientLight intensity={0.05} color={0xffffff} />
+<T.SpotLight 
+	position={[0, 1, 1.5]} 
+	castShadow 
+	color={0xff0000} 
+	intensity={100} 
+	angle={Math.PI / 6} 
+	penumbra={1} 
+	decay={10} 
+/>
+
+<LaserCrosshair />
+
+{#each CIRCLE_CONFIGS as config}
+	<CircleLine radius={config.radius} y={0.9} segments={config.segments} color={config.color} />
+	<CircleLine radius={config.radius} y={-0.9} segments={config.segments} color={config.color} />
+{/each}
+
+<T.Group rotation.y={rotate} position.y={posY}>
 	<HeroModel />
 
-	<BracketText text="DESIGNING IDEAS THAT RESONATE BEYOND VISION" position={circPos(1, 1)} worldCenter={[0, posY + 0.2, 0]} />
-	<BracketText text="BLENDING LOGIC AND INTUITION WITH FUNCTION AND BEAUTY" position={circPos(2, 0)} worldCenter={[0, posY + 0.2, 0]} />
-	<BracketText text="A PURSUIT OF KNOWLEDGE FUELLED BY ENDLESS CURIOUSITY" position={circPos(3, -1)} worldCenter={[0, posY + 0.2, 0]} />
+	{#each TEXT_CONFIGS as textConfig}
+		<BracketText 
+			text={textConfig.text}
+			position={getCircPos(textConfig.index, textConfig.y)}
+			{worldCenter}
+		/>
+	{/each}
 </T.Group>
-
-<CircleLine radius={0.5} y={0.9} segments={46} color="#777777" />
-<CircleLine radius={0.9} y={0.9} segments={58} color="#666666" />
-<CircleLine radius={1.4} y={0.9} color="#555555" />
-<CircleLine radius={2.0} y={0.9} color="#444444" />
-<CircleLine radius={0.5} y={-0.9} segments={46} color="#777777" />
-<CircleLine radius={0.9} y={-0.9} segments={46} color="#666666" />
-<CircleLine radius={1.4} y={-0.9} segments={58} color="#555555" />
-<CircleLine radius={2.0} y={-0.9} color="#444444" />
-
-<T.AmbientLight color={0xffffff} intensity={0.01} castShadow={false} />
-<T.DirectionalLight position={[0, 1, 2]} castShadow color={0xffffff} intensity={0.1} />
-<T.SpotLight position={[0, 1, 1.5]} castShadow color={0xff0000} intensity={100} angle={Math.PI / 6} penumbra={1} decay={10} />
