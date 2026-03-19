@@ -20,6 +20,8 @@
     )
   }
   const geometry = new THREE.BufferGeometry().setFromPoints(points)
+
+  const mat = new THREE.LineBasicMaterial({ color: color, side: THREE.FrontSide })
 </script>
 
-<T.LineLoop geometry={geometry} material={new THREE.LineBasicMaterial({ color: color, side: THREE.FrontSide })} position={[0, y, 0]} rotation={[rotation, 0, 0]} />
+<T.LineLoop geometry={geometry} material={mat} position={[0, y, 0]} rotation={[rotation, 0, 0]} />

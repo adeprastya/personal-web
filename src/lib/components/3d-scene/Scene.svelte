@@ -34,7 +34,7 @@
 		{ text: "A PURSUIT OF KNOWLEDGE FUELLED BY ENDLESS CURIOUSITY", index: 3, y: -1 }
 	]
 
-	const circPositions = new Map<string, [number, number, number]>()
+	let circPositions = $state(new Map<string, [number, number, number]>())
 	function getCircPos(i: number, y: number): [number, number, number] {
 		const key = `${i}-${y}`
 		if (!circPositions.has(key)) {
@@ -98,7 +98,7 @@
 
 <LaserCrosshair />
 
-{#each CIRCLE_CONFIGS as config}
+{#each CIRCLE_CONFIGS as config (config.radius)}
 	<CircleLine radius={config.radius} y={0.9} segments={config.segments} color={config.color} />
 	<CircleLine radius={config.radius} y={-0.9} segments={config.segments} color={config.color} />
 {/each}
@@ -106,7 +106,7 @@
 <T.Group rotation.y={rotate} position.y={posY}>
 	<HeroModel />
 
-	{#each TEXT_CONFIGS as textConfig}
+	{#each TEXT_CONFIGS as textConfig (textConfig.text)}
 		<BracketText 
 			text={textConfig.text}
 			position={getCircPos(textConfig.index, textConfig.y)}

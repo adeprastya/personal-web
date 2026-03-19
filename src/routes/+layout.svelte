@@ -1,9 +1,9 @@
 <script lang="ts">
 	import '../app.css';
-	import AppFrame from '$lib/components/frame/AppFrame.svelte';
-	import WebGLCanvas from '$lib/components/3d-scene/Canvas.svelte';
 	import { afterNavigate } from '$app/navigation';
 	import { typingAnimation } from "$lib/utils/textAnimation";
+	import AppFrame from '$lib/components/frame/AppFrame.svelte';
+	import WebGLCanvas from '$lib/components/3d-scene/Canvas.svelte';
 
 	let { children } = $props();
 
@@ -19,6 +19,7 @@
 		"/about": "Don't know me?",
 		"/works": "Hope you like it!",
 	};
+
 	afterNavigate(({ to, from }) => {
 		const init = routeTitles[from?.url.pathname || "/"] ?? ""
 		const final = routeTitles[to?.url.pathname || "/"] ?? ""
