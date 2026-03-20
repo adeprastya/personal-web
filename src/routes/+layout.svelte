@@ -1,7 +1,9 @@
 <script lang="ts">
 	import '../app.css';
+	import { onMount } from "svelte";
 	import { afterNavigate } from '$app/navigation';
 	import { typingAnimation } from "$lib/utils/textAnimation";
+	import { initScroll } from "$lib/scrollState.svelte"
 	import AppFrame from '$lib/components/frame/AppFrame.svelte';
 	import WebGLCanvas from '$lib/components/3d-scene/Canvas.svelte';
 
@@ -30,6 +32,10 @@
 			{ delay: 100 }
 		);
 	});
+
+	onMount(() => {
+		initScroll()
+	})
 </script>
 
 <svelte:head>
