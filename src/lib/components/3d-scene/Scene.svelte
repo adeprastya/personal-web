@@ -56,7 +56,7 @@
 
 <Camera />
 
-<T.AmbientLight intensity={0.05} color={0xffffff} />
+<T.AmbientLight intensity={0.025} color={0xffffff} />
 <T.SpotLight 
 	position={[0, 1, 1.5]} 
 	castShadow 

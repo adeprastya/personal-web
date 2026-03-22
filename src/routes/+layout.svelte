@@ -4,6 +4,7 @@
 	import { afterNavigate } from '$app/navigation';
 	import { typingAnimation } from "$lib/utils/textAnimation";
 	import { initScroll } from "$lib/scrollState.svelte"
+	import ScrollToNext from "$lib/ScrollToNext.svelte";
 	import AppFrame from '$lib/components/frame/AppFrame.svelte';
 	import WebGLCanvas from '$lib/components/3d-scene/Canvas.svelte';
 
@@ -16,18 +17,17 @@
 	const IMG = 'https://adefathoniprastya.vercel.app/og-image.jpg';
 	const LANG = 'en';
 
-	const routeTitles: Record<string, string> = {
+	const routesDetail: Record<string, string> = {
 		"/": "Ade Prastya",
 		"/about": "Don't know me?",
 		"/works": "Hope you like it!",
 	};
+	const routes = Object.keys(routesDetail);
 
 	afterNavigate(({ to, from }) => {
-		const init = routeTitles[from?.url.pathname || "/"] ?? ""
-		const final = routeTitles[to?.url.pathname || "/"] ?? ""
 		typingAnimation(
-			init,
-			final,
+			routesDetail[from?.url.pathname || "/"],
+			routesDetail[to?.url.pathname || "/"],
 			(s: string) => document.title = s || "|",
 			{ delay: 100 }
 		);
@@ -73,11 +73,12 @@
 	</script>
 </svelte:head>
 
-<div class="fixed z-50 w-full h-screen overflow-hidden">
+<div class="fixed z-10 w-full h-screen overflow-hidden">
 	<WebGLCanvas />
 	<AppFrame />
+	<ScrollToNext routes={routes} />
 </div>
 
-<main id="smooth-content" class="h-[600vh] bg-zinc-900 text-zinc-300 absolute -z-50 inset-0 opacity-0 pointer-events-none">
+<main id="smooth-content" class="h-[600vh] bg-zinc-900 text-zinc-300 absolute -z-10 inset-0 opacity-0 pointer-events-none">
 	{@render children()}
 </main>

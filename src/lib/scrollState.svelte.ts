@@ -2,11 +2,6 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 
-const SCROLL_CONFIG = {
-	smooth: 2,
-	smoothTouch: 0.05
-};
-
 export const scrollData = $state({
 	y: 0,
 	trigger: null as ScrollTrigger | null,
@@ -20,8 +15,8 @@ export function initScroll() {
 	gsap.registerPlugin(ScrollSmoother, ScrollTrigger);
 
 	scrollData.smoother = ScrollSmoother.create({
-		smooth: SCROLL_CONFIG.smooth,
-		smoothTouch: SCROLL_CONFIG.smoothTouch,
+		smooth: 2,
+		smoothTouch: 0.05,
 		wrapper: '#smooth-wrapper',
 		content: '#smooth-content'
 	});

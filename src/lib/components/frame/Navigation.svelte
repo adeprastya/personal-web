@@ -13,13 +13,23 @@
 		{ href: '/about', label: 'About' }
 	];
 
-	gsap.registerPlugin(Draggable, InertiaPlugin);
+	let syncFn = $state<(() => void) | null>(null);
+
+  // Dipanggil ulang setiap kali pathname berubah
+  $effect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _ = page.url.pathname;
+    syncFn?.();
+  });
+
 	let activeIdx = links.findIndex((l) => l.href === page.url.pathname);
 
 	let containerEl: HTMLElement;
 	let wrapperEl: HTMLElement;
 
 	onMount(() => {
+		gsap.registerPlugin(Draggable, InertiaPlugin);
+
 		const containerCenter = containerEl.offsetHeight / 2;
 		const wrapperHeight = (wrapperEl.children[0] as HTMLElement).offsetHeight;
 
@@ -64,7 +74,8 @@
 
 		function syncRouter() {
 			const curIdx = links.findIndex((l) => l.href === page.url.pathname);
-			if (curIdx !== -1) {
+			if (curIdx === -1) return;
+
 				const snapPoints = itemCenters.map((center) => containerCenter - center);
 				const targetY = snapPoints[curIdx];
 				gsap.to(wrapperEl, {
@@ -75,11 +86,9 @@
 						activeIdx = curIdx;
 					}
 				});
-			}
 		}
 
-		syncRouter();
-		gsap.set(wrapperEl, { y: 0 });
+		syncFn = syncRouter;
 		updateOpacity();
 
 		Draggable.create(wrapperEl, {
@@ -132,9 +141,10 @@
 		class="h-36 touch-none overflow-hidden select-none"
 	>
 		<div bind:this={wrapperEl}>
-			{#each Array(3) as _, i}
+			<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
+			{#each Array(3) as _, i  (i)}
 				<ul aria-hidden={i !== 1} class="flex flex-col items-center">
-					{#each links as { label, href }}
+					{#each links as { label, href }, i (i)}
 						<li>
 							<a
 								{href}
