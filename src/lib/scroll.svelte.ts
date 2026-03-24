@@ -34,7 +34,6 @@ export function initScroll() {
 	});
 
 	scrollData.isInitialized = true;
-
 	return () => {
 		scrollData.smoother?.kill();
 		scrollData.trigger?.kill();

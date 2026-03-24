@@ -1,18 +1,18 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
+  import { fade } from "svelte/transition";
 	import { page } from '$app/state';
 	import { goto } from "$app/navigation";
-  import { fade } from "svelte/transition";
   import gsap from "gsap";
   import { Observer } from "gsap/Observer";
-  import { scrollData } from "$lib/scrollState.svelte";
+  import { scrollData } from "$lib/scroll.svelte";
+  import { deviceData } from "$lib/device.svelte";
 
 	let { routes } = $props<{ routes: string[] }>();
 
   const REQUIRED_PROGRESS = 4000;
   const DRAIN_SPEED = 2.5;
 
-  let isMobile = false;
   let observer: Observer;
 	let drainTicker: gsap.TickerCallback | null = null;
 
@@ -37,9 +37,6 @@
 			goto(nextPath);
 		}
 
-    const ua = navigator.userAgent;
-    isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
-
 		// Progress draining
     drainTicker = gsap.ticker.add(() => {
     	if (progress > 0) progress = Math.max(0, progress - DRAIN_SPEED);
@@ -53,7 +50,7 @@
       onChangeY: (self) => {
         if (!show) return;
 
-        if (isMobile) {
+        if (deviceData.isMobile) {
           progress = Math.min(progress + Math.min(100, Math.abs(self.deltaY * 50)), REQUIRED_PROGRESS);
         } else {
           progress = Math.min(progress + Math.min(50, Math.abs(self.deltaY)), REQUIRED_PROGRESS);

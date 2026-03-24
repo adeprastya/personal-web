@@ -2,11 +2,15 @@
 	import '../app.css';
 	import { onMount } from "svelte";
 	import { afterNavigate } from '$app/navigation';
+	
+	import { initDevice } from "$lib/device.svelte";
+	import { initScroll } from "$lib/scroll.svelte"
 	import { typingAnimation } from "$lib/utils/textAnimation";
-	import { initScroll } from "$lib/scrollState.svelte"
+
 	import ScrollToNext from "$lib/ScrollToNext.svelte";
 	import AppFrame from '$lib/components/frame/AppFrame.svelte';
 	import WebGLCanvas from '$lib/components/3d-scene/Canvas.svelte';
+	import { initPointer } from "$lib/pointer.svelte";
 
 	let { children } = $props();
 
@@ -34,7 +38,8 @@
 	});
 
 	onMount(() => {
-		initScroll()
+		const cleanups = [initDevice(), initScroll(), initPointer()];
+		return () => cleanups.forEach((fn) => (typeof fn === 'function') && fn());
 	})
 </script>
 

@@ -1,19 +1,20 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte'
-  import { useThrelte, useTask } from '@threlte/core'
+  import { onMount } from 'svelte'
   import * as THREE from 'three'
+  import { useThrelte, useTask } from '@threlte/core'
+  import { pointerData } from "$lib/pointer.svelte";
 
   const { scene, camera } = useThrelte()
 
   // ============ CONSTANTS ============
-  const LASER_CONFIG = {
+  const CONFIG = {
     thickness: 0.006, 
     glow: 0.06,
     color: new THREE.Color(1, 0.05, 0.05),
     intensity: 0.2,
     lerpSpeed: 0.2,
     scanInterval: 5000,
-    initDelay: 1000,
+    initDelay: 200,
     projectionDepth: 0 
   }
 
@@ -53,35 +54,33 @@
   `
 
   // ============ STATE ============
-  const mouse = new THREE.Vector2()
   const targetPoint = new THREE.Vector3()
   const currentPoint = new THREE.Vector3()
-
-  // Plane cursor to laser projection 
-  const projectionPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -LASER_CONFIG.projectionDepth)
+  const projectionPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -CONFIG.projectionDepth)
 
   const laserUniforms = {
     uHitPoint: { value: currentPoint },
     uActive: { value: 1 },
-    uThickness: { value: LASER_CONFIG.thickness },
-    uGlow: { value: LASER_CONFIG.glow },
-    uColor: { value: LASER_CONFIG.color },
-    uIntensity: { value: LASER_CONFIG.intensity }
+    uThickness: { value: CONFIG.thickness },
+    uGlow: { value: CONFIG.glow },
+    uColor: { value: CONFIG.color },
+    uIntensity: { value: CONFIG.intensity }
   }
-  const tempRay = new THREE.Ray()
+
+  // Reusable objects untuk kalkulasi raycasting
+  const raycaster = new THREE.Raycaster()
+  const mouseCoords = new THREE.Vector2()
 
   let meshes: THREE.Mesh[] = []
   const processedMeshes = new WeakSet<THREE.Mesh>()
-  let isScanning = false
-  let lastMeshCount = 0
+  let lastCheckTime = 0
 
-  // ============ SHADER INJECTION ============
   function injectLaser(material: THREE.Material) {
     if (material.userData.__laserInjected) return
     
-    material.onBeforeCompile = function(shader) {
+    material.onBeforeCompile = (shader) => {
       if (shader.uniforms.uHitPoint) return
-      
+
       Object.assign(shader.uniforms, laserUniforms)
 
       if (!shader.vertexShader.includes('vWorldPos')) {
@@ -92,12 +91,11 @@
         shader.fragmentShader = FRAGMENT_INJECTION + shader.fragmentShader.replace('#include <dithering_fragment>', FRAGMENT_REPLACE)
       }
     }
-    
+
     material.needsUpdate = true;
     material.userData.__laserInjected = true;
   }
 
-  // ============ MESH PROCESSING ============
   function processMesh(mesh: THREE.Mesh) {
     if (processedMeshes.has(mesh)) return
     
@@ -112,84 +110,41 @@
   }
 
   function scanScene() {
-    if (isScanning) return
-    isScanning = true
-
     scene.traverse((obj) => {
       if ('geometry' in obj || 'material' in obj) {
         processMesh(obj as THREE.Mesh)
       }
     })
-
-    lastMeshCount = meshes.length
-    isScanning = false
   }
 
-  function checkSceneChanges() {
-    let currentCount = 0
-    scene.traverse((obj) => {
-      if ('geometry' in obj || 'material' in obj) {
-        currentCount++
-      }
-    })
-    
-    if (currentCount !== lastMeshCount) {
+  useTask(() => {
+    const cam = camera.current
+    if (!cam) return
+
+    // Get normalized pointer position (-1, 1)
+    mouseCoords.x = (pointerData.x / window.innerWidth) * 2 - 1
+    mouseCoords.y = -(pointerData.y / window.innerHeight) * 2 + 1
+
+    // Plane raycast projection
+    raycaster.setFromCamera(mouseCoords, cam)
+    raycaster.ray.intersectPlane(projectionPlane, targetPoint)
+
+    // Lerping
+    currentPoint.lerp(targetPoint, CONFIG.lerpSpeed)
+
+    // Get all meshes
+    const now = performance.now()
+    if (now - lastCheckTime > CONFIG.scanInterval) {
       scanScene()
+      lastCheckTime = now
     }
-  }
-
-  // ============ ANIMATION ============
-  function updateLaserPosition() {
-    currentPoint.lerp(targetPoint, LASER_CONFIG.lerpSpeed)
-  }
-
-  // ============ MOUSE PROJECTION ============
-  let mouseMovedThisFrame = false
-
-  function updateLaserTargetFromMouse() {
-    if (!mouseMovedThisFrame || !camera.current) return
-
-    tempRay.origin.setFromMatrixPosition(camera.current.matrixWorld)
-    tempRay.direction.set(mouse.x, mouse.y, 0.5).unproject(camera.current).sub(tempRay.origin).normalize()
-
-    tempRay.intersectPlane(projectionPlane, targetPoint)
-
-    mouseMovedThisFrame = false
-  }
-
-  // ============ LIFECYCLE ============
-  onMount(() => {
-    // Initial scan
-    setTimeout(scanScene, LASER_CONFIG.initDelay)
-    setTimeout(scanScene, LASER_CONFIG.initDelay + 1000)
-
-    const onMove = (event: PointerEvent) => {
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1
-      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
-      mouseMovedThisFrame = true
-    }
-
-    window.addEventListener('pointermove', onMove, { passive: true })
-
-    onDestroy(() => {
-      window.removeEventListener('pointermove', onMove)
-      meshes.length = 0
-    })
   })
 
-  // ============ GAME LOOP ============
-  let lastCheckTime = 0
-  useTask(() => {
-    if (!camera.current) return
-
-    updateLaserTargetFromMouse()
-
-    updateLaserPosition()
-
-    const now = performance.now()
-    if (now - lastCheckTime > LASER_CONFIG.scanInterval) {
-      checkSceneChanges()
-      lastCheckTime = now
+  onMount(() => {
+    const timer = setTimeout(scanScene, CONFIG.initDelay)
+    return () => {
+      clearTimeout(timer)
+      meshes.length = 0
     }
   })
 </script>

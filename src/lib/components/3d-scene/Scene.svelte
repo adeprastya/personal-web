@@ -3,14 +3,13 @@
 	import { T, useThrelte } from '@threlte/core';
 	import * as THREE from 'three';
 	// Global
-	import { scrollData } from "../../scrollState.svelte";
+	import { scrollData } from "$lib/scroll.svelte";
 	import Camera from './Camera.svelte';
 	import LaserCrosshair from "./LaserCrosshair.svelte";
 	import HeroModel from './HeroModel.svelte';
   import CircleLine from './CircleLine.svelte';
 	// Home
 	import BracketText from './BracketText.svelte';
-
 
 	const CIRCLE_CONFIGS = [
 		{ radius: 0.5, segments: 32, color: "#777777" },
