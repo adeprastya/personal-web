@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { HTMLTextareaAttributes } from 'svelte/elements';
-	import { cn } from '$lib/utils/twailwind';
+	import { cn } from '$lib/utils/tailwind';
 
 	interface ITextAreaFieldProps extends HTMLTextareaAttributes {
 		name: string;
