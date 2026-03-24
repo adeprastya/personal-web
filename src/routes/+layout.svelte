@@ -46,6 +46,7 @@
 	<meta name="language" content={LANG} />
 	<link rel="canonical" href={URL} />
 
+	<meta property="og:site_name" content={TITLE}>
 	<meta property="og:title" content={TITLE} />
 	<meta property="og:description" content={DESC} />
 	<meta property="og:type" content="website" />
@@ -73,7 +74,7 @@
 	</script>
 </svelte:head>
 
-<div class="fixed z-10 w-full h-screen overflow-hidden">
+<div class="fixed z-10 w-full h-dvh overflow-hidden">
 	<WebGLCanvas />
 	<AppFrame />
 	<ScrollToNext routes={routes} />

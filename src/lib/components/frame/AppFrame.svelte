@@ -21,7 +21,7 @@
 
 <svelte:window bind:innerWidth={windowWidth} />
 
-<header class="fixed inset-0 text-zinc-800">
+<header class="fixed inset-0 size-full text-zinc-800">
 	<!-- borders -->
 	<!-- [T] -->
 	<div class="absolute top-0 left-0 h-2 w-full bg-zinc-200"></div>

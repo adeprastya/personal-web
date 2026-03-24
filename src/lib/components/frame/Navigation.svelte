@@ -149,7 +149,7 @@
 							<a
 								{href}
 								tabindex={i === 1 ? 0 : -1}
-								class="pointer-events-none inline-block w-full cursor-grab px-2 py-3.5 text-center font-mono text-sm tracking-widest text-zinc-300 uppercase focus:bg-zinc-50/30 active:cursor-grabbing"
+								class="pointer-events-none inline-block w-full cursor-grab px-2 py-2.5 sm:py-3.5 text-center font-mono text-xs sm:text-sm tracking-widest text-zinc-300 uppercase focus:bg-zinc-50/30 active:cursor-grabbing"
 							>
 								{label}
 							</a>
