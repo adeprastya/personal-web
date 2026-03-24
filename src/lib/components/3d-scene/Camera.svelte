@@ -2,8 +2,10 @@
   import * as THREE from "three"
   import { onMount } from "svelte"
   import { useThrelte, useTask } from '@threlte/core'
+  import { deviceData } from "$lib/device.svelte";
   import { pointerData } from "$lib/pointer.svelte";
 
+  const FOV = 50
   const NEAR = 0.1
   const FAR = 10
   const CAMERA_DISTANCE = 2.5
@@ -19,21 +21,21 @@
   onMount(() => {
     const cam = camera.current
     if (cam instanceof THREE.PerspectiveCamera) {
+      cam.fov = deviceData.isMobile ? FOV * 1.25 : FOV
       cam.near = NEAR
       cam.far = FAR
+      cam.position.z = deviceData.isMobile ? CAMERA_DISTANCE * 1.25 : CAMERA_DISTANCE
       cam.updateProjectionMatrix();
-      cam.position.z = CAMERA_DISTANCE
     }
   })
 
   useTask((delta) => {
     const cam = camera.current
-    const obs = pointerData.instance
-    if (!cam || !obs) return
+    if (!cam) return
 
     //  Normalize coordinates
-    const newTargetX = ((obs.x || 0) / window.innerWidth) * 2 - 1
-    const newTargetY = -((obs.y || 0) / window.innerHeight) * 2 + 1
+    const newTargetX = (pointerData.x / window.innerWidth) * 2 - 1
+    const newTargetY = -(pointerData.y / window.innerHeight) * 2 + 1
 
     // Lerping
     targetX = newTargetX * 0.5
