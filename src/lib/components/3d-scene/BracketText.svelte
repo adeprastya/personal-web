@@ -4,17 +4,21 @@
   import { Text } from '@threlte/extras';
 	import { onMount } from "svelte";
 
-  export let text: string = "HELLO WORLD";
-  export let fontSize: number = 0.05;
-  export let width: number = 1.0;
-  export let height: number = 0.3;
-  export let color: string = '#888888';
-  export let position: [number, number, number] = [0, 0, 0];
-  export let worldCenter: [number, number, number] = [0, 0, 0];
+  interface BracketTextProps {
+    text?: string;
+    fontSize?: number;
+    width?: number;
+    height?: number;
+    color?: string;
+    position?: [number, number, number];
+    worldCenter?: [number, number, number];
+    visible?: boolean;
+  }
+  let { text = "HELLO WORLD", fontSize = 0.05, width = 1.0, height = 0.3, color = '#888888', position = [0, 0, 0], worldCenter = [0, 0, 0], visible = true }: BracketTextProps = $props();
 
   const { camera } = useThrelte()
-  let group: THREE.Group | undefined = undefined;
-  let centerLineRef: THREE.Line
+  let group = $state<THREE.Group | undefined>(undefined);
+  let centerLineRef = $state<THREE.Line | undefined>(undefined);
 
   const lineMat = new THREE.LineBasicMaterial({ color: color, side: THREE.FrontSide, transparent: true, fog: false });
   const bracketMat = new THREE.LineBasicMaterial({ color: color, side: THREE.FrontSide, transparent: true, fog: false });
@@ -45,24 +49,25 @@
   )
   const worldPos = new THREE.Vector3();
 
-  let CAM_NEAR: number;
-  let CAM_FAR: number;
+  let camNear: number;
+  let camFar: number;
 
   onMount(() => {
-    CAM_NEAR = (camera.current as THREE.PerspectiveCamera).near + 1.0
-    CAM_FAR = (camera.current as THREE.PerspectiveCamera).far - 5.0
+    camNear = (camera.current as THREE.PerspectiveCamera).near + 1.5
+    camFar = (camera.current as THREE.PerspectiveCamera).far - 5.0
   })
 
   useTask(() => {
+    if (!group || !camera.current || !visible) return;
+
     // Billboard effect
-    if (!group || !camera.current) return;
     const camPos = camera.current.position;
     group.lookAt(camPos.x, camPos.y, camPos.z)
 
     // Distance opacity effect
     group.getWorldPosition(worldPos);
     const distance = worldPos.distanceTo(camPos);
-    const opacity = THREE.MathUtils.clamp(1 - (distance - CAM_NEAR) / (CAM_FAR - CAM_NEAR), 0, 1 );
+    const opacity = THREE.MathUtils.clamp(1 - (distance - camNear) / (camFar - camNear), 0, 1 );
     textMat.opacity = opacity;
     bracketMat.opacity = opacity;
     lineMat.opacity = opacity * 0.7;
@@ -80,7 +85,7 @@
   })
 </script> 
 
-<T.Group bind:ref={group} position={position}>
+<T.Group bind:ref={group} position={position} visible={visible}>
   <T.Line geometry={bracketL} material={bracketMat} />
   <T.Line geometry={bracketR} material={bracketMat} />
   <T.Line bind:ref={centerLineRef} geometry={centerLine} material={lineMat} />

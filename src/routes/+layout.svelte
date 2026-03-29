@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { onMount } from "svelte";
-	import { afterNavigate } from '$app/navigation';
+	import { initRoute, routeData } from "$lib/route.svelte";
 	import { initDevice } from "$lib/device.svelte";
 	import { initScroll } from "$lib/scroll.svelte"
 	import { typingAnimation } from "$lib/utils/textAnimation";
@@ -26,17 +26,17 @@
 	};
 	const routes = Object.keys(routesDetail);
 
-	afterNavigate(({ to, from }) => {
+	$effect(() => {
 		typingAnimation(
-			routesDetail[from?.url.pathname || "/"],
-			routesDetail[to?.url.pathname || "/"],
+			routesDetail[routeData.from || '/'],
+			routesDetail[routeData.to || '/'],
 			(s: string) => document.title = s || "|",
 			{ delay: 100 }
 		);
-	});
+	})
 
 	onMount(() => {
-		const cleanups = [initDevice(), initScroll(), initPointer()];
+		const cleanups = [initRoute(), initDevice(), initScroll(), initPointer()];
 		return () => cleanups.forEach((fn) => (typeof fn === 'function') && fn());
 	})
 </script>
@@ -77,12 +77,12 @@
 	</script>
 </svelte:head>
 
-<div class="fixed z-10 w-full h-dvh overflow-hidden">
+<div class="fixed z-10 size-full overflow-hidden">
 	<WebGLCanvas />
 	<AppFrame />
 	<ScrollToNext routes={routes} />
 </div>
 
-<main id="smooth-content" class="h-[600vh] bg-zinc-900 text-zinc-300 absolute -z-10 inset-0 opacity-0 pointer-events-none">
+<main id="smooth-content" class="absolute -z-10 inset-0 w-full h-[600vh] bg-zinc-900 text-zinc-300 opacity-0 pointer-events-none">
 	{@render children()}
 </main>

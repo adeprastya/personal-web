@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { HTMLInputAttributes } from 'svelte/elements';
-	import { cn } from '$lib/utils/tailwind';
+	import { cn } from '$lib/utils/tailwindUtil';
 
 	interface IInputFieldProps extends HTMLInputAttributes {
 		name: string;
