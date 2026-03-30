@@ -15,7 +15,7 @@
     lerpSpeed: 0.2,
     scanInterval: 5000,
     initDelay: 200,
-    projectionDepth: 0 
+    projectionDepth: 2.5
   }
 
   // ============ SHADERS ============
@@ -35,15 +35,20 @@
     uniform float uGlow;
     uniform vec3 uColor;
     uniform float uIntensity;
+    uniform vec3 uCameraRight; 
+    uniform vec3 uCameraUp; 
   `
+
   const FRAGMENT_REPLACE = `
     if(uActive > 0.5){
-      // Compute distance from world pixel position to laser center
-      vec2 d = abs(vWorldPos.xy - uHitPoint.xy);
+      vec3 diff = vWorldPos - uHitPoint;
 
-      // Crosshair logic
-      float d1 = abs(d.x - d.y) * 0.707107;
-      float d2 = abs(d.x + d.y) * 0.707107;
+      // Proyeksikan diff ke sumbu kamera, bukan world XY
+      float dx = dot(diff, uCameraRight);
+      float dy = dot(diff, uCameraUp);
+
+      float d1 = abs(dx - dy) * 0.707107;
+      float d2 = abs(dx + dy) * 0.707107;
 
       float c = max(smoothstep(uThickness, 0.0, d1), smoothstep(uThickness, 0.0, d2));
       float g = max(smoothstep(uGlow, 0.0, d1), smoothstep(uGlow, 0.0, d2));
@@ -56,15 +61,23 @@
   // ============ STATE ============
   const targetPoint = new THREE.Vector3()
   const currentPoint = new THREE.Vector3()
-  const projectionPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -CONFIG.projectionDepth)
+
+  // Hapus projectionPlane statis, ganti dengan yang dinamis
+  const projectionPlane = new THREE.Plane()
+  const cameraDir = new THREE.Vector3()
+  const planeOrigin = new THREE.Vector3()
+  const cameraRight = new THREE.Vector3()
+  const cameraUp = new THREE.Vector3()
 
   const laserUniforms = {
-    uHitPoint: { value: currentPoint },
-    uActive: { value: 1 },
-    uThickness: { value: CONFIG.thickness },
-    uGlow: { value: CONFIG.glow },
-    uColor: { value: CONFIG.color },
-    uIntensity: { value: CONFIG.intensity }
+    uHitPoint:     { value: currentPoint },
+    uActive:       { value: 1 },
+    uThickness:    { value: CONFIG.thickness },
+    uGlow:         { value: CONFIG.glow },
+    uColor:        { value: CONFIG.color },
+    uIntensity:    { value: CONFIG.intensity },
+    uCameraRight:  { value: cameraRight }, 
+    uCameraUp:     { value: cameraUp }, 
   }
 
   // Reusable objects untuk kalkulasi raycasting
@@ -121,15 +134,21 @@
     const cam = camera.current
     if (!cam) return
 
-    // Get normalized pointer position (-1, 1)
+    // Ekstrak sumbu kamera dari matrix world
+    cam.getWorldDirection(cameraDir)
+    cameraRight.setFromMatrixColumn(cam.matrixWorld, 0) // kolom X
+    cameraUp.setFromMatrixColumn(cam.matrixWorld, 1)    // kolom Y
+
+    // Update projection plane
+    planeOrigin.copy(cam.position).addScaledVector(cameraDir, CONFIG.projectionDepth)
+    projectionPlane.setFromNormalAndCoplanarPoint(cameraDir, planeOrigin)
+
     mouseCoords.x = (pointerData.x / window.innerWidth) * 2 - 1
     mouseCoords.y = -(pointerData.y / window.innerHeight) * 2 + 1
 
-    // Plane raycast projection
     raycaster.setFromCamera(mouseCoords, cam)
     raycaster.ray.intersectPlane(projectionPlane, targetPoint)
 
-    // Lerping
     currentPoint.lerp(targetPoint, CONFIG.lerpSpeed)
 
     // Get all meshes
