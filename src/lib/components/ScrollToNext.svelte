@@ -5,8 +5,8 @@
 	import { goto } from "$app/navigation";
   import gsap from "gsap";
   import { Observer } from "gsap/Observer";
-  import { scrollData } from "$lib/scroll.svelte";
-  import { deviceData } from "$lib/device.svelte";
+  import { scrollData } from "$lib/contexts/scroll.svelte";
+  import { deviceData } from "$lib/contexts/device.svelte";
 
 	let { routes } = $props<{ routes: string[] }>();
 

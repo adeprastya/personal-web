@@ -2,7 +2,7 @@
   import { onMount } from 'svelte'
   import * as THREE from 'three'
   import { useThrelte, useTask } from '@threlte/core'
-  import { pointerData } from "$lib/pointer.svelte";
+  import { pointerData } from "$lib/contexts/pointer.svelte";
 
   const { scene, camera } = useThrelte()
 

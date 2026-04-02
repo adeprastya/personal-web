@@ -4,9 +4,11 @@
   import { cubicOut } from 'svelte/easing';
 	import { T, useThrelte } from '@threlte/core';
 	import * as THREE from 'three';
-	import { deviceData } from "$lib/device.svelte";
-	import { routeData } from "$lib/route.svelte";
-	import { scrollData } from "$lib/scroll.svelte";
+
+	import { deviceData } from "$lib/contexts/device.svelte";
+	import { routeData } from "$lib/contexts/route.svelte";
+	import { scrollData } from "$lib/contexts/scroll.svelte";
+
 	import Camera from './Camera.svelte';
 	import LaserCrosshair from "./LaserCrosshair.svelte";
 	import HeroModel from './HeroModel.svelte';

@@ -1,14 +1,14 @@
 <script lang="ts">
 	import '../app.css';
 	import { onMount } from "svelte";
-	import { initRoute, routeData } from "$lib/route.svelte";
-	import { initDevice } from "$lib/device.svelte";
-	import { initScroll } from "$lib/scroll.svelte"
+	import { initRoute, routeData } from "$lib/contexts/route.svelte";
+	import { initDevice } from "$lib/contexts/device.svelte";
+	import { initPointer } from "$lib/contexts/pointer.svelte";
+	import { initScroll } from "$lib/contexts/scroll.svelte";
 	import { typingAnimation } from "$lib/utils/textAnimation";
-	import ScrollToNext from "$lib/ScrollToNext.svelte";
 	import AppFrame from '$lib/components/frame/AppFrame.svelte';
 	import WebGLCanvas from '$lib/components/3d-scene/Canvas.svelte';
-	import { initPointer } from "$lib/pointer.svelte";
+	import ScrollToNext from "$lib/components/ScrollToNext.svelte";
 
 	let { children } = $props();
 

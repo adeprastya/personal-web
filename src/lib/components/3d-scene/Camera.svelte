@@ -2,8 +2,8 @@
   import { afterNavigate } from "$app/navigation";
   import * as THREE from "three";
   import { useThrelte, useTask } from "@threlte/core";
-  import { deviceData } from "$lib/device.svelte";
-  import { pointerData } from "$lib/pointer.svelte";
+  import { deviceData } from "$lib/contexts/device.svelte";
+  import { pointerData } from "$lib/contexts/pointer.svelte";
 
   const FOV          = 60;
   const NEAR         = 0.1;

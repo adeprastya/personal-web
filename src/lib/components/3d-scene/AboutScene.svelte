@@ -1,8 +1,8 @@
 <script lang="ts">
   import { T } from '@threlte/core';
-  import { deviceData } from "$lib/device.svelte";
-  import { routeData } from "$lib/route.svelte";
-	import { scrollData } from "$lib/scroll.svelte";
+  import { deviceData } from "$lib/contexts/device.svelte";
+  import { routeData } from "$lib/contexts/route.svelte";
+	import { scrollData } from "$lib/contexts/scroll.svelte";
   import DiamondText from './shared/DiamondText.svelte';
 
 	function getCircPos(i: number, y: number, radius: number): [number, number, number] {
