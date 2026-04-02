@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
-  import * as THREE from 'three';
+  import { Vector3, BufferGeometry, LineBasicMaterial, MeshBasicMaterial, Mesh, Group, FrontSide } from 'three';
   import { T, useThrelte, useTask } from '@threlte/core';
   import { Text } from '@threlte/extras';
   import gsap from 'gsap';
@@ -31,26 +31,26 @@
 
   const { camera } = useThrelte();
 
-  let diamondMesh = $state.raw<THREE.Mesh | undefined>(undefined);
-  let textGroup   = $state.raw<THREE.Group | undefined>(undefined);
-  let lineMat = $state.raw<THREE.LineBasicMaterial | undefined>(undefined);
-  const titleMat = new THREE.MeshBasicMaterial({
+  let diamondMesh = $state.raw<Mesh | undefined>(undefined);
+  let textGroup   = $state.raw<Group | undefined>(undefined);
+  let lineMat = $state.raw<LineBasicMaterial | undefined>(undefined);
+  const titleMat = new MeshBasicMaterial({
     color: textColor,
-    side: THREE.FrontSide,
+    side: FrontSide,
     transparent: true,
     fog: false,
     opacity: textIsVisible ? 1 : 0
   });
-  const descMat = new THREE.MeshBasicMaterial({
+  const descMat = new MeshBasicMaterial({
     color: textColor,
-    side: THREE.FrontSide,
+    side: FrontSide,
     transparent: true,
     fog: false,
     opacity: textIsVisible ? 1 : 0
   });
-  const lineGeometry = new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(-textWidth / 2, 0, 0),
-    new THREE.Vector3(textWidth / 2, 0, 0)
+  const lineGeometry = new BufferGeometry().setFromPoints([
+    new Vector3(-textWidth / 2, 0, 0),
+    new Vector3(textWidth / 2, 0, 0)
   ]);
 
   let floatTime = 0;

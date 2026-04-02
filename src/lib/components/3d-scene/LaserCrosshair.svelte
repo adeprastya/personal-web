@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import * as THREE from 'three'
+  import { Vector2, Vector3, Color, Plane, Mesh, Material, Raycaster } from 'three'
   import { useThrelte, useTask } from '@threlte/core'
   import { pointerData } from "$lib/contexts/pointer.svelte";
 
@@ -8,9 +8,9 @@
 
   // ============ CONSTANTS ============
   const CONFIG = {
-    thickness: 0.006, 
-    glow: 0.06,
-    color: new THREE.Color(1, 0.05, 0.05),
+    thickness: 0.003,
+    glow: 0.035,
+    color: new Color("#ff8888"),
     intensity: 0.2,
     lerpSpeed: 0.2,
     scanInterval: 5000,
@@ -59,36 +59,36 @@
   `
 
   // ============ STATE ============
-  const targetPoint = new THREE.Vector3()
-  const currentPoint = new THREE.Vector3()
+  const targetPoint = new Vector3()
+  const currentPoint = new Vector3()
 
   // Hapus projectionPlane statis, ganti dengan yang dinamis
-  const projectionPlane = new THREE.Plane()
-  const cameraDir = new THREE.Vector3()
-  const planeOrigin = new THREE.Vector3()
-  const cameraRight = new THREE.Vector3()
-  const cameraUp = new THREE.Vector3()
+  const projectionPlane = new Plane()
+  const cameraDir = new Vector3()
+  const planeOrigin = new Vector3()
+  const cameraRight = new Vector3()
+  const cameraUp = new Vector3()
 
   const laserUniforms = {
-    uHitPoint:     { value: currentPoint },
-    uActive:       { value: 1 },
-    uThickness:    { value: CONFIG.thickness },
-    uGlow:         { value: CONFIG.glow },
-    uColor:        { value: CONFIG.color },
-    uIntensity:    { value: CONFIG.intensity },
-    uCameraRight:  { value: cameraRight }, 
-    uCameraUp:     { value: cameraUp }, 
+    uHitPoint: { value: currentPoint },
+    uActive: { value: 1 },
+    uThickness: { value: CONFIG.thickness },
+    uGlow: { value: CONFIG.glow },
+    uColor: { value: CONFIG.color },
+    uIntensity: { value: CONFIG.intensity },
+    uCameraRight: { value: cameraRight }, 
+    uCameraUp: { value: cameraUp }, 
   }
 
   // Reusable objects untuk kalkulasi raycasting
-  const raycaster = new THREE.Raycaster()
-  const mouseCoords = new THREE.Vector2()
+  const raycaster = new Raycaster()
+  const mouseCoords = new Vector2()
 
-  let meshes: THREE.Mesh[] = []
-  const processedMeshes = new WeakSet<THREE.Mesh>()
+  let meshes: Mesh[] = []
+  const processedMeshes = new WeakSet<Mesh>()
   let lastCheckTime = 0
 
-  function injectLaser(material: THREE.Material) {
+  function injectLaser(material: Material) {
     if (material.userData.__laserInjected) return
     
     material.onBeforeCompile = (shader) => {
@@ -109,7 +109,7 @@
     material.userData.__laserInjected = true;
   }
 
-  function processMesh(mesh: THREE.Mesh) {
+  function processMesh(mesh: Mesh) {
     if (processedMeshes.has(mesh)) return
     
     meshes.push(mesh)
@@ -125,7 +125,7 @@
   function scanScene() {
     scene.traverse((obj) => {
       if ('geometry' in obj || 'material' in obj) {
-        processMesh(obj as THREE.Mesh)
+        processMesh(obj as Mesh)
       }
     })
   }

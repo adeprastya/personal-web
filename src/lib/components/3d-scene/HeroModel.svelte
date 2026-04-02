@@ -1,5 +1,5 @@
 <script lang="ts">
-  import * as THREE from 'three'
+  import { FrontSide } from 'three'
   import { T } from '@threlte/core'
   import { useGltf } from "@threlte/extras";
 
@@ -11,6 +11,6 @@
       geometry={$gltf.nodes.Mesh10.geometry}
       rotation={[0, Math.PI, 0]}
     >
-      <T.MeshLambertMaterial side={THREE.FrontSide}/>
+      <T.MeshLambertMaterial side={FrontSide}/>
     </T.Mesh>
 {/if}

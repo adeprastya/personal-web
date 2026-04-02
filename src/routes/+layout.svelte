@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { onMount } from "svelte";
+	import { browser } from '$app/environment';
 	import { initRoute, routeData } from "$lib/contexts/route.svelte";
 	import { initDevice } from "$lib/contexts/device.svelte";
 	import { initPointer } from "$lib/contexts/pointer.svelte";
@@ -78,7 +79,9 @@
 </svelte:head>
 
 <div class="fixed z-10 size-full overflow-hidden">
-	<WebGLCanvas />
+	{#if browser}
+		<WebGLCanvas />
+	{/if}
 	<AppFrame />
 	<ScrollToNext routes={routes} />
 </div>

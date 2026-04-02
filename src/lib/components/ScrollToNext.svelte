@@ -19,8 +19,23 @@
   let show = $state(false);
   let progress = $state(0);
   let progressRatio = $derived(progress / REQUIRED_PROGRESS);
+  let isNavigating = $state(false);
 
-  // Progress reset if not showing
+  function handleComplete() {
+    if (isNavigating) return;
+    isNavigating = true;
+
+    const curIdx = routes.findIndex((l: string) => l === page.url.pathname);
+    if (curIdx === -1) return;
+    const nextPath = routes[(curIdx + 1) % routes.length];
+
+    goto(nextPath).then(() => {
+      isNavigating = false; 
+      progress = 0;
+    });
+  }
+
+  // Progress reset when user scrolls back up
   $effect(() => {
     show = scrollData.y >= 0.98;
     if (!show) progress = 0;
@@ -29,17 +44,9 @@
   onMount(() => {
     gsap.registerPlugin(Observer);
 
-		// Navigate
-		function handleComplete() {
-			const curIdx = routes.findIndex((l: string) => l === page.url.pathname);
-			if (curIdx === -1) return;
-			const nextPath = routes[(curIdx + 1) % routes.length];
-			goto(nextPath);
-		}
-
 		// Progress draining
     drainTicker = gsap.ticker.add(() => {
-    	if (progress > 0) progress = Math.max(0, progress - DRAIN_SPEED);
+    	if (progress > 0 && !isNavigating) progress = Math.max(0, progress - DRAIN_SPEED);
   	});
 
 		// Scroll observer
@@ -48,7 +55,7 @@
       preventDefault: false,
       tolerance: 10,
       onChangeY: (self) => {
-        if (!show) return;
+        if (!show || isNavigating) return;
 
         if (deviceData.isMobile) {
           progress = Math.min(progress + Math.min(100, Math.abs(self.deltaY * 50)), REQUIRED_PROGRESS);
@@ -56,7 +63,9 @@
           progress = Math.min(progress + Math.min(50, Math.abs(self.deltaY)), REQUIRED_PROGRESS);
         }
 
-        if (progress >= REQUIRED_PROGRESS - 10) handleComplete();
+        if (progress >= REQUIRED_PROGRESS) {
+          handleComplete();
+        }
       },
     });
   });

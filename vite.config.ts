@@ -1,7 +1,8 @@
+import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vite';
 import svg from '@poppanator/sveltekit-svg';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
 	plugins: [
@@ -21,6 +22,10 @@ export default defineConfig({
 					{ name: 'removeAttrs', params: { attrs: '(fill|stroke)' } }
 				]
 			}
+		}),
+		visualizer({
+			emitFile: true,
+			filename: 'stats.html'
 		})
 	]
 });

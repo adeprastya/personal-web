@@ -2,7 +2,8 @@
 	import type { PageData } from './$types';
  
 	let { data }: { data: PageData } = $props();
-  let { projects, error } = data;
+  let projects = $derived(data.projects);
+  let error = $derived(data.error);
 </script>
 
 <section class="flex min-h-screen w-full flex-col">

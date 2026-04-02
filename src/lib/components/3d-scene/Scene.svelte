@@ -2,8 +2,8 @@
 	import { onMount } from 'svelte';
 	import { Tween } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
+	import { Color } from 'three';
 	import { T, useThrelte } from '@threlte/core';
-	import * as THREE from 'three';
 
 	import { deviceData } from "$lib/contexts/device.svelte";
 	import { routeData } from "$lib/contexts/route.svelte";
@@ -62,7 +62,7 @@
   });
 
 	onMount(() => {
-		scene.background = new THREE.Color('#09090b')
+		scene.background = new Color('#09090b')
 	})
 </script>
 

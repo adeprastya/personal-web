@@ -1,15 +1,15 @@
 <script lang="ts">
   import { afterNavigate } from "$app/navigation";
-  import * as THREE from "three";
+  import { Vector3, PerspectiveCamera } from "three";
   import { useThrelte, useTask } from "@threlte/core";
   import { deviceData } from "$lib/contexts/device.svelte";
   import { pointerData } from "$lib/contexts/pointer.svelte";
 
-  const FOV          = 60;
-  const NEAR         = 0.1;
-  const FAR          = 10;
-  const LERP_SPEED   = 0.025;
-  const LERP_FAST    = LERP_SPEED * 2;
+  const FOV = 60;
+  const NEAR = 0.1;
+  const FAR = 10;
+  const LERP_SPEED = 0.025;
+  const LERP_FAST = LERP_SPEED * 2;
   const MOUSE_SMOOTH = 0.1;
 
   type Vec3 = { x: number; y: number; z: number };
@@ -30,9 +30,9 @@
   };
   const DEFAULT_ROUTE = ROUTE_CONFIG["/"];
 
-  const toVec3  = ({ x, y, z }: Vec3) => new THREE.Vector3(x, y, z);
-  const isCam   = (c: unknown): c is THREE.PerspectiveCamera =>
-    c instanceof THREE.PerspectiveCamera;
+  const toVec3  = ({ x, y, z }: Vec3) => new Vector3(x, y, z);
+  const isCam   = (c: unknown): c is PerspectiveCamera =>
+    c instanceof PerspectiveCamera;
 
   const { camera } = useThrelte();
 
@@ -40,11 +40,11 @@
   let posBase    = { ...DEFAULT_ROUTE.pos };
   let lookAtBase = { ...DEFAULT_ROUTE.look };
 
-  const currentLookAt  = new THREE.Vector3();
+  const currentLookAt  = new Vector3();
   const smoothedMouse  = { x: 0, y: 0 };
   let   t              = 0;
 
-  function updateCameraParams(cam: THREE.PerspectiveCamera) {
+  function updateCameraParams(cam: PerspectiveCamera) {
     cam.near = NEAR;
     cam.far  = FAR;
     cam.fov  = FOV * (deviceData.isMobile ? 1.25 : 1.0);
@@ -52,7 +52,7 @@
   }
 
   $effect(() => {
-    if (camera.current instanceof THREE.PerspectiveCamera) updateCameraParams(camera.current);
+    if (camera.current instanceof PerspectiveCamera) updateCameraParams(camera.current);
   });
 
   afterNavigate(({ to }) => {
@@ -74,10 +74,10 @@
     smoothedMouse.y += (rawY - smoothedMouse.y) * MOUSE_SMOOTH;
   }
 
-  function handleHome(cam: THREE.PerspectiveCamera, delta: number) {
+  function handleHome(cam: PerspectiveCamera, delta: number) {
     t += delta;
 
-    const targetPos = new THREE.Vector3(
+    const targetPos = new Vector3(
       posBase.x + smoothedMouse.x * 0.3,
       posBase.y + smoothedMouse.y * 0.2,
       posBase.z,
@@ -98,16 +98,16 @@
     );
   }
 
-  function handleAbout(cam: THREE.PerspectiveCamera) {
+  function handleAbout(cam: PerspectiveCamera) {
     cam.position.lerp(toVec3(posBase), LERP_SPEED);
     currentLookAt.lerp(toVec3(lookAtBase), LERP_SPEED);
     cam.lookAt(currentLookAt);
   }
 
-  function handleWorks(cam: THREE.PerspectiveCamera) {
+  function handleWorks(cam: PerspectiveCamera) {
     cam.position.lerp(toVec3(posBase), LERP_SPEED);
 
-    const targetLook = new THREE.Vector3(
+    const targetLook = new Vector3(
       lookAtBase.x + smoothedMouse.x * 0.2,
       lookAtBase.y,
       lookAtBase.z + smoothedMouse.y * 0.2,
@@ -116,7 +116,7 @@
     cam.lookAt(currentLookAt);
   }
 
-  type RouteHandler = (cam: THREE.PerspectiveCamera, delta: number) => void;
+  type RouteHandler = (cam: PerspectiveCamera, delta: number) => void;
   const routeHandlers: Record<string, RouteHandler> = {
     "/":      handleHome,
     "/about": handleAbout,
