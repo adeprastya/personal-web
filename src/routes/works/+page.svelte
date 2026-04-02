@@ -1,20 +1,16 @@
 <script lang="ts">
 	import type { PageData } from './$types';
- 
+
 	let { data }: { data: PageData } = $props();
-  let projects = $derived(data.projects);
-  let error = $derived(data.error);
+  let projects = data.projects;
 </script>
 
 <section class="flex min-h-screen w-full flex-col">
 	<h1>Works</h1>
 	<p>Dedicated to writing clean, efficient, and scalable code by harnessing cutting-edge tools and best practices. Drive to solve real problems that make life easier and better.</p>
 
-  {#if error}
+  {#if projects.length === 0}
 		<div role="alert">Im, sorry. Something went wrong.</div>
-
-  {:else if projects.length === 0}
-    <p>No projects found.</p>
 
   {:else}
     <ul>
