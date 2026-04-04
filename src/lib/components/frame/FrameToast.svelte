@@ -9,10 +9,11 @@
 		class="group flex size-full min-w-[10rem] items-center justify-center gap-4 px-3.5 py-2.5 backdrop-blur-sm sm:min-w-[12rem] sm:gap-6 sm:px-5 sm:py-3.5"
 		style="box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);"
 	>
-		<span class="group-hover:animate-glitch inline-block size-1.5 sm:size-2 rotate-45 animate-pulse bg-zinc-200"
+		<span
+			class="group-hover:animate-glitch inline-block size-1.5 rotate-45 animate-pulse bg-zinc-200 sm:size-2"
 		></span>
 		<span
-			class="inline-block cursor-pointer font-mono tracking-widest text-2xs sm:text-xs text-zinc-300 uppercase underline underline-offset-4 group-hover:text-zinc-100 group-active:text-zinc-500"
+			class="text-2xs inline-block cursor-pointer font-mono tracking-widest text-zinc-300 uppercase underline underline-offset-4 group-hover:text-zinc-100 group-active:text-zinc-500 sm:text-xs"
 			>{text}
 		</span>
 

@@ -19,7 +19,7 @@
 	class="group flex aspect-[2/3] w-4 cursor-pointer sm:w-5"
 >
 	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 {totalHeight}">
-		{#each bars as { w, d }, i}
+		{#each bars as { w, d }, i (i)}
 			<rect
 				x={0}
 				y={(i + 1) * spacing + i * barHeight}

@@ -15,12 +15,12 @@
 
 	let syncFn = $state<(() => void) | null>(null);
 
-  // Dipanggil ulang setiap kali pathname berubah
-  $effect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _ = page.url.pathname;
-    syncFn?.();
-  });
+	// Dipanggil ulang setiap kali pathname berubah
+	$effect(() => {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const _ = page.url.pathname;
+		syncFn?.();
+	});
 
 	let activeIdx = links.findIndex((l) => l.href === page.url.pathname);
 
@@ -76,16 +76,16 @@
 			const curIdx = links.findIndex((l) => l.href === page.url.pathname);
 			if (curIdx === -1) return;
 
-				const snapPoints = itemCenters.map((center) => containerCenter - center);
-				const targetY = snapPoints[curIdx];
-				gsap.to(wrapperEl, {
-					y: targetY,
-					duration: 0.3,
-					onUpdate: wrapPosition,
-					onComplete: () => {
-						activeIdx = curIdx;
-					}
-				});
+			const snapPoints = itemCenters.map((center) => containerCenter - center);
+			const targetY = snapPoints[curIdx];
+			gsap.to(wrapperEl, {
+				y: targetY,
+				duration: 0.3,
+				onUpdate: wrapPosition,
+				onComplete: () => {
+					activeIdx = curIdx;
+				}
+			});
 		}
 
 		syncFn = syncRouter;
@@ -142,14 +142,14 @@
 	>
 		<div bind:this={wrapperEl}>
 			<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
-			{#each Array(3) as _, i  (i)}
+			{#each Array(3) as _, i (i)}
 				<ul aria-hidden={i !== 1} class="flex flex-col items-center">
 					{#each links as { label, href }, i (i)}
 						<li>
 							<a
 								{href}
 								tabindex={i === 1 ? 0 : -1}
-								class="pointer-events-none inline-block w-full cursor-grab px-2 py-2.5 sm:py-3.5 text-center font-mono text-xs sm:text-sm tracking-widest text-zinc-300 uppercase focus:bg-zinc-50/30 active:cursor-grabbing"
+								class="pointer-events-none inline-block w-full cursor-grab px-2 py-2.5 text-center font-mono text-xs tracking-widest text-zinc-300 uppercase focus:bg-zinc-50/30 active:cursor-grabbing sm:py-3.5 sm:text-sm"
 							>
 								{label}
 							</a>

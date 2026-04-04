@@ -1,15 +1,16 @@
 <script lang="ts">
 	import '../app.css';
-	import { onMount } from "svelte";
+	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import { initRoute, routeData } from "$lib/contexts/route.svelte";
-	import { initDevice } from "$lib/contexts/device.svelte";
-	import { initPointer } from "$lib/contexts/pointer.svelte";
-	import { initScroll } from "$lib/contexts/scroll.svelte";
-	import { typingAnimation } from "$lib/utils/textAnimation";
+	import { initRoute, routeData } from '$lib/contexts/route.svelte';
+	import { initDevice } from '$lib/contexts/device.svelte';
+	import { initPointer } from '$lib/contexts/pointer.svelte';
+	import { initScroll } from '$lib/contexts/scroll.svelte';
+	import { typingAnimation } from '$lib/utils/textAnimation';
 	import AppFrame from '$lib/components/frame/AppFrame.svelte';
 	import WebGLCanvas from '$lib/components/3d-scene/Canvas.svelte';
-	import ScrollToNext from "$lib/components/ScrollToNext.svelte";
+	import ScrollToNext from '$lib/components/ScrollToNext.svelte';
+	import { projectStore } from '$lib/stores/projects.svelte';
 
 	let { children } = $props();
 
@@ -21,9 +22,9 @@
 	const LANG = 'en';
 
 	const routesDetail: Record<string, string> = {
-		"/": "Ade Prastya",
-		"/about": "Don't know me?",
-		"/works": "Hope you like it!",
+		'/': 'Ade Prastya',
+		'/about': "Don't know me?",
+		'/works': 'Hope you like it!'
 	};
 	const routes = Object.keys(routesDetail);
 
@@ -31,15 +32,18 @@
 		typingAnimation(
 			routesDetail[routeData.from || '/'],
 			routesDetail[routeData.to || '/'],
-			(s: string) => document.title = s || "|",
+			(s: string) => (document.title = s || '|'),
 			{ delay: 100 }
 		);
-	})
+	});
 
 	onMount(() => {
+		// Preload fetching projects data on initial load, used in works page
+		projectStore.fetchProjects();
+
 		const cleanups = [initRoute(), initDevice(), initScroll(), initPointer()];
-		return () => cleanups.forEach((fn) => (typeof fn === 'function') && fn());
-	})
+		return () => cleanups.forEach((fn) => typeof fn === 'function' && fn());
+	});
 </script>
 
 <svelte:head>
@@ -50,7 +54,7 @@
 	<meta name="language" content={LANG} />
 	<link rel="canonical" href={URL} />
 
-	<meta property="og:site_name" content={TITLE}>
+	<meta property="og:site_name" content={TITLE} />
 	<meta property="og:title" content={TITLE} />
 	<meta property="og:description" content={DESC} />
 	<meta property="og:type" content="website" />
@@ -83,9 +87,12 @@
 		<WebGLCanvas />
 	{/if}
 	<AppFrame />
-	<ScrollToNext routes={routes} />
+	<ScrollToNext {routes} />
 </div>
 
-<main id="smooth-content" class="absolute -z-10 inset-0 w-full h-[600vh] bg-zinc-900 text-zinc-300 opacity-0 pointer-events-none">
+<main
+	id="smooth-content"
+	class="pointer-events-none absolute inset-0 -z-10 h-[600vh] w-full bg-zinc-900 text-zinc-300 opacity-0"
+>
 	{@render children()}
 </main>
