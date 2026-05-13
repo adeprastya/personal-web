@@ -15,7 +15,7 @@
 	const isSoundOn = false;
 	const toastCTA = {
 		text: 'Dive into my resume',
-		href: '/docs/example.txt'
+		href: '/docs/cv.pdf'
 	};
 </script>
 
