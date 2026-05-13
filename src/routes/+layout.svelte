@@ -82,17 +82,22 @@
 	</script>
 </svelte:head>
 
-<div class="fixed z-10 size-full overflow-hidden">
+<div class="fixed -z-10 size-full overflow-hidden">
 	{#if browser}
 		<WebGLCanvas />
 	{/if}
+</div>
+
+<main class="absolute z-0 size-full">
+	{@render children()}
+</main>	
+
+<div class="fixed z-10 size-full overflow-hidden">
 	<AppFrame />
 	<ScrollToNext {routes} />
 </div>
 
-<main
+<div
 	id="smooth-content"
-	class="pointer-events-none absolute inset-0 -z-10 h-[600vh] w-full bg-zinc-900 text-zinc-300 opacity-0"
->
-	{@render children()}
-</main>
+	class="pointer-events-none absolute -z-50 h-[600vh] w-full"
+></div>

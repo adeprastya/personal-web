@@ -8,10 +8,10 @@
 
 	// ============ CONSTANTS ============
 	const CONFIG = {
-		thickness: 0.003,
-		glow: 0.035,
-		color: new Color('#ff8888'),
-		intensity: 0.2,
+		thickness: 0.002,
+		glow: 0.02,
+		color: new Color('#ff5555'),
+		intensity: 0.1,
 		lerpSpeed: 0.2,
 		scanInterval: 5000,
 		initDelay: 200,

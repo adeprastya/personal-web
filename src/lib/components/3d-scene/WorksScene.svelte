@@ -1,13 +1,17 @@
 <script lang="ts">
+  import { HalfFloatType } from 'three';
   import gsap from 'gsap';
   import { untrack } from 'svelte';
   import { T, useThrelte, useTask } from '@threlte/core';
   import { EffectComposer, EffectPass, RenderPass } from 'postprocessing';
+
+  import { AppRoute } from '$lib/types/Route';
   import { projectStore } from '$lib/stores/projects.svelte';
   import { routeData } from '$lib/contexts/route.svelte';
   import { scrollData } from '$lib/contexts/scroll.svelte';
   import { pointerData } from '$lib/contexts/pointer.svelte';
-  import { AppRoute } from '$lib/types/Route';
+  import { setActiveProject } from "$lib/contexts/activeProject.svelte";
+
   import { DimensionalEffect } from '$lib/effects/DimensionalEffect';
   import ProjectPlane from './shared/ProjectPlane.svelte';
   import ProjectText from './shared/ProjectText.svelte';
@@ -20,7 +24,7 @@
   let currentProject = $derived(projectStore.projects[currentIndex] ?? null);
 
   const { renderer, scene, camera, renderStage, autoRender } = useThrelte();
-  const invertEffect = new DimensionalEffect();
+  const invertEffect = new DimensionalEffect({ progress: 0, time: 0 });
   let composer: EffectComposer | null = null;
 
   $effect(() => {
@@ -28,7 +32,11 @@
     if (!cam) return;
 
     composer?.dispose();
-    composer = new EffectComposer(renderer);
+    composer = new EffectComposer(renderer, {
+      frameBufferType: HalfFloatType,
+    });
+    composer.setSize(window.innerWidth, window.innerHeight);
+
     composer.addPass(new RenderPass(scene, cam));
     composer.addPass(new EffectPass(cam, invertEffect));
     autoRender.set(false);
@@ -48,8 +56,14 @@
 
   $effect(() => {
     if (!pointerData.isClicked || !isOnWorks) return;
+
     untrack(() => {
       isInverted = !isInverted;
+      if (isInverted) {
+        setActiveProject(currentIndex ,currentProject);
+      } else {
+        setActiveProject(-1, null);
+      }
     });
   });
 

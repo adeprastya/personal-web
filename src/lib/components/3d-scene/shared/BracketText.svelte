@@ -78,7 +78,7 @@
 
 	onMount(() => {
 		camNear = (camera.current as PerspectiveCamera).near + 1.5;
-		camFar = (camera.current as PerspectiveCamera).far - 5.0;
+		camFar = (camera.current as PerspectiveCamera).far - 6.0;
 	});
 
 	useTask(() => {

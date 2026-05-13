@@ -1,4 +1,4 @@
-<section class="flex min-h-screen w-full flex-col">
+<section class="opacity-0">
 	<div>
 		<h2>Ade Fathoni Prastya</h2>
 		<p>
