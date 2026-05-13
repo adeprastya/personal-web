@@ -1,61 +1,74 @@
 <script lang="ts">
-	import gsap from 'gsap';
-	import { routeData } from '$lib/contexts/route.svelte';
-	import { pointerData } from '$lib/contexts/pointer.svelte';
-	import { projectStore } from '$lib/stores/projects.svelte';
-	import { AppRoute } from '$lib/types/Route';
-	import ProjectPlane from './shared/ProjectPlane.svelte';
+  import gsap from 'gsap';
+  import { T } from '@threlte/core';
+  import { projectStore } from '$lib/stores/projects.svelte';
+  import { routeData } from '$lib/contexts/route.svelte';
+  import { scrollData } from '$lib/contexts/scroll.svelte';
+  import { AppRoute } from '$lib/types/Route';
+  import ProjectPlane from './shared/ProjectPlane.svelte';
+	import ProjectText from "./shared/ProjectText.svelte";
 
-	let isOnWorks = $derived(routeData.current === AppRoute.works);
+  let isOnWorks = $derived(routeData.current === AppRoute.works);  
+  let totalProjects = $derived(projectStore.projects.length);
+  let currentIndex = $state(0);
+  let isTransitioning = $state(false);
+  let progress = $state(0);  
+  let currentProject = $derived(projectStore.projects[currentIndex] ?? null);
 
-	let currentIndex = $state(0);
-	let isTransitioning = $state(false);
-	let progress = $state(0);
+  function handleNext(i: number) {
+    if (isTransitioning || totalProjects < 2 || !isOnWorks || !projectStore.projects[i]) return;
+    
+    isTransitioning = true;
+    const animState = { p: 0 };
 
-	function handleNext() {
-		if (isTransitioning || projectStore.projects.length < 2 || !isOnWorks) return;
-		isTransitioning = true;
+    const tl = gsap.timeline({
+      onUpdate: () => { progress = animState.p },
+      onComplete: () => {
+        isTransitioning = false;
+      }
+    });
 
-		const animState = { p: 0 };
+    tl.to(animState, {
+      p: 1,
+      duration: 0.6,
+      ease: 'sine.inOut'
+    });
+    tl.add(() => { 
+      currentIndex = i;
+    });
+    tl.to(animState, {
+      p: 0,
+      duration: 0.6,
+      ease: 'sine.inOut'
+    });
+  }
 
-		const tl = gsap.timeline({
-			onUpdate: () => {
-				progress = animState.p;
-			},
-			onComplete: () => {
-				progress = 0;
-				isTransitioning = false;
-			}
-		});
+  $effect(() => {
+    if (!isOnWorks || totalProjects === 0) return;
 
-		// Animate progress to 1
-		tl.to(animState, {
-			p: 1,
-			duration: 1.0,
-			ease: 'sine'
-		});
-		// Switch project at the end of the animation
-		tl.add(() => {
-			currentIndex = (currentIndex + 1) % projectStore.projects.length;
-		});
-		// Animate progress back to 0
-		tl.to(animState, {
-			p: 0,
-			duration: 1.2,
-			ease: 'sine'
-		});
-	}
+    const newIndex = Math.min(
+      Math.floor(scrollData.y * totalProjects), 
+      totalProjects - 1
+    );
 
-	$effect(() => {
-		if (pointerData.isClicked) handleNext();
-	});
+    if (newIndex !== currentIndex) {
+      handleNext(newIndex);
+    }
+  });
 </script>
 
-{#each projectStore.projects as project, i (project.id)}
-	<ProjectPlane
-		imageUrl={project.image_thumbnail_url}
-		isVisible={i === currentIndex && isOnWorks}
-		{progress}
-		onClick={handleNext}
-	/>
-{/each}
+{#if currentProject}
+  {#each projectStore.projects as project, i (project.id)}
+    <T.Group position={[0, 4, 0]} visible={i === currentIndex && isOnWorks}>
+      <ProjectPlane
+        isVisible={i === currentIndex && isOnWorks}
+        {progress}
+        imageUrl={currentProject.image_thumbnail_url}
+      />
+      <ProjectText
+        {progress}
+        title={currentProject.title}
+      />
+    </T.Group>
+  {/each}
+{/if}

@@ -3,12 +3,11 @@
 	import { T, useTask, useThrelte } from '@threlte/core';
 
 	interface ProjectPlaneProps {
-		imageUrl: string;
+        imageUrl: string;
 		isVisible: boolean;
 		progress: number;
-		onClick?: () => void;
 	}
-	let { imageUrl, isVisible = false, progress = 0, onClick }: ProjectPlaneProps = $props();
+	let { imageUrl, isVisible = false, progress = 0 }: ProjectPlaneProps = $props();
 
 	const { camera } = useThrelte();
 	const loader = new TextureLoader();
@@ -52,16 +51,7 @@
 		const h = 2 * Math.tan((cam.fov * Math.PI) / 360) * dist;
 		const w = h * cam.aspect;
 
-		// Like css "contain" logic
 		return cam.aspect > aspect ? { w: h * aspect, h } : { w, h: w / aspect };
-	});
-
-	// Time increment
-	useTask((delta) => {
-		time += delta;
-		if (material) {
-			material.uniforms.uTime.value = time;
-		}
 	});
 
 	const vertexShader = `
@@ -160,7 +150,7 @@
 
       // Final alpha
       float alpha = mix(0.0, organicAlpha, edgeFade);
-      gl_FragColor = vec4(finalColor, alpha);
+      gl_FragColor = vec4(finalColor, alpha - 0.25);
     }
   `;
 
@@ -169,17 +159,23 @@
 		uProgress: { value: 0 },
 		uTime: { value: 0 }
 	};
+
+	// Time increment
+	useTask((delta) => {
+		time += delta;
+		if (material) material.uniforms.uTime.value = time;
+	});
 </script>
 
-<T.Mesh position={[0, 4, 0]} onpointerup={onClick} visible={isVisible}>
-	<T.PlaneGeometry args={[planeDim.w, planeDim.h, 48, 48]} />
-	<T.ShaderMaterial
-		{vertexShader}
-		{fragmentShader}
-		transparent
-		oncreate={(m) => {
-			m.uniforms = uniforms;
-			material = m;
-		}}
-	/>
+<T.Mesh>
+    <T.PlaneGeometry args={[planeDim.w, planeDim.h, 48, 48]} />
+    <T.ShaderMaterial
+        {vertexShader}
+        {fragmentShader}
+        transparent
+        oncreate={(m) => {
+            m.uniforms = uniforms;
+            material = m;
+        }}
+    />
 </T.Mesh>
