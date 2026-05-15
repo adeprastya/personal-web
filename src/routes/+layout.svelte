@@ -2,15 +2,18 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+
+	import { projectStore } from '$lib/stores/projects.svelte';
 	import { initRoute, routeData } from '$lib/contexts/route.svelte';
 	import { initDevice } from '$lib/contexts/device.svelte';
 	import { initPointer } from '$lib/contexts/pointer.svelte';
 	import { initScroll } from '$lib/contexts/scroll.svelte';
 	import { typingAnimation } from '$lib/utils/textAnimation';
+
+	import Intro from "$lib/components/Intro.svelte";
 	import AppFrame from '$lib/components/frame/AppFrame.svelte';
-	import WebGLCanvas from '$lib/components/3d-scene/Canvas.svelte';
 	import ScrollToNext from '$lib/components/ScrollToNext.svelte';
-	import { projectStore } from '$lib/stores/projects.svelte';
+	import WebGLCanvas from '$lib/components/3d-scene/Canvas.svelte';
 
 	let { children } = $props();
 
@@ -90,14 +93,12 @@
 
 <main class="absolute z-0 size-full">
 	{@render children()}
-</main>	
+</main>
 
 <div class="fixed z-10 size-full overflow-hidden">
+	<Intro />
 	<AppFrame />
 	<ScrollToNext {routes} />
 </div>
 
-<div
-	id="smooth-content"
-	class="pointer-events-none absolute -z-50 h-[600vh] w-full"
-></div>
+<div id="smooth-content" class="pointer-events-none absolute -z-50 h-[600vh] w-full"></div>
