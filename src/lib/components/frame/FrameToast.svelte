@@ -7,19 +7,17 @@
 		{href}
 		target="_blank"
 		class="group flex size-full min-w-[10rem] items-center justify-center gap-4 px-3.5 py-2.5 backdrop-blur-sm sm:min-w-[12rem] sm:gap-6 sm:px-5 sm:py-3.5"
-		style="box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);"
 	>
 		<span
 			class="group-hover:animate-glitch inline-block size-1.5 rotate-45 animate-pulse bg-zinc-200 sm:size-2"
 		></span>
 		<span
-			class="text-2xs inline-block cursor-pointer font-mono tracking-widest text-zinc-300 uppercase underline underline-offset-4 group-hover:text-zinc-100 group-active:text-zinc-500 sm:text-xs"
+			class="text-2xs inline-block cursor-pointer font-mono tracking-widest text-zinc-200 uppercase underline underline-offset-4 group-hover:text-zinc-100 group-active:text-zinc-500 sm:text-xs"
 			>{text}
 		</span>
 
 		<!-- decoration -->
-		<span class="absolute top-0 left-0 h-1/2 w-1/6 border-s-2 border-t-2 border-zinc-200"></span>
-		<span class="absolute right-0 bottom-0 h-1/2 w-1/6 border-e-2 border-b-2 border-zinc-200"
-		></span>
+		<span class="absolute top-0 left-0 h-1/2 w-1/8 group-hover:h-full group-hover:w-full border-s border-t border-zinc-200/70 group-hover:border-zinc-200 transition-all duration-700"></span>
+		<span class="absolute right-0 bottom-0 h-1/2 w-1/8 group-hover:h-full group-hover:w-full border-e border-b border-zinc-200/70 group-hover:border-zinc-200 transition-all duration-700"></span>
 	</a>
 {/if}
