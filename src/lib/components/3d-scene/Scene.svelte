@@ -18,7 +18,7 @@
 	interactivity();
 
 	const { scene } = useThrelte();
-	
+
 	const lightPos = new Tween<[number, number, number]>([0, 1.0, 1.5], {
 		duration: 1000,
 		easing: cubicOut

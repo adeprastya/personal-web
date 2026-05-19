@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { T } from '@threlte/core';
+	import { T } from '@threlte/core';
 
-  import HeroModel from './HeroModel.svelte';
-  import CircleLine from './shared/CircleLine.svelte';
-  import BracketText from './shared/BracketText.svelte';
+	import HeroModel from './HeroModel.svelte';
+	import CircleLine from './shared/CircleLine.svelte';
+	import BracketText from './shared/BracketText.svelte';
 
-  import { deviceData } from '$lib/contexts/device.svelte';
+	import { deviceData } from '$lib/contexts/device.svelte';
 	import { routeData } from '$lib/contexts/route.svelte';
 	import { scrollData } from '$lib/contexts/scroll.svelte';
 
@@ -26,7 +26,7 @@
 		{ radius: 1.4, segments: 60, color: '#555555' },
 		{ radius: 2.0, segments: 64, color: '#444444' }
 	];
-	
+
 	function getCircPos(i: number, y: number, radius: number): [number, number, number] {
 		const startAngle = 0.1;
 		const angle = startAngle + (i * Math.PI * 2) / 3;

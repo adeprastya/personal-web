@@ -2,6 +2,8 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import { gsap } from 'gsap';
+	import { SplitText } from 'gsap/SplitText';
 
 	import { projectStore } from '$lib/stores/projects.svelte';
 	import { initRoute, routeData } from '$lib/contexts/route.svelte';
@@ -10,10 +12,12 @@
 	import { initScroll } from '$lib/contexts/scroll.svelte';
 	import { typingAnimation } from '$lib/utils/textAnimation';
 
-	import Intro from "$lib/components/Intro.svelte";
+	import Intro from '$lib/components/Intro.svelte';
 	import AppFrame from '$lib/components/frame/AppFrame.svelte';
 	import ScrollToNext from '$lib/components/ScrollToNext.svelte';
 	import WebGLCanvas from '$lib/components/3d-scene/Canvas.svelte';
+
+	gsap.registerPlugin(SplitText);
 
 	let { children } = $props();
 

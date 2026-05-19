@@ -3,7 +3,7 @@
 	import { T, useTask, useThrelte } from '@threlte/core';
 
 	interface ProjectPlaneProps {
-        imageUrl: string;
+		imageUrl: string;
 		isVisible: boolean;
 		progress: number;
 	}
@@ -168,14 +168,14 @@
 </script>
 
 <T.Mesh>
-    <T.PlaneGeometry args={[planeDim.w, planeDim.h, 48, 48]} />
-    <T.ShaderMaterial
-        {vertexShader}
-        {fragmentShader}
-        transparent
-        oncreate={(m) => {
-            m.uniforms = uniforms;
-            material = m;
-        }}
-    />
+	<T.PlaneGeometry args={[planeDim.w, planeDim.h, 48, 48]} />
+	<T.ShaderMaterial
+		{vertexShader}
+		{fragmentShader}
+		transparent
+		oncreate={(m) => {
+			m.uniforms = uniforms;
+			material = m;
+		}}
+	/>
 </T.Mesh>

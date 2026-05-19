@@ -17,7 +17,11 @@
 		</span>
 
 		<!-- decoration -->
-		<span class="absolute top-0 left-0 h-1/2 w-1/8 group-hover:h-full group-hover:w-full border-s border-t border-zinc-200/70 group-hover:border-zinc-200 transition-all duration-700"></span>
-		<span class="absolute right-0 bottom-0 h-1/2 w-1/8 group-hover:h-full group-hover:w-full border-e border-b border-zinc-200/70 group-hover:border-zinc-200 transition-all duration-700"></span>
+		<span
+			class="absolute top-0 left-0 h-1/2 w-1/8 border-s border-t border-zinc-200/70 transition-all duration-700 group-hover:h-full group-hover:w-full group-hover:border-zinc-200"
+		></span>
+		<span
+			class="absolute right-0 bottom-0 h-1/2 w-1/8 border-e border-b border-zinc-200/70 transition-all duration-700 group-hover:h-full group-hover:w-full group-hover:border-zinc-200"
+		></span>
 	</a>
 {/if}
