@@ -55,11 +55,6 @@
 			updateOpacity();
 		}
 
-		function updateAnimation() {
-			items.forEach((item) => item.classList.remove('animate-glitch'));
-			items[activeIdx].classList.add('animate-glitch');
-		}
-
 		function navigate() {
 			const y = gsap.getProperty(wrapperEl, 'y') as number;
 			const distances = itemCenters.map((center) => Math.abs(center + y - containerCenter));
@@ -67,7 +62,6 @@
 			const link = items[closestIndex].querySelector('a') as HTMLAnchorElement;
 			if (link) {
 				activeIdx = closestIndex;
-				updateAnimation();
 				goto(link.href);
 			}
 		}
