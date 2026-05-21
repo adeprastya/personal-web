@@ -14,7 +14,7 @@
 	import HomeScene from './HomeScene.svelte';
 	import AboutScene from './AboutScene.svelte';
 	import WorksScene from './WorksScene.svelte';
-	import Emberparticles from './EmberParticles.svelte';
+	import Particles from './Particles.svelte';
 
 	interactivity();
 
@@ -59,11 +59,11 @@
 <AboutScene />
 <WorksScene />
 
-<Emberparticles
-	origin={[0, -2, 0]}
-	spread={[4, 0, 4]}
-	height={8}
+<Particles
+	origin={[0, -2.5, 0]}
+	spread={[3, 1, 3]}
+	height={6}
 	count={100}
-	hotColor={[1.0, 0.85, 0.4]}
-	coolColor={[1.0, 0.27, 0.0]}
+	hotColor={[1.0, 0.4, 0.2]}
+	coolColor={[1.0, 0.0, 0.0]}
 />

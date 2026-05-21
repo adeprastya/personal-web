@@ -50,7 +50,7 @@
 <div class="pointer-events-none fixed inset-0 flex size-full items-center justify-center">
 	<!-- Curtain transition -->
 	<div
-		class="absolute top-0 left-0 transition-transform delay-1500 duration-2000"
+		class="absolute top-0 -left-0 transition-transform delay-1500 duration-2000"
 		style="translate: {isOpen ? '0 0' : '-100% 0%'}"
 	>
 		<Trapezoid variant="BL" slant="30%" class="h-[50.01svh] w-[60vw] bg-zinc-200"

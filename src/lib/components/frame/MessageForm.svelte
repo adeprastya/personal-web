@@ -11,7 +11,7 @@
 <form
 	aria-label="Fast Message Form"
 	class="flex w-full max-w-xs flex-col items-center gap-8 bg-zinc-200 p-6 transition-transform duration-300 will-change-transform"
-	style:transform={isOpen ? 'translateX(0)' : 'translateX(-100%)'}
+	style:transform={isOpen ? 'translateX(100%)' : 'translateX(0)'}
 >
 	<p class="font-mono text-sm">Let's collaborate, brainstrom, or simply geek out together.</p>
 

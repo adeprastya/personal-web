@@ -107,23 +107,25 @@
 		};
 	});
 
-	useTask((delta) => {
-		if (!ready) return;
+	useTask(() => {
+			if (!ready) return;
 
-		for (let i = 0; i < count; i++) {
-			const b = i * 3;
+			for (let i = 0; i < count; i++) {
+					const b = i * 3;
 
-			lifetimes[i] += delta * speeds[i] * 0.3;
+					positions[b]     += velocities[b]     + Math.sin(lifetimes[i] * 8 + i) * 0.002;
+					positions[b + 1] += velocities[b + 1];
+					positions[b + 2] += velocities[b + 2] + Math.cos(lifetimes[i] * 6 + i) * 0.002;
 
-			positions[b] += velocities[b] + Math.sin(lifetimes[i] * 8 + i) * 0.002;
-			positions[b + 1] += velocities[b + 1];
-			positions[b + 2] += velocities[b + 2] + Math.cos(lifetimes[i] * 6 + i) * 0.002;
+					// lifetime = seberapa jauh dari origin ke maxY (0.0 → 1.0)
+					lifetimes[i] = (positions[b + 1] - origin[1]) / height;
 
-			if (lifetimes[i] >= 1.0 || positions[b + 1] > maxY) randomize(i);
-		}
+					// hanya mati kalau sudah melewati maxY
+					if (positions[b + 1] > maxY) randomize(i);
+			}
 
-		posAttr.needsUpdate = true;
-		lifeAttr.needsUpdate = true;
+			posAttr.needsUpdate  = true;
+			lifeAttr.needsUpdate = true;
 	});
 </script>
 

@@ -1,12 +1,82 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { activeProjectData } from '$lib/contexts/activeProject.svelte';
+	import gsap from 'gsap';
+	import { SplitText } from 'gsap/SplitText';
 
 	let { data }: { data: PageData } = $props();
 	let projects = data.projects;
 
 	let cachedData = $state(activeProjectData.data);
 	let isVisible = $state(activeProjectData.index !== -1);
+
+	// Refs
+	let sectionEl = $state<HTMLElement>();
+	let taglineEl = $state<HTMLElement>();
+	let metaEl = $state<HTMLElement>();
+	let descEl = $state<HTMLElement>();
+	let linksEl = $state<HTMLElement>();
+
+	let tl: gsap.core.Timeline | null = null;
+	let taglineSplit: SplitText | null = null;
+	let descSplit: SplitText | null = null;
+
+function animateIn() {
+    if (!sectionEl || !taglineEl || !metaEl || !descEl || !linksEl) return;
+
+    tl?.kill();
+
+    // 1. Revert split dulu
+    taglineSplit?.revert();
+    descSplit?.revert();
+
+    // 2. Set teks manual — karena Svelte binding sudah putus setelah SplitText
+    // eslint-disable-next-line svelte/no-dom-manipulating
+    taglineEl.textContent = cachedData?.tagline ?? '';
+    // eslint-disable-next-line svelte/no-dom-manipulating
+    descEl.textContent = cachedData?.description ?? '';
+
+    // 3. Baru split ulang dengan teks yang sudah benar
+    taglineSplit = new SplitText(taglineEl, { type: 'words' });
+    descSplit = new SplitText(descEl, { type: 'words' });
+
+    tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+    tl.fromTo(sectionEl, { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0);
+    tl.fromTo(
+        taglineSplit.words,
+        { y: '110%', opacity: 0 },
+        { y: '0%', opacity: 1, duration: 0.6, stagger: 0.04 },
+        0.1
+    );
+    tl.fromTo(metaEl, { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5 }, 0.35);
+    tl.fromTo(
+        descSplit.words,
+        { y: '110%', opacity: 0 },
+        { y: '0%', opacity: 1, duration: 0.45, stagger: 0.018 },
+        0.45
+    );
+    tl.fromTo(
+        linksEl.children,
+        { y: 12, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.4, stagger: 0.1 },
+        0.65
+    );
+}
+
+	function animateOut() {
+		if (!sectionEl) return;
+
+		tl?.kill();
+		tl = gsap.timeline({
+			onComplete: () => {
+				// Revert split setelah animasi selesai
+				taglineSplit?.revert();
+				descSplit?.revert();
+			}
+		});
+		tl.to(sectionEl, { opacity: 0, duration: 0.25, ease: 'power2.in' });
+	}
 
 	$effect(() => {
 		if (activeProjectData.index !== -1) {
@@ -16,18 +86,35 @@
 			isVisible = false;
 		}
 	});
+
+$effect(() => {
+    const _visible = isVisible;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _data = cachedData;
+
+    Promise.resolve().then(() => {
+        if (_visible) animateIn();
+        else animateOut();
+    });
+});
 </script>
 
 <section
-	class="fixed top-0 left-0 flex h-screen w-full items-center justify-center bg-zinc-50/10 px-3 backdrop-blur-xs transition-opacity duration-800 text-shadow-md sm:px-10 md:px-20"
-	style="opacity: {isVisible ? 1 : 0};"
+	bind:this={sectionEl}
+	class="fixed top-0 left-0 flex h-screen w-full items-center justify-center g-zinc-50/10 px-3 backdrop-blur-xs text-shadow-md sm:px-10 md:px-20"
 >
 	<div class="flex w-full max-w-3xl flex-col gap-3">
-		<h1 class="font-mono text-xl leading-tight tracking-widest text-zinc-600 uppercase sm:text-4xl">
+		<h1
+			bind:this={taglineEl}
+			class="font-mono text-xl leading-tight tracking-widest text-zinc-600 uppercase sm:text-4xl"
+		>
 			{cachedData?.tagline}
 		</h1>
 
-		<div class="flex flex-wrap gap-2 font-mono text-xs tracking-widest text-zinc-700 uppercase">
+		<div
+			bind:this={metaEl}
+			class="flex flex-wrap gap-2 font-mono text-xs tracking-widest text-zinc-700 uppercase"
+		>
 			<span>{cachedData?.created_at}</span>
 			<div class="flex flex-wrap gap-2">
 				{#each cachedData?.technologies ?? [] as tech, i (i)}
@@ -36,11 +123,14 @@
 			</div>
 		</div>
 
-		<p class="max-w-xl font-mono text-xs leading-relaxed text-zinc-700">
+		<p
+			bind:this={descEl}
+			class="max-w-xl font-mono text-xs leading-relaxed text-zinc-700"
+		>
 			{cachedData?.description}
 		</p>
 
-		<div class="flex gap-4 font-mono text-xs tracking-widest uppercase">
+		<div bind:this={linksEl} class="flex gap-4 font-mono text-xs tracking-widest uppercase">
 			{#if cachedData?.site_url}
 				<a
 					href={cachedData.site_url}

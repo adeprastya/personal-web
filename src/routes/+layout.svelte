@@ -95,11 +95,8 @@
 	{/if}
 </div>
 
-<main class="absolute z-0 size-full">
-	{@render children()}
-</main>
-
 <div class="fixed z-10 size-full overflow-hidden">
+	{@render children()}
 	<Intro />
 	<AppFrame />
 	<ScrollToNext {routes} />
