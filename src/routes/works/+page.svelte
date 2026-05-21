@@ -2,13 +2,12 @@
 	import gsap from 'gsap';
 	import { SplitText } from 'gsap/SplitText';
 	import type { PageData } from './$types';
-	import { activeProjectData } from '$lib/contexts/activeProject.svelte';
+	import { activeProjectData, setVisibility } from '$lib/contexts/activeProject.svelte';
 
 	let { data }: { data: PageData } = $props();
 	let projects = data.projects;
 
 	let cachedData = $state(activeProjectData.data);
-	let isVisible = $state(activeProjectData.index !== -1);
 
 	// Refs
 	let sectionEl = $state<HTMLElement>();
@@ -77,14 +76,11 @@ function animateIn() {
 	$effect(() => {
 		if (activeProjectData.index !== -1) {
 			cachedData = $state.snapshot(activeProjectData.data);
-			isVisible = true;
-		} else {
-			isVisible = false;
 		}
 	});
 
 $effect(() => {
-    const _visible = isVisible;
+    const _visible = activeProjectData.isVisible;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const _data = cachedData;
 
@@ -98,8 +94,11 @@ $effect(() => {
 <section
 	bind:this={sectionEl}
 	class="fixed top-0 left-0 flex h-screen w-full items-center justify-center g-zinc-50/10 px-3 backdrop-blur-xs text-shadow-md sm:px-10 md:px-20"
+	style={`pointer-events: ${activeProjectData.isVisible ? 'auto' : 'none'};`}
 >
-	<div class="flex w-full max-w-3xl flex-col gap-3">
+	<button
+	 	onclick={() => setVisibility(false)}
+	 	class="flex w-full max-w-3xl text-left flex-col items-start gap-3">
 		<h1
 			bind:this={taglineEl}
 			class="font-mono text-xl leading-tight tracking-widest text-zinc-600 uppercase sm:text-4xl"
@@ -131,7 +130,7 @@ $effect(() => {
 				<a
 					href={cachedData.site_url}
 					target="_blank"
-					class="flex cursor-pointer items-center gap-2 border border-zinc-300 px-2 py-1 text-zinc-600 hover:border-zinc-900 hover:text-zinc-800 transition-colors duration-300"
+					class="flex cursor-pointer items-center gap-2 border border-zinc-400 px-2 py-1 text-zinc-600 hover:border-zinc-900 hover:text-zinc-800 transition-colors duration-300"
 				>
 					LIVE SITE //
 				</a>
@@ -140,17 +139,17 @@ $effect(() => {
 				<a
 					href={cachedData.source_code_url}
 					target="_blank"
-					class="flex cursor-pointer items-center gap-2 border border-zinc-300 px-2 py-1 text-zinc-600 hover:border-zinc-900 hover:text-zinc-800 transition-colors duration-300"
+					class="flex cursor-pointer items-center gap-2 border border-zinc-400 px-2 py-1 text-zinc-600 hover:border-zinc-900 hover:text-zinc-800 transition-colors duration-300"
 				>
 					SOURCE CODE //
 				</a>
 			{/if}
 		</div>
-	</div>
+	</button>
 </section>
 
 <!-- Hidden projects data for screen readers & search engines -->
-<section class="pointer-events-auto absolute -z-50 opacity-0">
+<section class="pointer-events-none absolute -z-50 opacity-0">
 	<h1>Works</h1>
 	<p>
 		Dedicated to writing clean, efficient, and scalable code by harnessing cutting-edge tools and

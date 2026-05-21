@@ -7,6 +7,8 @@
 	import { Draggable } from 'gsap/Draggable';
 	import { InertiaPlugin } from 'gsap/InertiaPlugin';
 
+	import { activeProjectData } from '$lib/contexts/activeProject.svelte';
+
 	const links = [
 		{ href: '/works', label: 'Works' },
 		{ href: '/', label: 'Home' },
@@ -133,6 +135,7 @@
 		bind:this={containerEl}
 		aria-label="Primary Navigation"
 		class="h-36 touch-none overflow-hidden select-none"
+		style={`pointer-events: ${activeProjectData.isVisible ? 'none' : 'auto'}`}
 	>
 		<div bind:this={wrapperEl}>
 			<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->

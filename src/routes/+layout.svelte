@@ -89,13 +89,10 @@
 	</script>
 </svelte:head>
 
-<div class="fixed -z-10 size-full overflow-hidden">
+<div class="fixed z-10 size-full overflow-hidden">
 	{#if browser}
 		<WebGLCanvas />
 	{/if}
-</div>
-
-<div class="fixed z-10 size-full overflow-hidden">
 	{@render children()}
 	<Intro />
 	<AppFrame />
