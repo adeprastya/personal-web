@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import { activeProjectData } from '$lib/contexts/activeProject.svelte';
 	import gsap from 'gsap';
 	import { SplitText } from 'gsap/SplitText';
+	import type { PageData } from './$types';
+	import { activeProjectData } from '$lib/contexts/activeProject.svelte';
 
 	let { data }: { data: PageData } = $props();
 	let projects = data.projects;
@@ -26,17 +26,14 @@ function animateIn() {
 
     tl?.kill();
 
-    // 1. Revert split dulu
     taglineSplit?.revert();
     descSplit?.revert();
 
-    // 2. Set teks manual — karena Svelte binding sudah putus setelah SplitText
     // eslint-disable-next-line svelte/no-dom-manipulating
     taglineEl.textContent = cachedData?.tagline ?? '';
     // eslint-disable-next-line svelte/no-dom-manipulating
     descEl.textContent = cachedData?.description ?? '';
 
-    // 3. Baru split ulang dengan teks yang sudah benar
     taglineSplit = new SplitText(taglineEl, { type: 'words' });
     descSplit = new SplitText(descEl, { type: 'words' });
 
@@ -45,22 +42,22 @@ function animateIn() {
     tl.fromTo(sectionEl, { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0);
     tl.fromTo(
         taglineSplit.words,
-        { y: '110%', opacity: 0 },
-        { y: '0%', opacity: 1, duration: 0.6, stagger: 0.04 },
+        { x: -40, skewX: -25, opacity: 0 },
+        { x: 0, skewX: 0, opacity: 1, duration: 0.8, stagger: 0.08 },
         0.1
     );
-    tl.fromTo(metaEl, { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5 }, 0.35);
+    tl.fromTo(metaEl, { x: -40, skewX: -25, opacity: 0 }, { x: 0, skewX: 0, opacity: 1, duration: 0.8 }, 0.8);
     tl.fromTo(
         descSplit.words,
-        { y: '110%', opacity: 0 },
-        { y: '0%', opacity: 1, duration: 0.45, stagger: 0.018 },
-        0.45
+        { x: -40, skewX: -25, opacity: 0 },
+        { x: 0, skewX: 0, opacity: 1, duration: 0.4, stagger: 0.005 },
+        0.8
     );
     tl.fromTo(
         linksEl.children,
-        { y: 12, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.4, stagger: 0.1 },
-        0.65
+        { x: -40, skewX: -25, opacity: 0 },
+        { x: 0, skewX: 0, opacity: 1, duration: 0.8, stagger: 0.2 },
+        1.2
     );
 }
 
@@ -70,7 +67,6 @@ function animateIn() {
 		tl?.kill();
 		tl = gsap.timeline({
 			onComplete: () => {
-				// Revert split setelah animasi selesai
 				taglineSplit?.revert();
 				descSplit?.revert();
 			}
@@ -135,8 +131,7 @@ $effect(() => {
 				<a
 					href={cachedData.site_url}
 					target="_blank"
-					class="flex cursor-pointer items-center gap-2 border border-zinc-800 px-2 py-1 text-zinc-600
-                  transition-colors duration-200 hover:border-zinc-600 hover:text-zinc-500"
+					class="flex cursor-pointer items-center gap-2 border border-zinc-300 px-2 py-1 text-zinc-600 hover:border-zinc-900 hover:text-zinc-800 transition-colors duration-300"
 				>
 					LIVE SITE //
 				</a>
@@ -145,8 +140,7 @@ $effect(() => {
 				<a
 					href={cachedData.source_code_url}
 					target="_blank"
-					class="flex cursor-pointer items-center gap-2 border border-zinc-800 px-2 py-1 text-zinc-700
-                  transition-colors duration-200 hover:border-zinc-700 hover:text-zinc-600"
+					class="flex cursor-pointer items-center gap-2 border border-zinc-300 px-2 py-1 text-zinc-600 hover:border-zinc-900 hover:text-zinc-800 transition-colors duration-300"
 				>
 					SOURCE CODE //
 				</a>
