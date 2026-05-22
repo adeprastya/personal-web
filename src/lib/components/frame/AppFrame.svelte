@@ -126,7 +126,7 @@
 	</Trapezoid>
 
 	<!-- [L1] fast messages -->
-	<div class="pointer-events-auto absolute top-1/2 left-0 z-10 -translate-y-1/2 -translate-x-full">
+	<div class="pointer-events-auto absolute top-1/2 left-0 z-10 -translate-x-full -translate-y-1/2">
 		<div bind:this={messageEl}>
 			<MessageForm />
 		</div>
@@ -151,7 +151,11 @@
 	</div>
 
 	<!-- CTA toast -->
-	<div role="status" aria-live="polite" class="pointer-events-auto absolute top-10 left-5 z-50 sm:top-12 sm:left-6">
+	<div
+		role="status"
+		aria-live="polite"
+		class="pointer-events-auto absolute top-10 left-5 z-50 sm:top-12 sm:left-6"
+	>
 		<FrameToast {...toastCTA} />
 	</div>
 </header>

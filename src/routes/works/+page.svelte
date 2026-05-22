@@ -20,45 +20,50 @@
 	let taglineSplit: SplitText | null = null;
 	let descSplit: SplitText | null = null;
 
-function animateIn() {
-    if (!sectionEl || !taglineEl || !metaEl || !descEl || !linksEl) return;
+	function animateIn() {
+		if (!sectionEl || !taglineEl || !metaEl || !descEl || !linksEl) return;
 
-    tl?.kill();
+		tl?.kill();
 
-    taglineSplit?.revert();
-    descSplit?.revert();
+		taglineSplit?.revert();
+		descSplit?.revert();
 
-    // eslint-disable-next-line svelte/no-dom-manipulating
-    taglineEl.textContent = cachedData?.tagline ?? '';
-    // eslint-disable-next-line svelte/no-dom-manipulating
-    descEl.textContent = cachedData?.description ?? '';
+		// eslint-disable-next-line svelte/no-dom-manipulating
+		taglineEl.textContent = cachedData?.tagline ?? '';
+		// eslint-disable-next-line svelte/no-dom-manipulating
+		descEl.textContent = cachedData?.description ?? '';
 
-    taglineSplit = new SplitText(taglineEl, { type: 'words' });
-    descSplit = new SplitText(descEl, { type: 'words' });
+		taglineSplit = new SplitText(taglineEl, { type: 'words' });
+		descSplit = new SplitText(descEl, { type: 'words' });
 
-    tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+		tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-    tl.fromTo(sectionEl, { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0);
-    tl.fromTo(
-        taglineSplit.words,
-        { x: -40, skewX: -25, opacity: 0 },
-        { x: 0, skewX: 0, opacity: 1, duration: 0.8, stagger: 0.08 },
-        0.1
-    );
-    tl.fromTo(metaEl, { x: -40, skewX: -25, opacity: 0 }, { x: 0, skewX: 0, opacity: 1, duration: 0.8 }, 0.8);
-    tl.fromTo(
-        descSplit.words,
-        { x: -40, skewX: -25, opacity: 0 },
-        { x: 0, skewX: 0, opacity: 1, duration: 0.4, stagger: 0.005 },
-        0.8
-    );
-    tl.fromTo(
-        linksEl.children,
-        { x: -40, skewX: -25, opacity: 0 },
-        { x: 0, skewX: 0, opacity: 1, duration: 0.8, stagger: 0.2 },
-        1.2
-    );
-}
+		tl.fromTo(sectionEl, { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0);
+		tl.fromTo(
+			taglineSplit.words,
+			{ x: -40, skewX: -25, opacity: 0 },
+			{ x: 0, skewX: 0, opacity: 1, duration: 0.8, stagger: 0.08 },
+			0.1
+		);
+		tl.fromTo(
+			metaEl,
+			{ x: -40, skewX: -25, opacity: 0 },
+			{ x: 0, skewX: 0, opacity: 1, duration: 0.8 },
+			0.8
+		);
+		tl.fromTo(
+			descSplit.words,
+			{ x: -40, skewX: -25, opacity: 0 },
+			{ x: 0, skewX: 0, opacity: 1, duration: 0.4, stagger: 0.005 },
+			0.8
+		);
+		tl.fromTo(
+			linksEl.children,
+			{ x: -40, skewX: -25, opacity: 0 },
+			{ x: 0, skewX: 0, opacity: 1, duration: 0.8, stagger: 0.2 },
+			1.2
+		);
+	}
 
 	function animateOut() {
 		if (!sectionEl) return;
@@ -79,26 +84,27 @@ function animateIn() {
 		}
 	});
 
-$effect(() => {
-    const _visible = activeProjectData.isVisible;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _data = cachedData;
+	$effect(() => {
+		const _visible = activeProjectData.isVisible;
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const _data = cachedData;
 
-    Promise.resolve().then(() => {
-        if (_visible) animateIn();
-        else animateOut();
-    });
-});
+		Promise.resolve().then(() => {
+			if (_visible) animateIn();
+			else animateOut();
+		});
+	});
 </script>
 
 <section
 	bind:this={sectionEl}
-	class="fixed top-0 left-0 flex h-screen w-full items-center justify-center g-zinc-50/10 px-3 backdrop-blur-xs text-shadow-md sm:px-10 md:px-20"
+	class="g-zinc-50/10 fixed top-0 left-0 flex h-screen w-full items-center justify-center px-3 backdrop-blur-xs text-shadow-md sm:px-10 md:px-20"
 	style={`pointer-events: ${activeProjectData.isVisible ? 'auto' : 'none'};`}
 >
 	<button
-	 	onclick={() => setVisibility(false)}
-	 	class="flex w-full max-w-3xl text-left flex-col items-start gap-3">
+		onclick={() => setVisibility(false)}
+		class="flex w-full max-w-3xl flex-col items-start gap-3 text-left"
+	>
 		<h1
 			bind:this={taglineEl}
 			class="font-mono text-xl leading-tight tracking-widest text-zinc-600 uppercase sm:text-4xl"
@@ -118,10 +124,7 @@ $effect(() => {
 			</div>
 		</div>
 
-		<p
-			bind:this={descEl}
-			class="max-w-xl font-mono text-xs leading-relaxed text-zinc-700"
-		>
+		<p bind:this={descEl} class="max-w-xl font-mono text-xs leading-relaxed text-zinc-700">
 			{cachedData?.description}
 		</p>
 
@@ -130,7 +133,7 @@ $effect(() => {
 				<a
 					href={cachedData.site_url}
 					target="_blank"
-					class="flex cursor-pointer items-center gap-2 border border-zinc-400 px-2 py-1 text-zinc-600 hover:border-zinc-900 hover:text-zinc-800 transition-colors duration-300"
+					class="flex cursor-pointer items-center gap-2 border border-zinc-400 px-2 py-1 text-zinc-600 transition-colors duration-300 hover:border-zinc-900 hover:text-zinc-800"
 				>
 					LIVE SITE //
 				</a>
@@ -139,7 +142,7 @@ $effect(() => {
 				<a
 					href={cachedData.source_code_url}
 					target="_blank"
-					class="flex cursor-pointer items-center gap-2 border border-zinc-400 px-2 py-1 text-zinc-600 hover:border-zinc-900 hover:text-zinc-800 transition-colors duration-300"
+					class="flex cursor-pointer items-center gap-2 border border-zinc-400 px-2 py-1 text-zinc-600 transition-colors duration-300 hover:border-zinc-900 hover:text-zinc-800"
 				>
 					SOURCE CODE //
 				</a>

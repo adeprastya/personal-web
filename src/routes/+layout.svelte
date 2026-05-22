@@ -17,8 +17,6 @@
 	import ScrollToNext from '$lib/components/ScrollToNext.svelte';
 	import WebGLCanvas from '$lib/components/3d-scene/Canvas.svelte';
 
-	gsap.registerPlugin(SplitText);
-
 	let { children } = $props();
 
 	const TITLE = 'Ade Prastya';
@@ -48,8 +46,12 @@
 		// Preload fetching projects data on initial load, used in works page
 		projectStore.fetchProjects();
 
+		// Registering runtime plugins
+		gsap.registerPlugin(SplitText);
 		const cleanups = [initRoute(), initDevice(), initScroll(), initPointer()];
-		return () => cleanups.forEach((fn) => typeof fn === 'function' && fn());
+		return () => {
+			cleanups.forEach((fn) => typeof fn === 'function' && fn());
+		};
 	});
 </script>
 

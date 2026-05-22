@@ -9,7 +9,11 @@
 	import { projectStore } from '$lib/stores/projects.svelte';
 	import { routeData } from '$lib/contexts/route.svelte';
 	import { scrollData } from '$lib/contexts/scroll.svelte';
-	import { setActiveProject, setVisibility, activeProjectData } from '$lib/contexts/activeProject.svelte';
+	import {
+		setActiveProject,
+		setVisibility,
+		activeProjectData
+	} from '$lib/contexts/activeProject.svelte';
 
 	import { DimensionalEffect } from '$lib/effects/DimensionalEffect';
 	import ProjectPlane from './shared/ProjectPlane.svelte';
@@ -71,10 +75,10 @@
 
 	$effect(() => {
 		if (isHovered) {
-			document.body.style.cursor = 'pointer'
+			document.body.style.cursor = 'pointer';
 		} else document.body.style.cursor = 'default';
-	})
-	
+	});
+
 	function handleNext(i: number) {
 		if (isTransitioning || totalProjects < 2 || !isOnWorks || !projectStore.projects[i]) return;
 
@@ -105,13 +109,21 @@
 
 {#if currentProject}
 	{#each projectStore.projects as project, i (project.id)}
-		<T.Group position={[0, 4, 0]} visible={i === currentIndex && isOnWorks} interactive={i === currentIndex && isOnWorks}>
+		<T.Group
+			position={[0, 4, 0]}
+			visible={i === currentIndex && isOnWorks}
+			interactive={i === currentIndex && isOnWorks}
+		>
 			<ProjectPlane
 				isVisible={i === currentIndex && isOnWorks}
 				{progress}
 				imageUrl={currentProject.image_thumbnail_url}
 			/>
-			<T.Mesh onclick={handleClick} onpointerenter={() => (isHovered = true)} onpointerleave={() => (isHovered = false)}>
+			<T.Mesh
+				onclick={handleClick}
+				onpointerenter={() => (isHovered = true)}
+				onpointerleave={() => (isHovered = false)}
+			>
 				<Text
 					text={currentProject.title}
 					position={[0, 0, 0.5]}
@@ -119,7 +131,7 @@
 					fontSize={0.2}
 					anchorX="center"
 					anchorY="middle"
-					color='#eee'
+					color="#eee"
 					fillOpacity={1 - progress}
 				/>
 			</T.Mesh>
