@@ -3,6 +3,7 @@
 	import { cn } from '$lib/utils/tailwindUtil';
 
 	interface ITextAreaFieldProps extends HTMLTextareaAttributes {
+		value?: string;
 		name: string;
 		wClass?: string;
 		label: string;
@@ -13,6 +14,7 @@
 		eClass?: string;
 	}
 	let {
+		value = $bindable(''),
 		name,
 		wClass,
 		label,
@@ -24,7 +26,6 @@
 		...props
 	}: ITextAreaFieldProps = $props();
 
-	let value = $state(props.value ?? '');
 	let filled = $derived(!!value);
 	let focused = $state(false);
 </script>

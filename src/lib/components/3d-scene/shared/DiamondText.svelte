@@ -24,7 +24,6 @@
 		textColor?: string;
 		textIsVisible?: boolean;
 	}
-
 	let {
 		title = 'Title Text',
 		description = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
@@ -37,35 +36,39 @@
 		textIsVisible = true
 	}: DiamondTextProps = $props();
 
+	const getTextCol = () => textColor;
+	const getTextVis = () => textIsVisible;
+	const getTextWidth = () => textWidth;
+
 	const { camera } = useThrelte();
 
 	let diamondMesh = $state.raw<Mesh | undefined>(undefined);
 	let textGroup = $state.raw<Group | undefined>(undefined);
 	let lineMat = $state.raw<LineBasicMaterial | undefined>(undefined);
 	const titleMat = new MeshBasicMaterial({
-		color: textColor,
+		color: getTextCol(),
 		side: FrontSide,
 		transparent: true,
 		fog: false,
-		opacity: textIsVisible ? 1 : 0
+		opacity: getTextVis() ? 1 : 0
 	});
 	const descMat = new MeshBasicMaterial({
-		color: textColor,
+		color: getTextCol(),
 		side: FrontSide,
 		transparent: true,
 		fog: false,
-		opacity: textIsVisible ? 1 : 0
+		opacity: getTextVis() ? 1 : 0
 	});
 	const lineGeometry = new BufferGeometry().setFromPoints([
-		new Vector3(-textWidth / 2, 0, 0),
-		new Vector3(textWidth / 2, 0, 0)
+		new Vector3(-getTextWidth() / 2, 0, 0),
+		new Vector3(getTextWidth() / 2, 0, 0)
 	]);
 
 	let floatTime = 0;
 
 	$effect(() => {
 		const targets = [titleMat, descMat, lineMat].filter(Boolean);
-		if (textIsVisible) {
+		if (getTextVis()) {
 			gsap.to(targets, { opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.08 });
 		} else {
 			gsap.to(targets, { opacity: 0, duration: 0.5, ease: 'power2.in' });
@@ -75,7 +78,7 @@
 	$effect(() => {
 		if (!lineMat) return;
 		lineMat.transparent = true;
-		lineMat.opacity = textIsVisible ? 1 : 0;
+		lineMat.opacity = getTextVis() ? 1 : 0;
 	});
 
 	useTask((delta) => {

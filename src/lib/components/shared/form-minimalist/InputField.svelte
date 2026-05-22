@@ -3,6 +3,7 @@
 	import { cn } from '$lib/utils/tailwindUtil';
 
 	interface IInputFieldProps extends HTMLInputAttributes {
+		value?: string | number;
 		name: string;
 		wClass?: string;
 		label: string;
@@ -13,6 +14,7 @@
 		eClass?: string;
 	}
 	let {
+		value = $bindable(''),
 		name,
 		wClass,
 		label,
@@ -24,7 +26,6 @@
 		...props
 	}: IInputFieldProps = $props();
 
-	let value = $state(props.value ?? '');
 	let filled = $derived(!!value);
 	let focused = $state(false);
 </script>
@@ -41,7 +42,7 @@
 	>
 
 	<!-- char counter -->
-	{#if showCounter}
+	{#if showCounter && typeof value === 'string'}
 		<p class={cn('pointer-events-none absolute top-0 right-0.5 text-xs text-zinc-500', cClass)}>
 			{value.length}
 

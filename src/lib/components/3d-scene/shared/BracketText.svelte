@@ -37,35 +37,46 @@
 	}: BracketTextProps = $props();
 
 	const { camera } = useThrelte();
+	const getColor = () => color;
 	let group = $state<Group | undefined>(undefined);
 	let centerLineRef = $state<Line | undefined>(undefined);
 
 	const lineMat = new LineBasicMaterial({
-		color: color,
+		color: getColor(),
 		side: FrontSide,
 		transparent: true,
 		fog: false
 	});
 	const bracketMat = new LineBasicMaterial({
-		color: color,
+		color: getColor(),
 		side: FrontSide,
 		transparent: true,
 		fog: false
 	});
 	const textMat = new MeshBasicMaterial({ side: FrontSide, transparent: true });
 
-	const bracketL = new BufferGeometry().setFromPoints([
-		new Vector3(-width / 2, -height / 2, 0),
-		new Vector3(-width / 2 - width / 12, -height / 2, 0),
-		new Vector3(-width / 2 - width / 12, height / 2, 0),
-		new Vector3(-width / 2, height / 2, 0)
-	]);
-	const bracketR = new BufferGeometry().setFromPoints([
-		new Vector3(width / 2, -height / 2, 0),
-		new Vector3(width / 2 + width / 12, -height / 2, 0),
-		new Vector3(width / 2 + width / 12, height / 2, 0),
-		new Vector3(width / 2, height / 2, 0)
-	]);
+	$effect(() => {
+		lineMat.color.set(color);
+		bracketMat.color.set(color);
+	});
+
+	const bracketL = $derived.by(() => {
+		return new BufferGeometry().setFromPoints([
+			new Vector3(-width / 2, -height / 2, 0),
+			new Vector3(-width / 2 - width / 12, -height / 2, 0),
+			new Vector3(-width / 2 - width / 12, height / 2, 0),
+			new Vector3(-width / 2, height / 2, 0)
+		]);
+	});
+
+	const bracketR = $derived.by(() => {
+		return new BufferGeometry().setFromPoints([
+			new Vector3(width / 2, -height / 2, 0),
+			new Vector3(width / 2 + width / 12, -height / 2, 0),
+			new Vector3(width / 2 + width / 12, height / 2, 0),
+			new Vector3(width / 2, height / 2, 0)
+		]);
+	});
 
 	const temp = new Vector3();
 	const positions = new Float32Array([0, 0, 0, 0, 0, 0]);

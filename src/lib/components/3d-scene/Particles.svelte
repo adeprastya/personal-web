@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { T, useTask } from '@threlte/core';
 	import {
 		BufferGeometry,
@@ -31,12 +30,14 @@
 	let points: Points | null = $state(null);
 	let ready = $state(false);
 
-	const positions = new Float32Array(count * 3);
-	const velocities = new Float32Array(count * 3);
-	const lifetimes = new Float32Array(count);
-	const speeds = new Float32Array(count);
+	const maxY = $derived(origin[1] + height);
 
-	const maxY = origin[1] + height;
+	let positions: Float32Array;
+	let velocities: Float32Array;
+	let lifetimes: Float32Array;
+	let speeds: Float32Array;
+	let posAttr: BufferAttribute;
+	let lifeAttr: BufferAttribute;
 
 	const randomize = (i: number) => {
 		const b = i * 3;
@@ -50,17 +51,21 @@
 		speeds[i] = Math.random() * 0.5 + 0.7;
 	};
 
-	for (let i = 0; i < count; i++) randomize(i);
+	$effect(() => {
+		ready = false;
 
-	let posAttr: BufferAttribute;
-	let lifeAttr: BufferAttribute;
+		positions = new Float32Array(count * 3);
+		velocities = new Float32Array(count * 3);
+		lifetimes = new Float32Array(count);
+		speeds = new Float32Array(count);
 
-	onMount(() => {
+		for (let i = 0; i < count; i++) randomize(i);
+
 		const geo = new BufferGeometry();
 		posAttr = new BufferAttribute(positions, 3);
 		lifeAttr = new BufferAttribute(lifetimes, 1);
 
-		posAttr.setUsage(35048);
+		posAttr.setUsage(35048); // DYNAMIC_DRAW
 		lifeAttr.setUsage(35048);
 
 		geo.setAttribute('position', posAttr);
@@ -102,6 +107,7 @@
 		ready = true;
 
 		return () => {
+			ready = false;
 			geo.dispose();
 			mat.dispose();
 		};
@@ -117,10 +123,8 @@
 			positions[b + 1] += velocities[b + 1];
 			positions[b + 2] += velocities[b + 2] + Math.cos(lifetimes[i] * 6 + i) * 0.002;
 
-			// lifetime = seberapa jauh dari origin ke maxY (0.0 → 1.0)
 			lifetimes[i] = (positions[b + 1] - origin[1]) / height;
 
-			// hanya mati kalau sudah melewati maxY
 			if (positions[b + 1] > maxY) randomize(i);
 		}
 
