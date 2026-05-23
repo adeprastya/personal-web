@@ -5,6 +5,7 @@
 	import { Text } from '@threlte/extras';
 	import { EffectComposer, EffectPass, RenderPass } from 'postprocessing';
 
+	import { deviceData } from '$lib/contexts/device.svelte';
 	import { AppRoute } from '$lib/types/Route';
 	import { projectStore } from '$lib/stores/projects.svelte';
 	import { routeData } from '$lib/contexts/route.svelte';
@@ -110,7 +111,7 @@
 {#if currentProject}
 	{#each projectStore.projects as project, i (project.id)}
 		<T.Group
-			position={[0, 4, 0]}
+			position={[0, 5, 0]}
 			visible={i === currentIndex && isOnWorks}
 			interactive={i === currentIndex && isOnWorks}
 		>
@@ -128,7 +129,7 @@
 					text={currentProject.title}
 					position={[0, 0, 0.5]}
 					font="/fonts/Canterbury/Canterbury.ttf"
-					fontSize={0.2}
+					fontSize={deviceData.isMobile ? 0.14 : 0.2}
 					anchorX="center"
 					anchorY="middle"
 					color="#eee"

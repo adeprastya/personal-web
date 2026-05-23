@@ -24,8 +24,8 @@
 			look: { x: 0, y: 0, z: 0 }
 		},
 		'/works': {
-			pos: { x: 0, y: 4, z: 2.5 },
-			look: { x: 0, y: 4, z: 0 }
+			pos: { x: 0, y: 5, z: 2.5 },
+			look: { x: 0, y: 5, z: 0 }
 		}
 	};
 	const DEFAULT_ROUTE = ROUTE_CONFIG['/'];

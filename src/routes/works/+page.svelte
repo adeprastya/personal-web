@@ -98,7 +98,7 @@
 
 <section
 	bind:this={sectionEl}
-	class="g-zinc-50/10 fixed top-0 left-0 flex h-screen w-full items-center justify-center px-3 backdrop-blur-xs text-shadow-md sm:px-10 md:px-20"
+	class="fixed top-0 left-0 flex h-screen w-full items-center justify-center px-9 backdrop-blur-xs text-shadow-md sm:px-14 md:px-20"
 	style={`pointer-events: ${activeProjectData.isVisible ? 'auto' : 'none'};`}
 >
 	<button
@@ -124,7 +124,10 @@
 			</div>
 		</div>
 
-		<p bind:this={descEl} class="max-w-xl font-mono text-xs leading-relaxed text-zinc-700">
+		<p
+			bind:this={descEl}
+			class="max-w-xl text-justify font-mono text-xs leading-relaxed text-zinc-700"
+		>
 			{cachedData?.description}
 		</p>
 
