@@ -14,12 +14,12 @@
 	let windowWidth = $state(0);
 	let slant = $derived(windowWidth < 640 ? '2rem' : '2.5rem');
 
-	const isAvailable = true;
-	const isSoundOn = false;
-	const toastCTA = {
+	let isAvailable = $state(true);
+	let isSoundOn = $state(false);
+	let toastCTA = $state({
 		text: 'Dive into my resume',
 		href: '/docs/cv.pdf'
-	};
+	});
 
 	let nameEl: HTMLParagraphElement | null = null;
 	let logoEl: HTMLDivElement | null = null;
@@ -73,7 +73,10 @@
 		{slant}
 		class="pointer-events-auto absolute top-0 left-0 z-10 flex h-[1.8rem] min-w-[8rem] items-center justify-center bg-zinc-200 px-2 pe-[2.2rem] sm:h-[2rem] sm:min-w-[10rem] sm:px-6 sm:pe-[3.5rem]"
 	>
-		<p bind:this={nameEl} class="font-heading text-[18px] tracking-wide lowercase sm:text-[22px]">
+		<p
+			bind:this={nameEl}
+			class="font-heading text-[18px] tracking-wide lowercase opacity-0 sm:text-[22px]"
+		>
 			Ade Prastya
 		</p>
 	</Trapezoid>
@@ -84,7 +87,9 @@
 		{slant}
 		class="pointer-events-auto absolute top-0 left-1/2 z-10 flex h-[1.8rem] -translate-x-1/2 items-center justify-center bg-zinc-200 px-[2.2rem] sm:h-[2rem] sm:px-[2.7rem]"
 	>
-		<div bind:this={logoEl}><SvgLogo class="size-6 fill-zinc-700 sm:size-7" /></div>
+		<div bind:this={logoEl} class="opacity-0">
+			<SvgLogo class="size-6 fill-zinc-700 sm:size-7" />
+		</div>
 	</Trapezoid>
 
 	<!-- [TR] time -->
@@ -93,7 +98,7 @@
 		{slant}
 		class="pointer-events-auto absolute top-0 right-0 z-10 flex h-[1.8rem] min-w-[8rem] items-center justify-center bg-zinc-200 px-2 ps-[2.2rem] sm:h-[2rem] sm:min-w-[10rem] sm:px-6 sm:ps-[3.5rem]"
 	>
-		<div bind:this={clockEl}><RealtimeClock /></div>
+		<div bind:this={clockEl} class="opacity-0"><RealtimeClock /></div>
 	</Trapezoid>
 
 	<!-- [BL] social links -->
@@ -102,7 +107,7 @@
 		{slant}
 		class="pointer-events-auto absolute bottom-0 left-0 z-10 flex h-[1.8rem] min-w-[8rem] items-center bg-zinc-200 px-2 pe-[2.2rem] sm:h-[2rem] sm:min-w-[10rem] sm:px-6 sm:pe-[3.5rem]"
 	>
-		<div bind:this={socialEl}><SocialLinks /></div>
+		<div bind:this={socialEl} class="opacity-0"><SocialLinks /></div>
 	</Trapezoid>
 
 	<!-- [BR] avail status -->
@@ -111,7 +116,7 @@
 		{slant}
 		class="pointer-events-auto absolute right-0 bottom-0 z-10 flex h-[1.8rem] min-w-[8rem] items-center justify-center bg-zinc-200 px-2 ps-[2.2rem] sm:h-[2rem] sm:min-w-[10rem] sm:px-6 sm:ps-[3.5rem]"
 	>
-		<div bind:this={availEl}>
+		<div bind:this={availEl} class="opacity-0">
 			<p class="flex items-center gap-3 sm:gap-4">
 				<span
 					class="inline-block size-1.5 rotate-45 animate-pulse {isAvailable
@@ -127,7 +132,7 @@
 
 	<!-- [L1] fast messages -->
 	<div class="pointer-events-auto absolute top-1/2 left-0 z-10 -translate-x-full -translate-y-1/2">
-		<div bind:this={messageEl}>
+		<div bind:this={messageEl} class="opacity-0">
 			<MessageForm />
 		</div>
 	</div>
@@ -138,14 +143,14 @@
 		slant="2rem"
 		class="pointer-events-auto absolute top-1/4 right-0 z-10 -translate-y-1/2 bg-zinc-200 px-1.5 py-[2.2rem]"
 	>
-		<div bind:this={soundEl}>
+		<div bind:this={soundEl} class="opacity-0">
 			<SoundToggle animate={isSoundOn} />
 		</div>
 	</Trapezoid>
 
 	<!-- [R2] navigation -->
 	<div class="pointer-events-auto absolute right-0 bottom-1/4 z-10 w-fit translate-y-1/2">
-		<div bind:this={navEl}>
+		<div bind:this={navEl} class="opacity-0">
 			<Navigation />
 		</div>
 	</div>

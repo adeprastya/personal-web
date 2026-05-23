@@ -5,7 +5,7 @@
 	import { activeProjectData, setVisibility } from '$lib/contexts/activeProject.svelte';
 
 	let { data }: { data: PageData } = $props();
-	let projects = data.projects;
+	let projects = $derived(data.projects);
 
 	let cachedData = $state(activeProjectData.data);
 

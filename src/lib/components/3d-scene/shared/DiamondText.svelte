@@ -24,9 +24,11 @@
 		textColor?: string;
 		textIsVisible?: boolean;
 	}
+
+	// Destructuring props langsung dengan Svelte 5 runes
 	let {
 		title = 'Title Text',
-		description = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+		description = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
 		textWidth = 1.5,
 		fontSize = 0.1,
 		diamondPosition = [0, 0, 0],
@@ -35,16 +37,15 @@
 		textColor = '#ffffff',
 		textIsVisible = true
 	}: DiamondTextProps = $props();
-
 	const getTextCol = () => textColor;
 	const getTextVis = () => textIsVisible;
-	const getTextWidth = () => textWidth;
 
 	const { camera } = useThrelte();
 
 	let diamondMesh = $state.raw<Mesh | undefined>(undefined);
 	let textGroup = $state.raw<Group | undefined>(undefined);
 	let lineMat = $state.raw<LineBasicMaterial | undefined>(undefined);
+
 	const titleMat = new MeshBasicMaterial({
 		color: getTextCol(),
 		side: FrontSide,
@@ -52,6 +53,7 @@
 		fog: false,
 		opacity: getTextVis() ? 1 : 0
 	});
+
 	const descMat = new MeshBasicMaterial({
 		color: getTextCol(),
 		side: FrontSide,
@@ -59,16 +61,26 @@
 		fog: false,
 		opacity: getTextVis() ? 1 : 0
 	});
-	const lineGeometry = new BufferGeometry().setFromPoints([
-		new Vector3(-getTextWidth() / 2, 0, 0),
-		new Vector3(getTextWidth() / 2, 0, 0)
-	]);
+
+	const lineGeometry = $derived.by(() => {
+		const geo = new BufferGeometry().setFromPoints([
+			new Vector3(-textWidth / 2, 0, 0),
+			new Vector3(textWidth / 2, 0, 0)
+		]);
+		return geo;
+	});
+
+	$effect(() => {
+		return () => {
+			lineGeometry.dispose();
+		};
+	});
 
 	let floatTime = 0;
 
 	$effect(() => {
 		const targets = [titleMat, descMat, lineMat].filter(Boolean);
-		if (getTextVis()) {
+		if (textIsVisible) {
 			gsap.to(targets, { opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.08 });
 		} else {
 			gsap.to(targets, { opacity: 0, duration: 0.5, ease: 'power2.in' });
@@ -78,16 +90,14 @@
 	$effect(() => {
 		if (!lineMat) return;
 		lineMat.transparent = true;
-		lineMat.opacity = getTextVis() ? 1 : 0;
+		lineMat.opacity = textIsVisible ? 1 : 0;
 	});
 
 	useTask((delta) => {
-		// Texts billboarding
 		if (textGroup && camera.current) {
 			textGroup.quaternion.copy(camera.current.quaternion);
 		}
 
-		// Diamond floating animation
 		if (diamondMesh) {
 			diamondMesh.rotation.x += delta * 0.5;
 			diamondMesh.rotation.y += delta * 0.5;
@@ -98,22 +108,18 @@
 	});
 
 	onDestroy(() => {
-		lineGeometry.dispose();
 		titleMat.dispose();
 		descMat.dispose();
 		lineMat?.dispose();
 	});
 </script>
 
-<!-- Diamond -->
 <T.Mesh bind:ref={diamondMesh} position={diamondPosition}>
 	<T.TetrahedronGeometry args={[0.075, 0]} />
 	<T.MeshLambertMaterial color={diamondColor} />
 </T.Mesh>
 
-<!-- Texts group -->
 <T.Group bind:ref={textGroup} position={textPosition}>
-	<!-- Title -->
 	<Text
 		position={[-textWidth / 2, 0.4, 0]}
 		maxWidth={textWidth}
@@ -129,12 +135,10 @@
 		material={titleMat}
 	/>
 
-	<!-- Separator -->
 	<T.Line geometry={lineGeometry} position={[0, 0.35, 0]}>
 		<T.LineBasicMaterial bind:ref={lineMat} color={textColor} transparent />
 	</T.Line>
 
-	<!-- Description -->
 	<Text
 		position={[-textWidth / 2, 0.3, 0]}
 		maxWidth={textWidth}
