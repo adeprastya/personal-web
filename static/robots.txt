@@ -1,0 +1,6 @@
+# Robots.txt for adeprastya.vercel.app
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://adeprastya.vercel.app/sitemap.xml
