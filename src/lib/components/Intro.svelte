@@ -53,7 +53,7 @@
 		class="absolute top-0 -left-0 transition-transform delay-1500 duration-2000"
 		style="translate: {isOpen ? '0 0' : '-100% 0%'}"
 	>
-		<Trapezoid variant="BL" slant="30%" class="h-[50.01svh] w-[60vw] bg-zinc-200"
+		<Trapezoid variant="BL" slant="30%" class="h-[50.04svh] w-[60vw] bg-zinc-200"
 			><span></span></Trapezoid
 		>
 	</div>
@@ -61,7 +61,7 @@
 		class="absolute top-0 right-0 transition-transform delay-1500 duration-2000"
 		style="translate: {isOpen ? '0 0' : '100% -50%'}"
 	>
-		<Trapezoid variant="TR" slant="30%" class="h-[50.01svh] w-[60vw] bg-zinc-200"
+		<Trapezoid variant="TR" slant="30%" class="h-[50.04svh] w-[60vw] bg-zinc-200"
 			><span></span></Trapezoid
 		>
 	</div>
@@ -69,7 +69,7 @@
 		class="absolute bottom-0 left-0 transition-transform delay-1500 duration-2000"
 		style="translate: {isOpen ? '0 0' : '-100% 0%'}"
 	>
-		<Trapezoid variant="TL" slant="30%" class="h-[50.01svh] w-[60vw] bg-zinc-200"
+		<Trapezoid variant="TL" slant="30%" class="h-[50.04svh] w-[60vw] bg-zinc-200"
 			><span></span></Trapezoid
 		>
 	</div>
@@ -77,7 +77,7 @@
 		class="absolute right-0 bottom-0 transition-transform delay-1500 duration-2000"
 		style="translate: {isOpen ? '0 0' : '100% 50%'}"
 	>
-		<Trapezoid variant="BR" slant="30%" class="h-[50.01svh] w-[60vw] bg-zinc-200"
+		<Trapezoid variant="BR" slant="30%" class="h-[50.04svh] w-[60vw] bg-zinc-200"
 			><span></span></Trapezoid
 		>
 	</div>

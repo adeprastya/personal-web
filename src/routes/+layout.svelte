@@ -5,12 +5,12 @@
 	import { gsap } from 'gsap';
 	import { SplitText } from 'gsap/SplitText';
 
+	import { typingAnimation } from '$lib/utils/textAnimation';
 	import { projectStore } from '$lib/stores/projects.svelte';
 	import { initRoute, routeData } from '$lib/contexts/route.svelte';
 	import { initDevice } from '$lib/contexts/device.svelte';
-	import { initPointer } from '$lib/contexts/pointer.svelte';
-	import { initScroll } from '$lib/contexts/scroll.svelte';
-	import { typingAnimation } from '$lib/utils/textAnimation';
+	import { initPointer, pointerData } from '$lib/contexts/pointer.svelte';
+	import { initDragProgress } from '$lib/contexts/dragProgress.svelte';
 
 	import Intro from '$lib/components/Intro.svelte';
 	import AppFrame from '$lib/components/frame/AppFrame.svelte';
@@ -45,10 +45,14 @@
 	onMount(() => {
 		// Preload fetching projects data on initial load, used in works page
 		projectStore.fetchProjects();
-
 		// Registering runtime plugins
 		gsap.registerPlugin(SplitText);
-		const cleanups = [initRoute(), initDevice(), initScroll(), initPointer()];
+		const cleanups = [
+			initRoute(),
+			initDevice(),
+			initPointer(),
+			initDragProgress(() => pointerData.dy)
+		];
 		return () => {
 			cleanups.forEach((fn) => typeof fn === 'function' && fn());
 		};
@@ -95,10 +99,12 @@
 	{#if browser}
 		<WebGLCanvas />
 	{/if}
+
 	{@render children()}
+
 	<Intro />
+
 	<AppFrame />
+
 	<ScrollToNext {routes} />
 </div>
-
-<div id="smooth-content" class="pointer-events-none absolute -z-50 h-[600vh] w-full"></div>
