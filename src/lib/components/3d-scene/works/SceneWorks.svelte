@@ -23,7 +23,6 @@
 	import { AppRoute } from '$lib/types/Route';
 	import { projectStore } from '$lib/stores/projects.svelte';
 	import { routeData } from '$lib/contexts/route.svelte';
-	import { pointerData } from '$lib/contexts/pointer.svelte';
 	import {
 		setActiveProject,
 		setVisibility,
@@ -32,25 +31,26 @@
 	import { dragProgress } from '$lib/contexts/dragProgress.svelte';
 	import { DimensionalEffect } from '$lib/effects/DimensionalEffect';
 
-	// ---------------------------------------------------------------------------
-	// Constants
-	// ---------------------------------------------------------------------------
-	const HEX_RADIUS = 0.06;
-	const HEX_GAP = 0.006;
-	const HOLE_CHANCE = 0.0;
-	const COLS = 40;
-	const ROWS = 30;
-	const GROUP_Y = 5;
-	const BLEND_ZONE = 0.45;
+	const HEX = {
+		radius: 0.06,
+		gap: 0.008,
+		hole: 0.0, // [0-1]
+		cols: 40,
+		rows: 25
+	};
+	const WAVE = {
+		power: 0.5,
+		speed: 1.5,
+		freq: 4.0
+	};
+	const BLEND_ZONE = 0.4; // [0-0.5] 0.5 almost no static
+	const GROUP_Y = 5; // group postition
 
 	// ---------------------------------------------------------------------------
-	// Threlte
+	// State
 	// ---------------------------------------------------------------------------
 	const { renderer, scene, camera, renderStage } = useThrelte();
 
-	// ---------------------------------------------------------------------------
-	// Derived state
-	// ---------------------------------------------------------------------------
 	let progress = $derived(dragProgress.works);
 	let isOnWorks = $derived(routeData.current === AppRoute.works);
 	let totalProjects = $derived(projectStore.projects.length);
@@ -70,8 +70,7 @@
 		shape.closePath();
 		return shape;
 	}
-
-	const hexGeo = new ShapeGeometry(buildHexShape(HEX_RADIUS - HEX_GAP));
+	const hexGeo = new ShapeGeometry(buildHexShape(HEX.radius - HEX.gap));
 	const edgesGeo = new EdgesGeometry(hexGeo);
 
 	// ---------------------------------------------------------------------------
@@ -81,17 +80,16 @@
 		cx: number;
 		cy: number;
 	}
-
 	function buildGrid(): HexCell[] {
-		const r = HEX_RADIUS - HEX_GAP / 2;
+		const r = HEX.radius - HEX.gap / 2;
 		const dx = r * Math.sqrt(3);
 		const dy = r * 1.5;
-		const offsetX = (COLS * dx) / 2 - dx / 2;
-		const offsetY = (ROWS * dy) / 2 - dy / 2;
+		const offsetX = (HEX.cols * dx) / 2 - dx / 2;
+		const offsetY = (HEX.rows * dy) / 2 - dy / 2;
 		const cells: HexCell[] = [];
-		for (let row = 0; row < ROWS; row++) {
-			for (let col = 0; col < COLS; col++) {
-				if (Math.random() < HOLE_CHANCE) continue;
+		for (let row = 0; row < HEX.rows; row++) {
+			for (let col = 0; col < HEX.cols; col++) {
+				if (Math.random() < HEX.hole) continue;
 				cells.push({
 					cx: col * dx + (row % 2 === 0 ? 0 : dx / 2) - offsetX,
 					cy: row * dy - offsetY
@@ -103,15 +101,14 @@
 
 	const cells = buildGrid();
 	const COUNT = cells.length;
-
 	const gridBounds = (() => {
 		const xs = cells.map((c) => c.cx);
 		const ys = cells.map((c) => c.cy);
 		return {
-			minX: Math.min(...xs) - HEX_RADIUS,
-			maxX: Math.max(...xs) + HEX_RADIUS,
-			minY: Math.min(...ys) - HEX_RADIUS,
-			maxY: Math.max(...ys) + HEX_RADIUS
+			minX: Math.min(...xs) - HEX.radius,
+			maxX: Math.max(...xs) + HEX.radius,
+			minY: Math.min(...ys) - HEX.radius,
+			maxY: Math.max(...ys) + HEX.radius
 		};
 	})();
 
@@ -148,7 +145,6 @@
 		textureCache.set(url, tex);
 		return tex;
 	}
-
 	$effect(() => {
 		if (totalProjects === 0 || isTexturesLoaded) return;
 
@@ -180,60 +176,59 @@
 	// ---------------------------------------------------------------------------
 
 	const vertexShaderImg = /* glsl */ `
-    attribute vec2 aInstanceData;
-    varying vec2  vWorldUV;
-    varying float vBlend;
-    varying float vThreshold;
-    uniform vec2  gridMin;
-    uniform vec2  gridSize;
-    uniform vec2  groupOffset;
-    uniform vec2  uPointer;
+		attribute vec2 aInstanceData;
+		varying vec2  vWorldUV;
+		varying float vBlend;
+		varying float vThreshold;
+		uniform vec2  gridMin;
+		uniform vec2  gridSize;
+		uniform vec2  groupOffset;
+		uniform float uWavePower;
+		uniform float uWaveSpeed;
+		uniform float uWaveFreq;
+		uniform float uTime;
 
-    mat4 rotationX(float angle) {
-      float s = sin(angle);
-      float c = cos(angle);
-      return mat4(
-        1.0, 0.0, 0.0, 0.0,
-        0.0, c,   s,   0.0,
-        0.0, -s,  c,   0.0,
-        0.0, 0.0, 0.0, 1.0
-      );
-    }
+		mat4 rotationX(float angle) {
+			float s = sin(angle);
+			float c = cos(angle);
+			return mat4(
+				1.0, 0.0, 0.0, 0.0,
+				0.0, c,   s,   0.0,
+				0.0, -s,  c,   0.0,
+				0.0, 0.0, 0.0, 1.0
+			);
+		}
+		mat4 rotationY(float angle) {
+			float s = sin(angle);
+			float c = cos(angle);
+			return mat4(
+				c,   0.0, -s,  0.0,
+				0.0, 1.0, 0.0, 0.0,
+				s,   0.0, c,   0.0,
+				0.0, 0.0, 0.0, 1.0
+			);
+		}
 
-    mat4 rotationY(float angle) {
-      float s = sin(angle);
-      float c = cos(angle);
-      return mat4(
-        c,   0.0, -s,  0.0,
-        0.0, 1.0, 0.0, 0.0,
-        s,   0.0, c,   0.0,
-        0.0, 0.0, 0.0, 1.0
-      );
-    }
+		void main() {
+			vBlend     = aInstanceData.x;
+			vThreshold = aInstanceData.y;
 
-    void main() {
-      vBlend     = aInstanceData.x;
-      vThreshold = aInstanceData.y;
+			vec4 localPos = vec4(position, 1.0);
 
-      vec4 localPos = vec4(position, 1.0);
+			vec4 instanceCenter = instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+			float dist = length(instanceCenter.xy);
 
-      vec4 instanceCenter = modelMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+			float wave = sin(dist * uWaveFreq - uTime * uWaveSpeed) * uWavePower;
 
-      float rotX = uPointer.y * 0.4; 
-      float rotY = uPointer.x * 0.4;
+			mat4 rotMat = rotationX(wave) * rotationY(wave);
+			vec4 rotatedLocalPos = rotMat * localPos;
 
-      rotX += sin(instanceCenter.x * 2.0) * 0.05 * uPointer.y;
-      rotY += cos(instanceCenter.y * 2.0) * 0.05 * uPointer.x;
+			vec4 worldPos = modelMatrix * instanceMatrix * rotatedLocalPos;
 
-      mat4 rotMat = rotationX(rotX) * rotationY(rotY);
-      vec4 rotatedLocalPos = rotMat * localPos;
-
-      vec4 worldPos = modelMatrix * instanceMatrix * rotatedLocalPos;
-
-      vWorldUV      = (worldPos.xy - groupOffset - gridMin) / gridSize;
-      gl_Position   = projectionMatrix * viewMatrix * worldPos;
-    }
-  `;
+			vWorldUV    = (worldPos.xy - groupOffset - gridMin) / gridSize;
+			gl_Position = projectionMatrix * viewMatrix * worldPos;
+		}
+	`;
 	const fragmentShaderImg = /* glsl */ `
 		uniform sampler2D mapA;
 		uniform sampler2D mapB;
@@ -242,6 +237,7 @@
 		varying vec2 vWorldUV;
 		varying float vBlend;
 		varying float vThreshold;
+
 		void main() {
 			float t = step(vThreshold, vBlend);
 
@@ -255,43 +251,45 @@
 		}
 	`;
 	const vertexShaderEdge = /* glsl */ `
-    attribute vec2 aInstanceData;
-    varying float  vBlend;
-    varying float  vThreshold;
-    uniform vec2  uPointer;
+		attribute vec2 aInstanceData;
+		varying float  vBlend;
+		varying float  vThreshold;
+		uniform float  uWavePower;
+		uniform float  uWaveSpeed;
+		uniform float  uWaveFreq;
+		uniform float  uTime;
 
-    mat4 rotationX(float angle) {
-      float s = sin(angle);
-      float c = cos(angle);
-      return mat4(1.0, 0.0, 0.0, 0.0, 0.0, c, s, 0.0, 0.0, -s, c, 0.0, 0.0, 0.0, 0.0, 1.0);
-    }
+		mat4 rotationX(float angle) {
+			float s = sin(angle);
+			float c = cos(angle);
+			return mat4(1.0, 0.0, 0.0, 0.0, 0.0, c, s, 0.0, 0.0, -s, c, 0.0, 0.0, 0.0, 0.0, 1.0);
+		}
+		mat4 rotationY(float angle) {
+			float s = sin(angle);
+			float c = cos(angle);
+			return mat4(c, 0.0, -s, 0.0, 0.0, 1.0, 0.0, 0.0, s, 0.0, c, 0.0, 0.0, 0.0, 0.0, 1.0);
+		}
 
-    mat4 rotationY(float angle) {
-      float s = sin(angle);
-      float c = cos(angle);
-      return mat4(c, 0.0, -s, 0.0, 0.0, 1.0, 0.0, 0.0, s, 0.0, c, 0.0, 0.0, 0.0, 0.0, 1.0);
-    }
+		void main() {
+			vBlend     = aInstanceData.x;
+			vThreshold = aInstanceData.y;
 
-    void main() {
-      vBlend     = aInstanceData.x;
-      vThreshold = aInstanceData.y;
+			vec4 localPos = vec4(position, 1.0);
 
-      vec4 localPos = vec4(position, 1.0);
-      vec4 instanceCenter = modelMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+			vec4 instanceCenter = instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+			float dist = length(instanceCenter.xy);
 
-      float rotX = uPointer.y * 0.4;
-      float rotY = uPointer.x * 0.4;
-      rotX += sin(instanceCenter.x * 2.0) * 0.05 * uPointer.y;
-      rotY += cos(instanceCenter.y * 2.0) * 0.05 * uPointer.x;
+			float wave = sin(dist * uWaveFreq - uTime * uWaveSpeed) * uWavePower;
 
-      mat4 rotMat = rotationX(rotX) * rotationY(rotY);
+			mat4 rotMat = rotationX(wave) * rotationY(wave);
 
-      gl_Position = projectionMatrix * viewMatrix * modelMatrix * instanceMatrix * rotMat * localPos;
-    }
-  `;
+			gl_Position = projectionMatrix * viewMatrix * modelMatrix * instanceMatrix * rotMat * localPos;
+		}
+	`;
 	const fragmentShaderEdge = /* glsl */ `
 		varying float vBlend;
 		varying float vThreshold;
+
 		void main() {
 			float t  = step(vThreshold, vBlend);
 			float op = mix(0.08, 0.18, t);
@@ -308,7 +306,6 @@
 		gridBounds.maxY - gridBounds.minY
 	);
 	const groupOffset = new Vector2(0, GROUP_Y);
-	const uPointer = new Vector2(0, 0);
 
 	const imgMaterial = new ShaderMaterial({
 		uniforms: {
@@ -319,7 +316,10 @@
 			gridMin: { value: gridMin },
 			gridSize: { value: gridSize },
 			groupOffset: { value: groupOffset },
-			uPointer: { value: uPointer }
+			uWavePower: { value: WAVE.power },
+			uWaveSpeed: { value: WAVE.speed },
+			uWaveFreq: { value: WAVE.freq },
+			uTime: { value: 0 }
 		},
 		vertexShader: vertexShaderImg,
 		fragmentShader: fragmentShaderImg,
@@ -328,18 +328,14 @@
 	});
 	const edgeMaterial = new ShaderMaterial({
 		uniforms: {
-			uPointer: { value: uPointer }
+			uWavePower: { value: WAVE.power },
+			uWaveSpeed: { value: WAVE.speed },
+			uWaveFreq: { value: WAVE.freq },
+			uTime: { value: 0 }
 		},
 		vertexShader: vertexShaderEdge,
 		fragmentShader: fragmentShaderEdge,
 		transparent: true
-	});
-
-	$effect(() => {
-		if (!pointerData) return;
-		const x = (pointerData.x / window.innerWidth) * 2 - 1;
-		const y = (pointerData.y / window.innerHeight) * 2 - 1;
-		uPointer.set(x, y);
 	});
 
 	// ---------------------------------------------------------------------------
@@ -402,9 +398,6 @@
 		edgeInstanceAttr.needsUpdate = true;
 	}
 
-	// ---------------------------------------------------------------------------
-	// Effects
-	// ---------------------------------------------------------------------------
 	$effect(() => {
 		if (!isOnWorks || totalProjects === 0) return;
 
@@ -437,8 +430,10 @@
 	$effect(() => {
 		const cam = camera.current;
 		if (!cam) return;
+
 		composer?.dispose();
 		composer = new EffectComposer(renderer, { frameBufferType: HalfFloatType });
+
 		composer.setSize(window.innerWidth, window.innerHeight);
 		composer.addPass(new RenderPass(scene, cam));
 		composer.addPass(new EffectPass(cam, invertEffect));
@@ -448,13 +443,6 @@
 		};
 	});
 
-	useTask(
-		(delta) => {
-			composer?.render(delta);
-		},
-		{ stage: renderStage, autoInvalidate: true }
-	);
-
 	$effect(() => {
 		gsap.to(invertEffect, {
 			progress: activeProjectData.isVisible ? 1 : 0,
@@ -462,6 +450,15 @@
 			ease: 'circ.inOut'
 		});
 	});
+
+	useTask(
+		(delta) => {
+			imgMaterial.uniforms.uTime.value += delta;
+			edgeMaterial.uniforms.uTime.value += delta;
+			composer?.render(delta);
+		},
+		{ stage: renderStage, autoInvalidate: true }
+	);
 
 	// ---------------------------------------------------------------------------
 	// Cleanup
@@ -483,7 +480,6 @@
 	$effect(() => {
 		document.body.style.cursor = isHovered ? 'pointer' : 'default';
 	});
-
 	function handleClick() {
 		const project = projectStore.projects[currentIndex];
 		if (!project) return;
