@@ -4,6 +4,7 @@
 	import { useThrelte, useTask } from '@threlte/core';
 	import { deviceData } from '$lib/contexts/device.svelte';
 	import { pointerData } from '$lib/contexts/pointer.svelte';
+	import { AppRoute } from '$lib/types/Route';
 
 	const FOV = 60;
 	const NEAR = 0.1;
@@ -15,27 +16,27 @@
 	type Vec3 = { x: number; y: number; z: number };
 
 	const ROUTE_CONFIG: Record<string, { pos: Vec3; look: Vec3 }> = {
-		'/': {
+		[AppRoute.home]: {
 			pos: { x: 0, y: 0, z: 2.5 },
 			look: { x: 0, y: 0, z: 0 }
 		},
-		'/about': {
-			pos: { x: 0, y: 4, z: 0 },
+		[AppRoute.about]: {
+			pos: { x: 0, y: 1.0, z: 2.5 },
 			look: { x: 0, y: 0, z: 0 }
 		},
-		'/works': {
+		[AppRoute.works]: {
 			pos: { x: 0, y: 5, z: 2.5 },
 			look: { x: 0, y: 5, z: 0 }
 		}
 	};
-	const DEFAULT_ROUTE = ROUTE_CONFIG['/'];
+	const DEFAULT_ROUTE = ROUTE_CONFIG[AppRoute.home];
 
 	const toVec3 = ({ x, y, z }: Vec3) => new Vector3(x, y, z);
 	const isCam = (c: unknown): c is PerspectiveCamera => c instanceof PerspectiveCamera;
 
 	const { camera } = useThrelte();
 
-	let curUrl = '/';
+	let curUrl: string = AppRoute.home;
 	let posBase = { ...DEFAULT_ROUTE.pos };
 	let lookAtBase = { ...DEFAULT_ROUTE.look };
 
@@ -56,7 +57,7 @@
 
 	afterNavigate(({ to }) => {
 		const cam = camera.current;
-		const path = to?.url.pathname ?? '/';
+		const path = to?.url.pathname ?? AppRoute.home;
 		curUrl = path;
 
 		const config = ROUTE_CONFIG[path] ?? DEFAULT_ROUTE;
@@ -92,13 +93,11 @@
 
 		cam.lookAt(currentLookAt.x + shiftX, currentLookAt.y + shiftY, currentLookAt.z);
 	}
-
 	function handleAbout(cam: PerspectiveCamera) {
 		cam.position.lerp(toVec3(posBase), LERP_SPEED);
 		currentLookAt.lerp(toVec3(lookAtBase), LERP_SPEED);
 		cam.lookAt(currentLookAt);
 	}
-
 	function handleWorks(cam: PerspectiveCamera) {
 		cam.position.lerp(toVec3(posBase), LERP_SPEED);
 
@@ -113,9 +112,9 @@
 
 	type RouteHandler = (cam: PerspectiveCamera, delta: number) => void;
 	const routeHandlers: Record<string, RouteHandler> = {
-		'/': handleHome,
-		'/about': handleAbout,
-		'/works': handleWorks
+		[AppRoute.home]: handleHome,
+		[AppRoute.about]: handleAbout,
+		[AppRoute.works]: handleWorks
 	};
 
 	useTask((delta) => {

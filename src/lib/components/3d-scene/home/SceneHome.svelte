@@ -10,6 +10,7 @@
 	import { T } from '@threlte/core';
 	import { useViewport } from '@threlte/extras';
 
+	import { AppRoute } from '$lib/types/Route';
 	import { deviceData } from '$lib/contexts/device.svelte';
 	import { routeData } from '$lib/contexts/route.svelte';
 	import { dragProgress } from '$lib/contexts/dragProgress.svelte';
@@ -17,7 +18,7 @@
 	import CircleLine from '../shared/CircleLine.svelte';
 	import BracketText from '../shared/BracketText.svelte';
 	import Particles from './Particles.svelte';
-	import ButterflyModel from './ButterflyModel.svelte';
+	import ButterflyHero from './ButterflyHero.svelte';
 
 	const viewport = useViewport();
 
@@ -50,7 +51,7 @@
 		fontSize: deviceData.isMatchMediaMobile ? 0.05 : 0.038,
 		width: deviceData.isMatchMediaMobile ? 1.0 : 0.7
 	});
-	let isHomePage = $derived(routeData.to === '/');
+	let isHomePage = $derived(routeData.current === AppRoute.home);
 
 	// Transform calculations based on progress
 	let transform = $derived({
@@ -64,34 +65,35 @@
 	]);
 </script>
 
-{#each circleSettings as c, i (i)}
-	<CircleLine radius={c.radius} y={0.9} segments={c.segments} color={c.color} />
-	<CircleLine radius={c.radius} y={-0.9} segments={c.segments} color={c.color} />
-{/each}
-
-<T.Group rotation.y={transform.rotY} position.y={transform.posY}>
-	{#each textItems as t, i (i)}
-		<BracketText
-			text={t.text}
-			fontSize={textStyle.fontSize}
-			width={textStyle.width}
-			position={getCircPos(t.index, t.y, CONFIG.textRadius)}
-			{worldCenter}
-			visible={isHomePage}
-		/>
+<T.Group visible={isHomePage}>
+	{#each circleSettings as c, i (i)}
+		<CircleLine radius={c.radius} y={0.9} segments={c.segments} color={c.color} />
+		<CircleLine radius={c.radius} y={-0.9} segments={c.segments} color={c.color} />
 	{/each}
-</T.Group>
 
-<Particles
-	origin={[0, -2.5, 0]}
-	spread={[3, 1, 3]}
-	height={6}
-	count={80}
-	hotColor={[1.0, 0.4, 0.2]}
-	coolColor={[1.0, 0.0, 0.0]}
-/>
-<ButterflyModel
-	planePosition={[0, 0, 0]}
-	planeRotation={[0, 0, 0]}
-	planeSize={[viewport.current.width, viewport.current.height]}
-/>
+	<T.Group rotation.y={transform.rotY} position.y={transform.posY}>
+		{#each textItems as t, i (i)}
+			<BracketText
+				text={t.text}
+				fontSize={textStyle.fontSize}
+				width={textStyle.width}
+				position={getCircPos(t.index, t.y, CONFIG.textRadius)}
+				{worldCenter}
+			/>
+		{/each}
+	</T.Group>
+
+	<Particles
+		origin={[0, -2.5, 0]}
+		spread={[3, 1, 3]}
+		height={6}
+		count={80}
+		hotColor={[1.0, 0.4, 0.2]}
+		coolColor={[1.0, 0.0, 0.0]}
+	/>
+	<ButterflyHero
+		planePosition={[0, 0, 0]}
+		planeRotation={[0, 0, 0]}
+		planeSize={[viewport.current.width, viewport.current.height]}
+	/>
+</T.Group>

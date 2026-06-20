@@ -8,11 +8,12 @@
 	import { InertiaPlugin } from 'gsap/InertiaPlugin';
 
 	import { activeProjectData } from '$lib/contexts/activeProject.svelte';
+	import { AppRoute } from '$lib/types/Route';
 
 	const links = [
-		{ href: '/works', label: 'Works' },
-		{ href: '/', label: 'Home' },
-		{ href: '/about', label: 'About' }
+		{ href: AppRoute.works, label: 'Works' },
+		{ href: AppRoute.home, label: 'Home' },
+		{ href: AppRoute.about, label: 'About' }
 	];
 
 	let syncFn = $state<(() => void) | null>(null);

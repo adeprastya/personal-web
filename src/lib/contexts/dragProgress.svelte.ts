@@ -1,6 +1,7 @@
 import { page } from '$app/state';
 import gsap from 'gsap';
 import { deviceData } from '$lib/contexts/device.svelte';
+import { AppRoute } from '$lib/types/Route';
 
 const smoothProgress = $state({ value: 0 });
 let accumulated = 0;
@@ -39,12 +40,12 @@ export const dragProgress = {
 		return smoothProgress.value;
 	},
 	get home() {
-		return page.url.pathname === '/' ? smoothProgress.value : 0;
+		return page.url.pathname === AppRoute.home ? smoothProgress.value : 0;
 	},
 	get about() {
-		return page.url.pathname === '/about' ? smoothProgress.value : 0;
+		return page.url.pathname === AppRoute.about ? smoothProgress.value : 0;
 	},
 	get works() {
-		return page.url.pathname === '/works' ? smoothProgress.value : 0;
+		return page.url.pathname === AppRoute.works ? smoothProgress.value : 0;
 	}
 };

@@ -11,6 +11,7 @@
 	import { initDevice } from '$lib/contexts/device.svelte';
 	import { initPointer, pointerData } from '$lib/contexts/pointer.svelte';
 	import { initDragProgress } from '$lib/contexts/dragProgress.svelte';
+	import { AppRoute } from '$lib/types/Route';
 
 	import Intro from '$lib/components/Intro.svelte';
 	import AppFrame from '$lib/components/frame/AppFrame.svelte';
@@ -27,16 +28,16 @@
 	const LANG = 'en';
 
 	const routesDetail: Record<string, string> = {
-		'/': 'Ade Prastya',
-		'/about': "Don't know me?",
-		'/works': 'Hope you like it!'
+		[AppRoute.home]: 'Ade Prastya',
+		[AppRoute.about]: "Don't know me?",
+		[AppRoute.works]: 'Hope you like it!'
 	};
 	const routes = Object.keys(routesDetail);
 
 	$effect(() => {
 		typingAnimation(
-			routesDetail[routeData.from || '/'],
-			routesDetail[routeData.to || '/'],
+			routesDetail[routeData.from || AppRoute.home],
+			routesDetail[routeData.to || AppRoute.home],
 			(s: string) => (document.title = s || '|'),
 			{ delay: 100 }
 		);
