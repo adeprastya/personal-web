@@ -1,8 +1,9 @@
 <script lang="ts">
-	import type { Mesh } from 'three';
+	import type { Mesh, Group } from 'three';
 	import { DoubleSide, ShaderMaterial, MathUtils, Vector3, Quaternion, Matrix4 } from 'three';
 	import { T, useTask } from '@threlte/core';
 	import { useGltf } from '@threlte/extras';
+	import { gsap } from 'gsap';
 
 	type Props = {
 		planePosition?: [number, number, number];
@@ -40,6 +41,9 @@
 	}: Props = $props();
 
 	const gltf = useGltf('/models/Butterfly.glb');
+
+	let meshPost = $state<Group | undefined>();
+	let meshRoll = $state<Group | undefined>();
 
 	let mesh = $state<Mesh | undefined>();
 	const mat = new ShaderMaterial({
@@ -112,19 +116,82 @@
 		target.copy(e.point);
 	};
 
+	// Throttled butterfly rolling animation on click
+	let rolling = { value: 0 };
+	let isAnimating = false;
+	let rollDirection = 1;
+	let currentVelocityX = 0;
+	let flapBoost = 0;
+	function asymmetricBell(v: number, peak: number, sigmaUp: number, sigmaDown: number): number {
+		const sigma = v < peak ? sigmaUp : sigmaDown;
+		if (sigma <= 0) return v === peak ? 1 : 0;
+		const clampedV = Math.max(0, Math.min(1, v));
+		const exponent = -Math.pow((clampedV - peak) / sigma, 2) / 2;
+		return Math.exp(exponent);
+	}
+	const handlePointerClick = () => {
+		if (isAnimating || !meshRoll) return;
+
+		isAnimating = true;
+		rolling.value = 0;
+
+		const velocityThreshold = 0.05;
+		rollDirection =
+			Math.abs(currentVelocityX) > velocityThreshold
+				? Math.sign(currentVelocityX)
+				: Math.random() > 0.5
+					? 1
+					: -1;
+
+		const radius = 0.6;
+
+		const tl = gsap.timeline({
+			onComplete: () => {
+				isAnimating = false;
+				flapBoost = 0;
+			}
+		});
+
+		tl.to(rolling, {
+			value: 1,
+			duration: 4,
+			ease: 'sine.inOut',
+			onUpdate: () => {
+				if (!meshRoll) return;
+				const v = rolling.value;
+				const theta = v * Math.PI * 2 * rollDirection;
+
+				meshRoll.rotation.z = theta;
+				meshRoll.position.x = Math.sin(theta) * radius;
+				meshRoll.position.y = (1 - Math.cos(theta)) * radius;
+
+				const bell = asymmetricBell(v, 0.15, 0.08, 0.35);
+				flapBoost = bell * 20;
+			}
+		});
+	};
+
 	useTask((delta) => {
 		if (!mesh) return;
+		if (!meshPost) return;
 
-		prevPosition.copy(mesh.position);
+		if (isAnimating) {
+			const flapSpeed = Math.min(flapBaseSpeed + flapBoost, flapMaxSpeed);
+			mat.uniforms.uTime.value += delta * flapSpeed;
+			return;
+		}
+
+		prevPosition.copy(meshPost.position);
 
 		const t = 1 - Math.exp(-posSmoothing * delta);
-		mesh.position.lerp(target, t);
+		meshPost.position.lerp(target, t);
 
-		velocity.subVectors(mesh.position, prevPosition).divideScalar(delta);
+		velocity.subVectors(meshPost.position, prevPosition).divideScalar(delta);
 		const speed = velocity.length();
 
 		if (speed > idleSpeedThreshold) {
 			lastDirection.copy(velocity).normalize();
+			currentVelocityX = velocity.x;
 		} else {
 			const lt = 1 - Math.exp(-levelOutSmoothing * delta);
 			lastDirection.y = MathUtils.lerp(lastDirection.y, 0, lt);
@@ -135,6 +202,7 @@
 			}
 		}
 
+		// Rotation change animation (in mesh)
 		lookMatrix.lookAt(new Vector3(), lastDirection, BUTTERFLY_UP);
 		tmpQuat.setFromRotationMatrix(lookMatrix);
 		tmpQuat.multiply(MODEL_CORRECTION);
@@ -151,13 +219,22 @@
 		const rt = 1 - Math.exp(-rotSmoothing * delta);
 		mesh.quaternion.slerp(finalQuat, rt);
 
-		const flapSpeed = Math.min(flapBaseSpeed + speed * flapSpeedFromVelocity, flapMaxSpeed);
+		// Flapping animation
+		const flapSpeed = Math.min(
+			flapBaseSpeed + speed * flapSpeedFromVelocity + flapBoost,
+			flapMaxSpeed
+		);
 		mat.uniforms.uTime.value += delta * flapSpeed;
 	});
 </script>
 
 <!-- Hit-target raycast -->
-<T.Mesh position={planePosition} rotation={planeRotation} onpointermove={handlePointerMove}>
+<T.Mesh
+	position={planePosition}
+	rotation={planeRotation}
+	onpointermove={handlePointerMove}
+	onclick={handlePointerClick}
+>
 	<T.PlaneGeometry args={planeSize} />
 	<T.MeshBasicMaterial
 		transparent
@@ -170,11 +247,17 @@
 
 <!-- Main butterfly model -->
 {#if $gltf}
-	<T.Mesh
-		bind:ref={mesh}
-		geometry={$gltf.nodes.Butterfly.geometry}
-		material={mat}
-		position={[0, 0.2, 0.2]}
-		scale={0.18}
-	/>
+	<!-- Position manipulation -->
+	<T.Group bind:ref={meshPost}>
+		<T.Group bind:ref={meshRoll}>
+			<!-- Wing & look at manipulation -->
+			<T.Mesh
+				bind:ref={mesh}
+				geometry={$gltf.nodes.Butterfly.geometry}
+				material={mat}
+				position={[0, 0.1, 0]}
+				scale={0.16}
+			/>
+		</T.Group>
+	</T.Group>
 {/if}
