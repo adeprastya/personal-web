@@ -107,7 +107,7 @@
 			},
 			blending: AdditiveBlending,
 			transparent: true,
-			depthWrite: false
+			depthWrite: true
 		});
 
 		points = new Points(geo, newMat);

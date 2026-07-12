@@ -314,6 +314,6 @@
 {/if}
 
 <!-- Reflector -->
-{#if reflector}
+<!-- {#if reflector}
 	<T is={reflector} position={REFLECT.pos} rotation={REFLECT.rot} />
-{/if}
+{/if} -->

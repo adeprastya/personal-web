@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.css';
+	import { PUBLIC_ENV } from '$env/static/public';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { gsap } from 'gsap';
@@ -103,7 +104,9 @@
 
 	{@render children()}
 
-	<Intro />
+	{#if PUBLIC_ENV === 'prod'}
+		<Intro />
+	{/if}
 
 	<AppFrame />
 

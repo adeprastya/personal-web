@@ -88,7 +88,7 @@
 		spread={[3, 1, 3]}
 		height={6}
 		count={80}
-		hotColor={[1.0, 0.4, 0.2]}
+		hotColor={[0.8, 0.4, 0.2]}
 		coolColor={[1.0, 0.0, 0.0]}
 	/>
 	<ButterflyHero

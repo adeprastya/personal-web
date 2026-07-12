@@ -478,7 +478,7 @@
 	// Interaction
 	// ---------------------------------------------------------------------------
 	$effect(() => {
-		document.body.style.cursor = isHovered ? 'pointer' : 'default';
+		document.body.style.cursor = isHovered ? 'crosshair' : 'default';
 	});
 	function handleClick() {
 		const project = projectStore.projects[currentIndex];
