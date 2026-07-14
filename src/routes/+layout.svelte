@@ -6,7 +6,7 @@
 	import { gsap } from 'gsap';
 	import { SplitText } from 'gsap/SplitText';
 
-	import { typingAnimation } from '$lib/utils/textAnimation';
+	import { typingAnimation } from '$lib/utils/typingAnimation';
 	import { projectStore } from '$lib/stores/projects.svelte';
 	import { initRoute, routeData } from '$lib/contexts/route.svelte';
 	import { initDevice } from '$lib/contexts/device.svelte';

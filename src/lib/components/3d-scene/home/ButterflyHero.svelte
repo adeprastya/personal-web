@@ -1,6 +1,14 @@
 <script lang="ts">
 	import type { Mesh, Group } from 'three';
-	import { DoubleSide, ShaderMaterial, MathUtils, Vector3, Quaternion, Matrix4, Color } from 'three';
+	import {
+		DoubleSide,
+		ShaderMaterial,
+		MathUtils,
+		Vector3,
+		Quaternion,
+		Matrix4,
+		Color
+	} from 'three';
 	import { T, useTask } from '@threlte/core';
 	import { useGltf } from '@threlte/extras';
 	import { gsap } from 'gsap';
@@ -92,7 +100,7 @@
         gl_Position = projectionMatrix * modelViewMatrix * vec4(rotatedPosition, 1.0);
       }
     `,
-		fragmentShader : /* glsl */ `
+		fragmentShader: /* glsl */ `
 			uniform float uTime;
 			uniform float uSpeed;
 			uniform float uRough;
@@ -198,7 +206,7 @@
 			uSpeed: { value: 0.2 },
 			uRough: { value: 0.6 },
 			uMaxRadius: { value: 7 },
-			uWaveCount: { value: 2.5 },
+			uWaveCount: { value: 2.5 }
 		}
 	});
 
