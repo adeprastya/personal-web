@@ -5,7 +5,7 @@
 	import { dragProgress } from '$lib/contexts/dragProgress.svelte';
 	import { AppRoute } from '$lib/types/Route';
 	import DiamondText from '../shared/DiamondText.svelte';
-	import ButterfliesColony from './ButterfliesColony.svelte';
+	import ButterflyColony from './ButterflyColony.svelte';
 
 	let progress = $derived(dragProgress.about);
 
@@ -48,5 +48,5 @@
 		/>
 	{/each}
 
-	<ButterfliesColony />
+	<ButterflyColony />
 </T.Group>
