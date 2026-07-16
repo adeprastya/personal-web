@@ -15,8 +15,6 @@
 	const progressRatio = $derived(dragProgress.value);
 	const show = $derived(progressRatio > 0.01);
 
-	const routeLabel = $derived(`${routes[curIdx]} → ${routes[nextIdx]}`);
-
 	$effect(() => {
 		const pathname = page.url.pathname;
 		if (pathname !== lockedPathname) {
@@ -39,30 +37,30 @@
 		transition:fade={{ duration: 200 }}
 		class="fixed bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2"
 	>
-		<!-- bar -->
+		<!-- Track bar -->
 		<div class="flex items-center gap-2">
-			<span class="font-mono text-sm leading-none text-white/25">[</span>
+			<span class="font-mono text-sm leading-none text-neutral-50/25">[</span>
 
-			<div class="relative h-px w-[28vw] max-w-[240px] bg-white/10">
-				<!-- fill -->
-				<div class="absolute inset-y-0 left-0 bg-white" style="width: {progressRatio * 100}%"></div>
-				<!-- diamond tip -->
+			<div class="relative h-px w-[28vw] max-w-[240px] bg-neutral-50/10">
+				<!-- Fill -->
+				<div class="absolute inset-y-0 left-0 bg-neutral-50" style="width: {progressRatio * 100}%"></div>
+				<!-- Diamond tip -->
 				<div
-					class="absolute top-1/2 size-[5px] translate-x-1/2 -translate-y-1/2 rotate-45 bg-white"
+					class="absolute top-1/2 size-[5px] translate-x-1/2 -translate-y-1/2 rotate-45 bg-neutral-50 [filter:drop-shadow(0_0_3px_rgba(255,255,255,0.6))]"
 					style="right: {100 - progressRatio * 100}%"
 				></div>
 			</div>
 
-			<span class="font-mono text-sm leading-none text-white/25">]</span>
+			<span class="font-mono text-sm leading-none text-neutral-50/25">]</span>
 		</div>
 
-		<!-- tick marks -->
+		<!-- Tick marks -->
 		<div class="flex w-[28vw] max-w-[240px] justify-between">
 			{#each Array(21) as _, i (i)}
 				<div
 					class="h-1 w-px transition-colors duration-100 {i / 20 <= progressRatio
-						? 'bg-white/50'
-						: 'bg-white/15'}"
+						? 'bg-neutral-50/50'
+						: 'bg-neutral-50/15'}"
 				></div>
 			{/each}
 		</div>

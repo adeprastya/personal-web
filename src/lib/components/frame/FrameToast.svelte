@@ -1,27 +1,61 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	let { text, href }: { text?: string; href?: string } = $props();
+
+	let isOpen = $state(false);
+
+	function handleClick(e: MouseEvent) {
+		e.stopPropagation();
+
+		if (!isOpen) return isOpen = true;
+
+		window.open(href, '_blank', 'noopener,noreferrer');
+	}
+
+	onMount(() => {
+		const close = () => (isOpen = false);
+
+		window.addEventListener('click', close);
+		return () => window.removeEventListener('click', close);
+	});
 </script>
 
 {#if text && href}
-	<a
-		{href}
-		target="_blank"
-		class="group flex size-full min-w-[10rem] items-center justify-center gap-2 px-3.5 py-2.5 sm:min-w-[12rem] sm:gap-6 sm:px-4 sm:py-3.5"
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		onclick={(e) => handleClick(e)}
+		aria-expanded={isOpen}
+		aria-label="Toggle CTA"
+		class="group relative flex size-full items-center justify-center px-3.5 py-2.5 sm:px-4 sm:py-3"
 	>
+		<!-- Diamond -->
+		<div
+			class="group-hover:animate-glitch inline-block size-1.5 shrink-0 rotate-45 animate-pulse bg-zinc-200 sm:size-2 [filter:drop-shadow(0_0_3px_rgba(255,255,255,0.6))]"
+		></div>
+
+		<!-- Main text -->
 		<span
-			class="group-hover:animate-glitch inline-block size-1.5 rotate-45 animate-pulse bg-zinc-200 sm:size-2"
-		></span>
-		<span
-			class="text-2xs inline-block cursor-pointer font-mono tracking-widest text-zinc-200 uppercase underline underline-offset-4 group-hover:text-zinc-100 group-active:text-zinc-500 sm:text-xs"
-			>{text}
+			class="overflow-hidden whitespace-nowrap transition-all duration-600 ease-in-out {isOpen
+				? 'ml-4 max-w-xl'
+				: 'max-w-0'}"
+		>
+			<a
+				{href}
+				target="_blank"
+				class="pointer-events-auto text-2xs inline-block cursor-pointer font-mono tracking-widest text-zinc-200 uppercase sm:text-xs"
+			>
+				{text}
+			</a>
 		</span>
 
-		<!-- decoration -->
+		<!-- Decoration -->
 		<span
-			class="absolute top-0 left-0 h-1/2 w-1/8 border-s border-t border-zinc-200/70 transition-all duration-700 group-hover:h-full group-hover:w-full group-hover:border-zinc-200"
+			class="absolute top-0 left-0 size-4 border-s border-t border-zinc-200/70 transition-all duration-700 group-hover:h-full group-hover:w-full group-hover:border-zinc-200"
 		></span>
 		<span
-			class="absolute right-0 bottom-0 h-1/2 w-1/8 border-e border-b border-zinc-200/70 transition-all duration-700 group-hover:h-full group-hover:w-full group-hover:border-zinc-200"
+			class="absolute right-0 bottom-0 size-4 border-e border-b border-zinc-200/70 transition-all duration-700 group-hover:h-full group-hover:w-full group-hover:border-zinc-200"
 		></span>
-	</a>
+	</div>
 {/if}

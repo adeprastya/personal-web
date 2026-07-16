@@ -10,7 +10,7 @@
 	import Navigation from './Navigation.svelte';
 	import SocialLinks from './SocialLinks.svelte';
 	import FrameToast from './FrameToast.svelte';
-	import GyroCompassHUDEffect from '$lib/components/GyroCompassHUDEffect.svelte';
+	import GyroCompassHUDEffect from '$lib/components/frame/GyroCompassHUDEffect.svelte';
 
 	let windowWidth = $state(0);
 	let slant = $derived(windowWidth < 640 ? '2rem' : '2.5rem');
@@ -156,13 +156,13 @@
 		</div>
 	</div>
 
-	<!-- CTA toast -->
-	<div class="pointer-events-auto absolute top-20 left-6 z-50 lg:top-18 sm:left-6">
-		<FrameToast {...toastCTA} />
-	</div>
-
 	<!-- Gyro Compass Decoration -->
 	<div class="pointer-events-none absolute left-1/2 top-12 sm:top-14 z-10 -translate-x-1/2">
 		<GyroCompassHUDEffect />
+	</div>
+
+	<!-- CTA toast -->
+	<div class="pointer-events-auto absolute top-22 left-6 z-50 lg:top-18 sm:left-8">
+		<FrameToast {...toastCTA} />
 	</div>
 </header>
