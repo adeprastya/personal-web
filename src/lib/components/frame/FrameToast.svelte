@@ -6,7 +6,7 @@
 	<a
 		{href}
 		target="_blank"
-		class="group flex size-full min-w-[10rem] items-center justify-center gap-4 px-3.5 py-2.5 backdrop-blur-sm sm:min-w-[12rem] sm:gap-6 sm:px-5 sm:py-3.5"
+		class="group flex size-full min-w-[10rem] items-center justify-center gap-2 px-3.5 py-2.5 sm:min-w-[12rem] sm:gap-6 sm:px-4 sm:py-3.5"
 	>
 		<span
 			class="group-hover:animate-glitch inline-block size-1.5 rotate-45 animate-pulse bg-zinc-200 sm:size-2"

@@ -95,11 +95,7 @@
 		coolColor={[1.0, 0.0, 0.0]}
 	/>
 
-	<ButterflyHero
-		planePosition={[0, 0, 0]}
-		planeRotation={[0, 0, 0]}
-		planeSize={[viewport.current.width, viewport.current.height]}
-	/>
+	<ButterflyHero />
 
 	<T.Group rotation.y={transform.rotY} position.y={transform.posY}>
 		{#each textItems as item, i (i)}

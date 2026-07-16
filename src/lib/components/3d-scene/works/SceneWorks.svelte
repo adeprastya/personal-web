@@ -29,7 +29,7 @@
 		activeProjectData
 	} from '$lib/contexts/activeProject.svelte';
 	import { dragProgress } from '$lib/contexts/dragProgress.svelte';
-	import { DimensionalEffect } from '$lib/effects/DimensionalEffect';
+	import { DimensionalEffect } from '$lib/shaders/DimensionalEffect';
 
 	const HEX = {
 		radius: 0.06,

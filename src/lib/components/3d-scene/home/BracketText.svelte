@@ -3,6 +3,7 @@
 		Vector3,
 		BufferGeometry,
 		LineBasicMaterial,
+		MeshBasicMaterial,
 		Group,
 		FrontSide,
 		MathUtils,
@@ -44,6 +45,13 @@
 	let group = $state<Group | undefined>(undefined);
 	let displayText = $state('');
 
+	const textMat = new MeshBasicMaterial({
+		color: (() => color)(),
+		side: FrontSide,
+		transparent: true,
+		fog: false,
+		depthWrite: false
+	});
 	const bracketMat = new LineBasicMaterial({
 		color: (() => color)(),
 		side: FrontSide,
@@ -81,7 +89,8 @@
 		const plateauEnd = MathUtils.clamp(nearDistance + plateauWidth, nearDistance, farDistance);
 		const rawProgress = 1 - MathUtils.smoothstep(distance, plateauEnd, farDistance);
 
-		bracketMat.opacity = rawProgress + 0.05;
+		bracketMat.opacity = rawProgress;
+		textMat.opacity = rawProgress + 0.1;
 
 		if (revealSmoothing > 0) {
 			const t = 1 - Math.exp(-delta / revealSmoothing);
@@ -116,6 +125,7 @@
 			anchorX="center"
 			anchorY="middle"
 			textAlign="center"
+			material={textMat}
 		/>
 	</Billboard>
 </T.Group>

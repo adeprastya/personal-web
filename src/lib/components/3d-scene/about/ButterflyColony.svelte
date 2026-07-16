@@ -17,10 +17,10 @@
 		pos: [number, number, number];
 		rot: [number, number, number];
 		size: number;
-		debug: boolean
+		debug: boolean;
 	} = {
 		pos: [0, 0, 0],
-		rot: [(Math.PI/2) + (Math.PI/10), 0, 0],
+		rot: [Math.PI / 2 + Math.PI / 10, 0, 0],
 		size: 5,
 		debug: false
 	};
@@ -32,7 +32,7 @@
 	const MOVE_ROT: { rotSmoothing: number; bankStrength: number; maxBank: number } = {
 		rotSmoothing: 5.0,
 		bankStrength: 15,
-		maxBank: 70 
+		maxBank: 70
 	};
 	const COLONY: {
 		count: number;
@@ -44,8 +44,8 @@
 		centerSmoothing: number;
 		maxSpeed: number;
 		minSpeed: number;
-		damping: number; 
-		eachSize: number
+		damping: number;
+		eachSize: number;
 	} = {
 		count: 50,
 		radius: 0.4,
@@ -183,7 +183,7 @@
 			instanceQuats.push(new Quaternion());
 			wanderAngleXZ.push(Math.random() * Math.PI * 2);
 			wanderAngleY.push(Math.random() * Math.PI * 2);
-			flapArray[i] = Math.random() * Math.PI * 2; 
+			flapArray[i] = Math.random() * Math.PI * 2;
 		}
 
 		butterflyGeometry = geo;
@@ -283,7 +283,10 @@
 			instancedMesh.setMatrixAt(i, dummy.matrix);
 
 			// Flap animation
-			const flapSpeed = Math.min(FLAP.baseSpeed + currSpeed * FLAP.speedFromVelocity, FLAP.maxSpeed);
+			const flapSpeed = Math.min(
+				FLAP.baseSpeed + currSpeed * FLAP.speedFromVelocity,
+				FLAP.maxSpeed
+			);
 			flapPhase[i] += delta * flapSpeed;
 		}
 

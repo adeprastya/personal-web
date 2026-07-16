@@ -2,6 +2,7 @@
 	import type { Mesh, Group } from 'three';
 	import {
 		DoubleSide,
+		FrontSide,
 		ShaderMaterial,
 		MathUtils,
 		Vector3,
@@ -10,43 +11,29 @@
 		Color
 	} from 'three';
 	import { T, useTask } from '@threlte/core';
-	import { useGltf } from '@threlte/extras';
+	import { useGltf, useViewport } from '@threlte/extras';
 	import { gsap } from 'gsap';
 
-	type Props = {
-		planePosition?: [number, number, number];
-		planeRotation?: [number, number, number];
-		planeSize?: [number, number];
+	const viewport = useViewport();
 
-		flapBaseSpeed?: number;
-		flapSpeedFromVelocity?: number;
-		flapMaxSpeed?: number;
+	let cfg = {
+		debug: false,
+		planePosition: [0, 0, 0] as [number, number, number],
+		planeRotation: [0, 0, 0] as [number, number, number],
+		planeSize: [viewport.current.width, viewport.current.height],
 
-		posSmoothing?: number;
-		rotSmoothing?: number;
-		bankStrength?: number;
-		maxBank?: number;
+		flapBaseSpeed: 4,
+		flapSpeedFromVelocity: 8,
+		flapMaxSpeed: 10,
 
-		levelOutSmoothing?: number;
-		idleSpeedThreshold?: number;
+		posSmoothing: 0.6,
+		rotSmoothing: 1.0,
+		bankStrength: 0.5,
+		maxBank: 45,
+
+		levelOutSmoothing: 4.0,
+		idleSpeedThreshold: 0.2
 	};
-	let {
-		planePosition = [0, 0, 0],
-		planeRotation = [0, 0, 0],
-		planeSize = [10, 10],
-
-		flapBaseSpeed = 4,
-		flapSpeedFromVelocity = 8,
-		flapMaxSpeed = 10,
-
-		posSmoothing = 0.6,
-		rotSmoothing = 1.0,
-		bankStrength = 0.5,
-		maxBank = 45,
-
-		levelOutSmoothing = 4.0,
-		idleSpeedThreshold = 0.2
-	}: Props = $props();
 
 	const gltf = useGltf('/models/Butterfly.glb');
 
@@ -290,24 +277,24 @@
 		if (!meshPost) return;
 
 		if (isAnimating) {
-			const flapSpeed = Math.min(flapBaseSpeed + flapBoost, flapMaxSpeed);
+			const flapSpeed = Math.min(cfg.flapBaseSpeed + flapBoost, cfg.flapMaxSpeed);
 			mat.uniforms.uTime.value += delta * flapSpeed;
 			return;
 		}
 
 		prevPosition.copy(meshPost.position);
 
-		const t = 1 - Math.exp(-posSmoothing * delta);
+		const t = 1 - Math.exp(-cfg.posSmoothing * delta);
 		meshPost.position.lerp(target, t);
 
 		velocity.subVectors(meshPost.position, prevPosition).divideScalar(delta);
 		const speed = velocity.length();
 
-		if (speed > idleSpeedThreshold) {
+		if (speed > cfg.idleSpeedThreshold) {
 			lastDirection.copy(velocity).normalize();
 			currentVelocityX = velocity.x;
 		} else {
-			const lt = 1 - Math.exp(-levelOutSmoothing * delta);
+			const lt = 1 - Math.exp(-cfg.levelOutSmoothing * delta);
 			lastDirection.y = MathUtils.lerp(lastDirection.y, 0, lt);
 			if (lastDirection.lengthSq() > 1e-6) {
 				lastDirection.normalize();
@@ -323,20 +310,20 @@
 
 		rightVec.set(1, 0, 0).applyQuaternion(tmpQuat);
 		const lateralSpeed = velocity.dot(rightVec);
-		const bankAngle = MathUtils.clamp(-lateralSpeed * bankStrength, -maxBank, maxBank);
+		const bankAngle = MathUtils.clamp(-lateralSpeed * cfg.bankStrength, -cfg.maxBank, cfg.maxBank);
 
 		forwardVec.set(0, 0, -1).applyQuaternion(tmpQuat);
 		bankQuat.setFromAxisAngle(forwardVec, bankAngle);
 
 		finalQuat.copy(tmpQuat).multiply(bankQuat);
 
-		const rt = 1 - Math.exp(-rotSmoothing * delta);
+		const rt = 1 - Math.exp(-cfg.rotSmoothing * delta);
 		mesh.quaternion.slerp(finalQuat, rt);
 
 		// Flapping animation
 		const flapSpeed = Math.min(
-			flapBaseSpeed + speed * flapSpeedFromVelocity + flapBoost,
-			flapMaxSpeed
+			cfg.flapBaseSpeed + speed * cfg.flapSpeedFromVelocity + flapBoost,
+			cfg.flapMaxSpeed
 		);
 		mat.uniforms.uTime.value += delta * flapSpeed;
 	});
@@ -344,17 +331,17 @@
 
 <!-- Hit-target raycast -->
 <T.Mesh
-	position={planePosition}
-	rotation={planeRotation}
+	position={cfg.planePosition}
+	rotation={cfg.planeRotation}
 	onpointermove={handlePointerMove}
 	onclick={handlePointerClick}
 >
-	<T.PlaneGeometry args={planeSize} />
+	<T.PlaneGeometry args={cfg.planeSize} />
 	<T.MeshBasicMaterial
 		transparent
-		opacity={0.0}
+		opacity={cfg.debug ? 0.15 : 0.0}
 		color={0x00ff00}
-		side={DoubleSide}
+		side={FrontSide}
 		depthWrite={false}
 	/>
 </T.Mesh>
