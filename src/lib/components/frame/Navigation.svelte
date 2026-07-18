@@ -1,5 +1,4 @@
 <script lang="ts">
-	import SvgDecor from '$lib/assets/icons/nav-decor.svg?component';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -11,14 +10,16 @@
 	import { AppRoute } from '$lib/types/Route';
 
 	const links = [
-		{ href: AppRoute.works, label: 'Works' },
-		{ href: AppRoute.home, label: 'Home' },
-		{ href: AppRoute.about, label: 'About' }
+		{ href: AppRoute.works, label: 'Works', tick: '16' },
+		{ href: AppRoute.home, label: 'Home', tick: '48' },
+		{ href: AppRoute.about, label: 'About', tick: '80' }
 	];
+
+	const TICK_COUNT = 15;
+	const DIAMOND_EASE_SCALE = 120;
 
 	let syncFn = $state<(() => void) | null>(null);
 
-	// Dipanggil ulang setiap kali pathname berubah
 	$effect(() => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const _ = page.url.pathname;
@@ -29,18 +30,35 @@
 
 	let containerEl: HTMLElement;
 	let wrapperEl: HTMLElement;
+	let trackEl: HTMLElement;
+	let diamondEl: HTMLElement;
 
 	onMount(() => {
 		gsap.registerPlugin(Draggable, InertiaPlugin);
 
 		const containerCenter = containerEl.offsetHeight / 2;
-		const wrapperHeight = (wrapperEl.children[0] as HTMLElement).offsetHeight;
 
 		const items = Array.from(wrapperEl.querySelectorAll('li'));
 		const itemCenters = items.map((el) => el.offsetTop + el.offsetHeight / 2);
+		const itemStep = itemCenters[1] - itemCenters[0];
+
+		const groupHeight = links.length * itemStep;
+
+		const middleAnchorY = containerCenter - itemCenters[links.length];
+		const wrapY = gsap.utils.wrap(middleAnchorY - groupHeight / 2, middleAnchorY + groupHeight / 2);
 
 		const wrapIdx = gsap.utils.wrap(0, items.length);
-		const wrapY = gsap.utils.wrap(-wrapperHeight, 0);
+
+		let continuousIndex = activeIdx;
+		let lastY = gsap.getProperty(wrapperEl, 'y') as number;
+
+		const diamondMaxOffset = trackEl.offsetHeight / 2;
+		gsap.set(diamondEl, { xPercent: -50, yPercent: -50, y: 0 });
+
+		function diamondOffset(distance: number) {
+			const sign = Math.sign(distance);
+			return sign * diamondMaxOffset * (1 - Math.exp(-Math.abs(distance) / DIAMOND_EASE_SCALE));
+		}
 
 		function updateOpacity() {
 			const y = gsap.getProperty(wrapperEl, 'y') as number;
@@ -52,10 +70,27 @@
 			});
 		}
 
-		function wrapPosition() {
-			const y = gsap.getProperty(wrapperEl, 'y') as number;
-			gsap.set(wrapperEl, { y: wrapY(y) });
+		function refreshVisuals() {
 			updateOpacity();
+		}
+
+		function handleDragUpdate(this: Draggable) {
+			const rawY = gsap.getProperty(wrapperEl, 'y') as number;
+
+			continuousIndex += (lastY - rawY) / itemStep;
+			lastY = rawY;
+
+			const distance = this.y - this.startY;
+			gsap.set(diamondEl, { y: diamondOffset(distance) });
+
+			const wrapped = wrapY(rawY);
+			if (wrapped !== rawY) {
+				gsap.set(wrapperEl, { y: wrapped });
+				this.update();
+				lastY = wrapped;
+			}
+
+			refreshVisuals();
 		}
 
 		function navigate() {
@@ -73,16 +108,36 @@
 			const curIdx = links.findIndex((l) => l.href === page.url.pathname);
 			if (curIdx === -1) return;
 
-			const snapPoints = itemCenters.map((center) => containerCenter - center);
-			const targetY = snapPoints[curIdx];
+			const y = gsap.getProperty(wrapperEl, 'y') as number;
+
+			const candidates = [curIdx, curIdx + links.length, curIdx + links.length * 2].map(
+				(i) => containerCenter - itemCenters[i]
+			);
+			const targetY = candidates.reduce((closest, candidate) =>
+				Math.abs(candidate - y) < Math.abs(closest - y) ? candidate : closest
+			);
+
 			gsap.to(wrapperEl, {
 				y: targetY,
 				duration: 0.3,
-				onUpdate: wrapPosition,
+				onUpdate: updateOpacity,
 				onComplete: () => {
 					activeIdx = curIdx;
+					lastY = gsap.getProperty(wrapperEl, 'y') as number;
 				}
 			});
+
+			const progressTween = { value: continuousIndex };
+			gsap.to(progressTween, {
+				value: curIdx,
+				duration: 0.4,
+				ease: 'power2.out',
+				onUpdate: () => {
+					continuousIndex = progressTween.value;
+				}
+			});
+
+			gsap.to(diamondEl, { y: 0, duration: 0.5, ease: 'elastic.out(1, 0.7)', overwrite: true });
 		}
 
 		syncFn = syncRouter;
@@ -91,10 +146,13 @@
 		Draggable.create(wrapperEl, {
 			type: 'y',
 			inertia: true,
-			throwResistance: 1500,
-			overshootTolerance: 0.1,
-			onDrag: wrapPosition,
-			onThrowUpdate: wrapPosition,
+			throwResistance: 1000,
+			overshootTolerance: 0.05,
+			onDrag: handleDragUpdate,
+			onThrowUpdate: handleDragUpdate,
+			onDragEnd: () => {
+				gsap.to(diamondEl, { y: 0, duration: 0.5, ease: 'elastic.out(1, 0.7)', overwrite: true });
+			},
 			snap: (endVal) => {
 				const snapPoints = itemCenters.map((center) => containerCenter - center);
 				return gsap.utils.snap(snapPoints, endVal);
@@ -109,12 +167,12 @@
 			const y = gsap.getProperty(wrapperEl, 'y') as number;
 			if (clickY < rect.height / 2) {
 				activeIdx = wrapIdx(activeIdx - 1);
-				gsap.set(wrapperEl, { y: wrapY(y + wrapperHeight / 3) });
+				gsap.set(wrapperEl, { y: wrapY(y + itemStep) });
 			} else {
 				activeIdx = wrapIdx(activeIdx + 1);
-				gsap.set(wrapperEl, { y: wrapY(y - wrapperHeight / 3) });
+				gsap.set(wrapperEl, { y: wrapY(y - itemStep) });
 			}
-			updateOpacity();
+			refreshVisuals();
 
 			const link = items[activeIdx].querySelector('a') as HTMLAnchorElement;
 			if (link) {
@@ -126,16 +184,17 @@
 		return () => {
 			const draggable = Draggable.get(wrapperEl);
 			if (draggable) draggable.kill();
+			gsap.killTweensOf(diamondEl);
 			containerEl.removeEventListener('click', handleClick);
 		};
 	});
 </script>
 
-<div class="relative flex items-center justify-center">
+<div class="relative mr-2 flex items-center justify-center gap-2">
 	<nav
 		bind:this={containerEl}
 		aria-label="Primary Navigation"
-		class="h-36 touch-none overflow-hidden select-none"
+		class="relative h-36 touch-none overflow-hidden select-none"
 		style={`pointer-events: ${activeProjectData.isVisible ? 'none' : 'auto'}`}
 	>
 		<div bind:this={wrapperEl}>
@@ -158,5 +217,22 @@
 		</div>
 	</nav>
 
-	<SvgDecor class="-me-[1px] h-36 fill-zinc-200" />
+	<!-- Track -->
+	<div bind:this={trackEl} class="relative h-36 w-2.5 shrink-0" aria-hidden="true">
+		<div bind:this={diamondEl} class="absolute top-1/2 left-1/2 translate-x-1 will-change-transform">
+			<!-- Diamond tip -->
+			<div
+				class="size-2 rotate-45 bg-zinc-50 [filter:drop-shadow(0_0_3px_rgba(255,255,255,0.6))]"
+			></div>
+		</div>
+
+		<div class="absolute inset-0 flex flex-col justify-between">
+			<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
+			{#each Array(TICK_COUNT) as _, i (i)}
+				<div
+					class="h-px w-1.5 self-center bg-zinc-50/30 translate-x-0.5"
+				></div>
+			{/each}
+		</div>
+	</div>
 </div>
