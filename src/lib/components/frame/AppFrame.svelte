@@ -157,12 +157,12 @@
 	</div>
 
 	<!-- Gyro Compass Decoration -->
-	<div class="pointer-events-none absolute left-1/2 top-12 sm:top-14 z-10 -translate-x-1/2">
+	<div class="pointer-events-none absolute top-10 left-1/2 z-10 -translate-x-1/2">
 		<GyroCompassHUDEffect />
 	</div>
 
 	<!-- CTA toast -->
-	<div class="pointer-events-auto absolute top-22 left-6 z-50 lg:top-18 sm:left-8">
+	<div class="pointer-events-auto absolute top-18 left-6 z-50 sm:top-14 sm:left-8">
 		<FrameToast {...toastCTA} />
 	</div>
 </header>

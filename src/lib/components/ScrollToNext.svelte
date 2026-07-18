@@ -34,35 +34,42 @@
 
 {#if show}
 	<div
-		transition:fade={{ duration: 200 }}
-		class="fixed bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2"
+		class="pointer-events-none fixed bottom-10 left-1/2 flex w-[80vw] -translate-x-1/2 items-center gap-2 select-none sm:bottom-6 sm:w-[40vw] md:w-[50vw]"
 	>
-		<!-- Track bar -->
-		<div class="flex items-center gap-2">
-			<span class="font-mono text-sm leading-none text-neutral-50/25">[</span>
+		<!-- Bracket -->
+		<span class="font-mono text-sm leading-none text-zinc-50/30">[</span>
 
-			<div class="relative h-px w-[28vw] max-w-[240px] bg-neutral-50/10">
-				<!-- Fill -->
-				<div class="absolute inset-y-0 left-0 bg-neutral-50" style="width: {progressRatio * 100}%"></div>
-				<!-- Diamond tip -->
+		<!-- Track -->
+		<div transition:fade={{ duration: 200 }} class="relative w-full">
+			<div class="relative h-3 w-full overflow-hidden">
+				<!-- Baseline -->
+				<div class="absolute top-1/2 right-0 h-px w-full -translate-y-1/2 bg-zinc-50/30"></div>
+
+				<!-- Progress bar -->
 				<div
-					class="absolute top-1/2 size-[5px] translate-x-1/2 -translate-y-1/2 rotate-45 bg-neutral-50 [filter:drop-shadow(0_0_3px_rgba(255,255,255,0.6))]"
-					style="right: {100 - progressRatio * 100}%"
-				></div>
+					class="absolute top-1/2 right-full h-px w-full -translate-y-1/2 bg-zinc-50 will-change-transform"
+					style="transform: translateX({progressRatio * 100}%)"
+				>
+					<!-- Diamond tip -->
+					<div
+						class="absolute top-1/2 right-0 size-1.5 translate-x-1/2 -translate-y-1/2 rotate-45 bg-zinc-50 [filter:drop-shadow(0_0_3px_rgba(255,255,255,0.6))]"
+					></div>
+				</div>
 			</div>
 
-			<span class="font-mono text-sm leading-none text-neutral-50/25">]</span>
+			<div class="flex w-full justify-between">
+				{#each Array(36) as _, i (i)}
+					<!-- Tick marks -->
+					<div
+						class="h-1.5 w-px transition-colors duration-100 {i / 20 <= progressRatio
+							? 'bg-zinc-50/60'
+							: 'bg-zinc-50/15'}"
+					></div>
+				{/each}
+			</div>
 		</div>
 
-		<!-- Tick marks -->
-		<div class="flex w-[28vw] max-w-[240px] justify-between">
-			{#each Array(21) as _, i (i)}
-				<div
-					class="h-1 w-px transition-colors duration-100 {i / 20 <= progressRatio
-						? 'bg-neutral-50/50'
-						: 'bg-neutral-50/15'}"
-				></div>
-			{/each}
-		</div>
+		<!-- Bracket -->
+		<span class="font-mono text-sm leading-none text-zinc-50/30">]</span>
 	</div>
 {/if}

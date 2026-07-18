@@ -8,7 +8,7 @@
 	function handleClick(e: MouseEvent) {
 		e.stopPropagation();
 
-		if (!isOpen) return isOpen = true;
+		if (!isOpen) return (isOpen = true);
 
 		window.open(href, '_blank', 'noopener,noreferrer');
 	}
@@ -32,7 +32,7 @@
 	>
 		<!-- Diamond -->
 		<div
-			class="group-hover:animate-glitch inline-block size-1.5 shrink-0 rotate-45 animate-pulse bg-zinc-200 sm:size-2 [filter:drop-shadow(0_0_3px_rgba(255,255,255,0.6))]"
+			class="group-hover:animate-glitch inline-block size-1.5 shrink-0 rotate-45 animate-pulse bg-zinc-200 [filter:drop-shadow(0_0_3px_rgba(255,255,255,0.6))] sm:size-2"
 		></div>
 
 		<!-- Main text -->
@@ -44,7 +44,7 @@
 			<a
 				{href}
 				target="_blank"
-				class="pointer-events-auto text-2xs inline-block cursor-pointer font-mono tracking-widest text-zinc-200 uppercase sm:text-xs"
+				class="text-2xs pointer-events-auto inline-block cursor-pointer font-mono tracking-widest text-zinc-200 uppercase sm:text-xs"
 			>
 				{text}
 			</a>

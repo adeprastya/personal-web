@@ -5,7 +5,6 @@ interface PointerData {
 	/** Posisi absolut kursor/jari di layar */
 	x: number;
 	y: number;
-
 	/**
 	 * Delta PER-FRAME: seberapa jauh pointer bergerak sejak frame RAF sebelumnya.
 	 * Ini yang harus dibaca oleh konsumer (Three.js, dll).
@@ -13,20 +12,16 @@ interface PointerData {
 	 */
 	dx: number;
 	dy: number;
-
 	/**
 	 * Velocity rolling average (px/s).
 	 * Dihitung manual — bukan dari Observer — agar stabil.
 	 */
 	vx: number;
 	vy: number;
-
 	/** Apakah pointer sedang ditekan */
 	isDown: boolean;
-
 	/** Sinyal click (true selama 1 frame RAF) */
 	isClicked: boolean;
-
 	isInitialized: boolean;
 	instance: Observer | null;
 }
@@ -47,13 +42,12 @@ export const pointerData = $state<PointerData>({
 	isDown: false,
 	// Sinyal click — true hanya selama 1 frame RAF, lalu otomatis kembali false.
 	isClicked: false,
-
 	isInitialized: false,
 	instance: null
 });
 
 // ---------------------------------------------------------------------------
-// INTERNAL — tidak diekspos ke luar
+// INTERNAL
 // ---------------------------------------------------------------------------
 
 /**
@@ -119,7 +113,6 @@ function tick() {
 	}
 
 	wheelActive = false;
-
 	raw.prevTime = now;
 }
 
@@ -146,6 +139,9 @@ function hardReset() {
 
 export function initPointer() {
 	if (typeof window === 'undefined' || pointerData.isInitialized) return;
+
+	pointerData.x = window.innerWidth / 2;
+	pointerData.y = window.innerHeight / 2;
 
 	gsap.registerPlugin(Observer);
 
