@@ -7,6 +7,8 @@
 
 	let { routes } = $props<{ routes: string[] }>();
 
+	const TICK_COUNT = 40;
+
 	let isNavigating = $state(false);
 	let lockedPathname = $state('');
 
@@ -58,10 +60,10 @@
 			</div>
 
 			<div class="flex w-full justify-between">
-				{#each Array(36) as _, i (i)}
+				{#each Array(TICK_COUNT) as _, i (i)}
 					<!-- Tick marks -->
 					<div
-						class="h-1.5 w-px transition-colors duration-100 {i / 20 <= progressRatio
+						class="h-1.5 w-px transition-colors duration-100 {i / TICK_COUNT <= progressRatio
 							? 'bg-zinc-50/60'
 							: 'bg-zinc-50/15'}"
 					></div>

@@ -33,7 +33,7 @@
 
 	const HEX = {
 		radius: 0.06,
-		gap: 0.008,
+		gap: 0.009,
 		hole: 0.0, // [0-1]
 		cols: 40,
 		rows: 25
@@ -41,10 +41,10 @@
 	const WAVE = {
 		power: 0.5,
 		speed: 1.5,
-		freq: 4.0
+		freq: 4.0,
+		amplitude: 0.04
 	};
 	const BLEND_ZONE = 0.4; // [0-0.5] 0.5 almost no static
-	const GROUP_Y = 5; // group postition
 
 	// ---------------------------------------------------------------------------
 	// State
@@ -184,6 +184,7 @@
 		uniform vec2  gridSize;
 		uniform vec2  groupOffset;
 		uniform float uWavePower;
+		uniform float uWaveAmplitude;
 		uniform float uWaveSpeed;
 		uniform float uWaveFreq;
 		uniform float uTime;
@@ -218,10 +219,15 @@
 			vec4 instanceCenter = instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
 			float dist = length(instanceCenter.xy);
 
-			float wave = sin(dist * uWaveFreq - uTime * uWaveSpeed) * uWavePower;
+			float phase = dist * uWaveFreq - uTime * uWaveSpeed;
+			float wave = sin(phase) * uWavePower;
+			float posOffset = sin(phase) * uWaveAmplitude; // <-- gelombang yang sama dipakai utk posisi
 
 			mat4 rotMat = rotationX(wave) * rotationY(wave);
 			vec4 rotatedLocalPos = rotMat * localPos;
+
+			// manipulasi posisi: geser di sumbu Z lokal instance sebelum ke world space
+			rotatedLocalPos.z += posOffset;
 
 			vec4 worldPos = modelMatrix * instanceMatrix * rotatedLocalPos;
 
@@ -255,6 +261,7 @@
 		varying float  vBlend;
 		varying float  vThreshold;
 		uniform float  uWavePower;
+		uniform float  uWaveAmplitude;
 		uniform float  uWaveSpeed;
 		uniform float  uWaveFreq;
 		uniform float  uTime;
@@ -279,11 +286,15 @@
 			vec4 instanceCenter = instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
 			float dist = length(instanceCenter.xy);
 
-			float wave = sin(dist * uWaveFreq - uTime * uWaveSpeed) * uWavePower;
+			float phase = dist * uWaveFreq - uTime * uWaveSpeed;
+			float wave = sin(phase) * uWavePower;
+			float posOffset = sin(phase) * uWaveAmplitude;
 
 			mat4 rotMat = rotationX(wave) * rotationY(wave);
+			vec4 rotatedLocalPos = rotMat * localPos;
+			rotatedLocalPos.z += posOffset;
 
-			gl_Position = projectionMatrix * viewMatrix * modelMatrix * instanceMatrix * rotMat * localPos;
+			gl_Position = projectionMatrix * viewMatrix * modelMatrix * instanceMatrix * rotatedLocalPos;
 		}
 	`;
 	const fragmentShaderEdge = /* glsl */ `
@@ -305,7 +316,7 @@
 		gridBounds.maxX - gridBounds.minX,
 		gridBounds.maxY - gridBounds.minY
 	);
-	const groupOffset = new Vector2(0, GROUP_Y);
+	const groupOffset = new Vector2(0, 0);
 
 	const imgMaterial = new ShaderMaterial({
 		uniforms: {
@@ -317,6 +328,7 @@
 			gridSize: { value: gridSize },
 			groupOffset: { value: groupOffset },
 			uWavePower: { value: WAVE.power },
+			uWaveAmplitude: { value: WAVE.amplitude }, // <-- baru
 			uWaveSpeed: { value: WAVE.speed },
 			uWaveFreq: { value: WAVE.freq },
 			uTime: { value: 0 }
@@ -329,6 +341,7 @@
 	const edgeMaterial = new ShaderMaterial({
 		uniforms: {
 			uWavePower: { value: WAVE.power },
+			uWaveAmplitude: { value: WAVE.amplitude }, // <-- baru
 			uWaveSpeed: { value: WAVE.speed },
 			uWaveFreq: { value: WAVE.freq },
 			uTime: { value: 0 }
@@ -343,7 +356,6 @@
 	// ---------------------------------------------------------------------------
 	let imgMesh: InstancedMesh | null = $state(null);
 	let edgeMesh: InstancedMesh | null = $state(null);
-
 	$effect(() => {
 		const mesh = new InstancedMesh(hexGeo, imgMaterial, COUNT);
 		const edges = new InstancedMesh(edgesGeo, edgeMaterial, COUNT);
@@ -490,10 +502,11 @@
 
 {#if imgMesh && edgeMesh}
 	<T.Group
-		position={[0, GROUP_Y, 0]}
+		position={[0, 0, 0]}
 		onclick={handleClick}
 		onpointerenter={() => (isHovered = true)}
 		onpointerleave={() => (isHovered = false)}
+		visible={isOnWorks}
 	>
 		<T is={imgMesh} />
 		<T is={edgeMesh} />

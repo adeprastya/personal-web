@@ -89,9 +89,6 @@
 		const plateauEnd = MathUtils.clamp(nearDistance + plateauWidth, nearDistance, farDistance);
 		const rawProgress = 1 - MathUtils.smoothstep(distance, plateauEnd, farDistance);
 
-		bracketMat.opacity = rawProgress;
-		textMat.opacity = rawProgress + 0.1;
-
 		if (revealSmoothing > 0) {
 			const t = 1 - Math.exp(-delta / revealSmoothing);
 			smoothedProgress = MathUtils.lerp(smoothedProgress, rawProgress, t);
@@ -103,11 +100,17 @@
 		if (timeSinceLastUpdate < updateThrottleMs) return;
 		timeSinceLastUpdate = 0;
 
+		// Typing animation
 		const charCount = Math.round(smoothedProgress * text.length);
 		if (charCount !== lastCharCount) {
 			lastCharCount = charCount;
 			displayText = text.slice(0, charCount);
 		}
+
+		// Opacity animation
+		const opacity = MathUtils.mapLinear(rawProgress, 0, 1, 0.1, 0.75);
+		bracketMat.opacity = opacity;
+		textMat.opacity = opacity;
 	});
 </script>
 

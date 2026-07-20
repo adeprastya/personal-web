@@ -245,7 +245,6 @@
 					: -1;
 
 		const radius = 0.6;
-
 		const tl = gsap.timeline({
 			onComplete: () => {
 				isAnimating = false;
