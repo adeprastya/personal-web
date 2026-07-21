@@ -1,12 +1,16 @@
 <script lang="ts">
-	import gsap from 'gsap';
-	import { SplitText } from 'gsap/SplitText';
 	import type { PageData } from './$types';
+	import gsap from 'gsap';
+	import { AppRoute } from '$lib/types/Route';
+	import { routeData } from '$lib/contexts/route.svelte';
+	import { SplitText } from 'gsap/SplitText';
 	import { activeProjectData, setVisibility } from '$lib/contexts/activeProject.svelte';
+	import ProjectNav from './ProjectNav.svelte';
 
 	let { data }: { data: PageData } = $props();
-	let projects = $derived(data.projects);
 
+	let isOnWorks = $derived(routeData.current === AppRoute.works);
+	let projects = $derived(data.projects);
 	let cachedData = $state(activeProjectData.data);
 
 	// Refs
@@ -87,7 +91,7 @@
 	$effect(() => {
 		const _visible = activeProjectData.isVisible;
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const _data = cachedData;
+		const _ = cachedData;
 
 		Promise.resolve().then(() => {
 			if (_visible) animateIn();
@@ -95,6 +99,10 @@
 		});
 	});
 </script>
+
+{#if isOnWorks}
+	<ProjectNav {projects} />
+{/if}
 
 <section
 	bind:this={sectionEl}

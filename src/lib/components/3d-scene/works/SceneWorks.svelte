@@ -165,12 +165,6 @@
 		loadAll();
 	});
 
-	function getProjectTexture(index: number): Texture | null {
-		if (index < 0 || index >= totalProjects) return null;
-		const url = projectStore.projects[index]?.image_thumbnail_url;
-		return url ? (textureCache.get(url) ?? null) : null;
-	}
-
 	// ---------------------------------------------------------------------------
 	// Shaders
 	// ---------------------------------------------------------------------------
@@ -391,6 +385,11 @@
 	let lastFrom = -1;
 	let lastTo = -1;
 
+	function getProjectTexture(index: number): Texture | null {
+		if (index < 0 || index >= totalProjects) return null;
+		const url = projectStore.projects[index]?.image_thumbnail_url;
+		return url ? (textureCache.get(url) ?? null) : null;
+	}
 	function setBlend(fromIdx: number, toIdx: number, blend: number) {
 		if (fromIdx !== lastFrom || toIdx !== lastTo) {
 			const texA = getProjectTexture(fromIdx);
@@ -509,18 +508,15 @@
 </script>
 
 {#if imgMesh && edgeMesh}
-	<T.Group
-		position={[0, 0, 0]}
-		onclick={handleClick}
-		onpointerenter={() => (isHovered = true)}
-		onpointerleave={() => (isHovered = false)}
-		visible={isOnWorks}
-	>
+	<T.Group position={[0, 0, 0]} onclick={handleClick} onpointerenter={() => (isHovered = true)}
+			onpointerleave={() => (isHovered = false)} visible={isOnWorks}>
+		<!-- Honeycomb decoration -->
 		<T is={imgMesh} />
 		<T is={edgeMesh} />
+
 		<Text
 			text={projectStore.projects[currentIndex]?.title ?? ''}
-			position={[0, 0, 0.05]}
+			position={[0, 0, 0.1]}
 			font="/fonts/Canterbury/Canterbury.ttf"
 			fontSize={deviceData.isMobile ? 0.14 : 0.2}
 			anchorX="center"

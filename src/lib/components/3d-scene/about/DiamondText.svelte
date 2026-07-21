@@ -12,6 +12,7 @@
 	} from 'three';
 	import { T, useThrelte, useTask } from '@threlte/core';
 	import { Billboard, Float, Text } from '@threlte/extras';
+	import { trapezoid } from '$lib/utils/progressManipulation';
 
 	interface Props {
 		diamondPosition?: [number, number, number];
@@ -75,12 +76,6 @@
 		depthWrite: false
 	});
 
-	function trapezoid(t: number, a = 0.4, b = 0.6, min = 0, max = 0.75) {
-		t = MathUtils.clamp(t, 0, 1);
-		if (t < a) return MathUtils.lerp(min, max, t / a);
-		if (t <= b) return max;
-		return MathUtils.lerp(max, min, (t - b) / (1 - b));
-	}
 	// Text typing animation based on progress
 	let smoothedProgress = 0;
 	let lastTitleCount = -1;

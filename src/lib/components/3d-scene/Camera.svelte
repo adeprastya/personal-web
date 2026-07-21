@@ -24,7 +24,7 @@
 			look: { x: 0, y: 0, z: 0 }
 		},
 		[AppRoute.works]: {
-			pos: { x: 0, y: 0, z: 2.5 },
+			pos: { x: 0, y: -0.5, z: 2.5 },
 			look: { x: 0, y: 0, z: 0 }
 		}
 	};
@@ -69,7 +69,6 @@
 		smoothedMouse.x += (rawX - smoothedMouse.x) * MOUSE_SMOOTH;
 		smoothedMouse.y += (rawY - smoothedMouse.y) * MOUSE_SMOOTH;
 	}
-
 	function handleFloat(cam: PerspectiveCamera, delta: number) {
 		t += delta;
 
@@ -89,7 +88,6 @@
 
 		cam.lookAt(currentLookAt.x + shiftX, currentLookAt.y + shiftY, currentLookAt.z);
 	}
-
 	useTask((delta) => {
 		const cam = camera.current;
 		if (!isCam(cam)) return;

@@ -6,8 +6,12 @@ import { AppRoute } from '$lib/types/Route';
 const smoothProgress = $state({ value: 0 });
 let accumulated = 0;
 
+function getDragNeeded() {
+	return deviceData.isMobile ? 1000 : 6000;
+}
+
 export function updateDrag(dy: number) {
-	const DRAG_NEEDED = deviceData.isMobile ? 1000 : 6000;
+	const DRAG_NEEDED = getDragNeeded();
 
 	accumulated = gsap.utils.clamp(0, DRAG_NEEDED, accumulated - dy);
 	gsap.to(smoothProgress, {
@@ -47,5 +51,17 @@ export const dragProgress = {
 	},
 	get works() {
 		return page.url.pathname === AppRoute.works ? smoothProgress.value : 0;
+	},
+	setValue(v: number, duration: number = 0.5) {
+		const progress = gsap.utils.clamp(0, 1, v);
+
+		accumulated = progress * getDragNeeded();
+
+		gsap.to(smoothProgress, {
+			value: progress,
+			duration,
+			ease: 'power2.out',
+			overwrite: true
+		});
 	}
 };
