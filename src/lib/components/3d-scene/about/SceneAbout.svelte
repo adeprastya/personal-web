@@ -10,7 +10,11 @@
 
 	let progress = $derived.by(() => {
 		const raw = dragProgress.about * 3;
-		return [MathUtils.mapLinear(raw, 0, 1, 0, 1), MathUtils.mapLinear(raw, 1, 2, 0, 1), MathUtils.mapLinear(raw, 2, 3, 0, 1)];
+		return [
+			MathUtils.mapLinear(raw, 0, 1, 0, 1),
+			MathUtils.mapLinear(raw, 1, 2, 0, 1),
+			MathUtils.mapLinear(raw, 2, 3, 0, 1)
+		];
 	});
 
 	const isMobile = $derived(deviceData.isMatchMediaMobile);
@@ -44,7 +48,7 @@
 	{#each texts as text, i (i)}
 		<DiamondText
 			diamondPosition={text.diamondPosition as [number, number, number]}
-			diamondColor="#dd0000" 
+			diamondColor="#dd0000"
 			title={text.title}
 			description={text.description}
 			{textWidth}

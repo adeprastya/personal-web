@@ -219,7 +219,10 @@
 
 	<!-- Track -->
 	<div bind:this={trackEl} class="relative h-36 w-2.5 shrink-0" aria-hidden="true">
-		<div bind:this={diamondEl} class="absolute top-1/2 left-1/2 translate-x-1 will-change-transform">
+		<div
+			bind:this={diamondEl}
+			class="absolute top-1/2 left-1/2 translate-x-1 will-change-transform"
+		>
 			<!-- Diamond tip -->
 			<div
 				class="size-2 rotate-45 bg-zinc-50 [filter:drop-shadow(0_0_3px_rgba(255,255,255,0.6))]"
@@ -229,9 +232,7 @@
 		<div class="absolute inset-0 flex flex-col justify-between">
 			<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 			{#each Array(TICK_COUNT) as _, i (i)}
-				<div
-					class="h-px w-1.5 self-center bg-zinc-50/30 translate-x-0.5"
-				></div>
+				<div class="h-px w-1.5 translate-x-0.5 self-center bg-zinc-50/30"></div>
 			{/each}
 		</div>
 	</div>

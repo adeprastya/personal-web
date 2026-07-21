@@ -52,9 +52,13 @@
 		{ text: 'A PURSUIT OF KNOWLEDGE FUELLED BY ENDLESS CURIOUSITY', index: 3, y: -1 }
 	];
 
-	let transform = $derived({
-		rotY: dragTransform.rotation.start + progress * dragTransform.rotation.end,
-		posY: dragTransform.position.start + progress * dragTransform.position.end
+	let transform = $derived.by(() => {
+		if (!isHomePage) return { rotY: 0, posY: 0 };
+
+		return {
+			rotY: dragTransform.rotation.start + progress * dragTransform.rotation.end,
+			posY: dragTransform.position.start + progress * dragTransform.position.end
+		};
 	});
 	let textStyle = $derived({
 		fontSize: deviceData.isMatchMediaMobile ? 0.05 : 0.038,
@@ -66,7 +70,7 @@
 	let throttleAcc = 0;
 	const throttleInterval = 1.0;
 	useTask((delta) => {
-		if (!camera.current) return;
+		if (!camera.current || !isHomePage) return;
 
 		throttleAcc += delta;
 		if (throttleAcc < throttleInterval) return;

@@ -50,13 +50,13 @@
 		color: (() => textColor)(),
 		side: FrontSide,
 		transparent: true,
-		fog: false,
+		fog: false
 	});
 	const descMat = new MeshBasicMaterial({
 		color: (() => textColor)(),
 		side: FrontSide,
 		transparent: true,
-		fog: false,
+		fog: false
 	});
 	const lineGeometry = $derived.by(() => {
 		const geo = new BufferGeometry().setFromPoints([
@@ -73,9 +73,9 @@
 		transparent: true,
 		fog: false,
 		depthWrite: false
-	})
+	});
 
-	function trapezoid(t: number, a = 0.4, b = 0.6, min = 0, max = 0.75 ) {
+	function trapezoid(t: number, a = 0.4, b = 0.6, min = 0, max = 0.75) {
 		t = MathUtils.clamp(t, 0, 1);
 		if (t < a) return MathUtils.lerp(min, max, t / a);
 		if (t <= b) return max;
@@ -92,11 +92,7 @@
 
 		if (revealSmoothing > 0) {
 			const t = 1 - Math.exp(-delta / revealSmoothing);
-			smoothedProgress = MathUtils.lerp(
-				smoothedProgress,
-				trapezoid(progress, 0.4, 0.6, 0, 1),
-				t
-			);
+			smoothedProgress = MathUtils.lerp(smoothedProgress, trapezoid(progress, 0.4, 0.6, 0, 1), t);
 		} else {
 			smoothedProgress = progress;
 		}
@@ -167,26 +163,12 @@
 	</Billboard>
 </T.Group>
 
-<T.Group 
-	bind:ref={diamondGroup}
-	position={diamondPosition}
->
+<T.Group bind:ref={diamondGroup} position={diamondPosition}>
 	<Float>
-		<T.Mesh
-			geometry={new OctahedronGeometry(0.05)}
-		>
-			<T.MeshBasicMaterial
-				color={(() => diamondColor)()}
-				wireframe
-				opacity={0.1}
-				transparent
-			/>
+		<T.Mesh geometry={new OctahedronGeometry(0.05)}>
+			<T.MeshBasicMaterial color={(() => diamondColor)()} wireframe opacity={0.1} transparent />
 		</T.Mesh>
 
-		<T.Mesh
-			geometry={new OctahedronGeometry(0.06)}
-			material={diamondMat}
-		>
-		</T.Mesh>
+		<T.Mesh geometry={new OctahedronGeometry(0.06)} material={diamondMat}></T.Mesh>
 	</Float>
 </T.Group>

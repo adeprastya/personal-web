@@ -441,7 +441,6 @@
 
 	$effect(() => {
 		const cam = camera.current;
-		if (!cam) return;
 
 		composer?.dispose();
 		composer = new EffectComposer(renderer, { frameBufferType: HalfFloatType });
@@ -457,7 +456,7 @@
 
 	$effect(() => {
 		gsap.to(invertEffect, {
-			progress: activeProjectData.isVisible ? 1 : 0,
+			progress: activeProjectData.isVisible ? 1 : -0.01,
 			duration: 1.2,
 			ease: 'circ.inOut'
 		});
@@ -465,9 +464,11 @@
 
 	useTask(
 		(delta) => {
+			if (!composer || !imgMaterial || !edgeMaterial) return;
+
 			imgMaterial.uniforms.uTime.value += delta;
 			edgeMaterial.uniforms.uTime.value += delta;
-			composer?.render(delta);
+			composer.render(delta);
 		},
 		{ stage: renderStage, autoInvalidate: true }
 	);
@@ -475,6 +476,10 @@
 	// ---------------------------------------------------------------------------
 	// Cleanup
 	// ---------------------------------------------------------------------------
+	$effect(() => {
+		if (!isOnWorks) setVisibility(false);
+	});
+
 	$effect(() => () => {
 		hexGeo.dispose();
 		edgesGeo.dispose();
@@ -490,9 +495,12 @@
 	// Interaction
 	// ---------------------------------------------------------------------------
 	$effect(() => {
+		if (!isOnWorks) return;
 		document.body.style.cursor = isHovered ? 'crosshair' : 'default';
 	});
 	function handleClick() {
+		if (!isOnWorks) return;
+
 		const project = projectStore.projects[currentIndex];
 		if (!project) return;
 		setActiveProject(currentIndex, project);
