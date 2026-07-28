@@ -1,14 +1,14 @@
 <script lang="ts">
-	import DarkAmbient from './DarkAmbient.svelte';
+	import DarkAmbientEnv from './DarkAmbientEnv.svelte';
 </script>
 
-<DarkAmbient
-	turbidity={0.1}
+<DarkAmbientEnv
+	turbidity={0.08}
 	rayleigh={0.002}
-	mieCoefficient={0.08}
+	mieCoefficient={0.06}
 	mieDirectionalG={0.88}
-	exposure={0.18}
-	elevation={20}
+	exposure={0.14}
+	elevation={28}
 	azimuth={180}
 	scale={10}
 />

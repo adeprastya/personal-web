@@ -71,7 +71,7 @@
 
 	const mat = new ShaderMaterial({
 		side: DoubleSide,
-		transparent: true,
+		transparent: false,
 		vertexShader: /* glsl */ `
       attribute float aFlapTime;
 
@@ -114,7 +114,7 @@
     `,
 		fragmentShader: /* glsl */ `
       void main() {
-        gl_FragColor = vec4(1.0, 0.1, 0.1, 0.4);
+        gl_FragColor = vec4(1.0, 0.06, 0.06, 1.0);
       }
     `
 	});

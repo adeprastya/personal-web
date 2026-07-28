@@ -23,28 +23,17 @@ const fragmentShader = /* glsl */ `
     return vec3(r, g, b);
   }
 
-  float vignette(vec2 uv, float strength) {
-    vec2 d = abs(uv - 0.5) * 2.0;
-    return clamp(1.0 - dot(d, d) * strength, 0.0, 1.0);
-  }
-
   void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
     float p = uProgress;
 
-    // 1. Wave distortion
     vec2 distortedUV = waveDistort(uv, p * 0.018, uTime);
-
-    // 2. Sample ulang dari UV terdistorsi
     vec4 distortedSample = texture(inputBuffer, distortedUV);
 
-    // 3. Chromatic aberration di atas UV terdistorsi
     vec3 aberrated = chromaticAberration(distortedUV, p * 0.025);
     vec3 color = mix(distortedSample.rgb, aberrated, p);
 
-    // 4. Invert
     color = mix(color, 1.0 - color, p);
 
-    // 5. Desaturasi
     float luma = dot(color, vec3(0.299, 0.587, 0.114));
     color = mix(color, vec3(luma), p * 0.4);
 
@@ -52,14 +41,37 @@ const fragmentShader = /* glsl */ `
   }
 `;
 
-export class DimensionalEffect extends Effect {
-	constructor({ progress = 0, time = 0 }: { progress?: number; time?: number } = {}) {
+export interface InvertedDimensionalSettings {
+	progress: number;
+	autoTime?: boolean; // true = uTime run every frame, false = manual via `time`
+	time?: number;
+}
+
+export class InvertedDimensionalEffect extends Effect {
+	private autoTime = true;
+
+	constructor({
+		progress = 0,
+		time = 0,
+		autoTime = true
+	}: { progress?: number; time?: number; autoTime?: boolean } = {}) {
 		super('DimensionalEffect', fragmentShader, {
 			uniforms: new Map([
 				['uProgress', new Uniform(progress)],
 				['uTime', new Uniform(time)]
 			])
 		});
+		this.autoTime = autoTime;
+	}
+
+	update(_renderer: unknown, _inputBuffer: unknown, deltaTime = 0) {
+		if (this.autoTime) {
+			this.uniforms.get('uTime')!.value += deltaTime;
+		}
+	}
+
+	setAutoTime(value: boolean) {
+		this.autoTime = value;
 	}
 
 	get progress(): number {

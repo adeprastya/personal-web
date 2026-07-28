@@ -73,7 +73,7 @@
 		side: DoubleSide,
 		transparent: true,
 		fog: false,
-		depthWrite: false
+		depthWrite: false,
 	});
 
 	// Text typing animation based on progress

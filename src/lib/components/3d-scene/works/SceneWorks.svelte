@@ -1,6 +1,5 @@
 <script lang="ts">
 	import {
-		HalfFloatType,
 		DoubleSide,
 		ShaderMaterial,
 		Vector2,
@@ -14,10 +13,8 @@
 		Matrix4
 	} from 'three';
 	import type { Texture } from 'three';
-	import gsap from 'gsap';
 	import { T, useThrelte, useTask } from '@threlte/core';
 	import { Text } from '@threlte/extras';
-	import { EffectComposer, EffectPass, RenderPass } from 'postprocessing';
 
 	import { deviceData } from '$lib/contexts/device.svelte';
 	import { AppRoute } from '$lib/types/Route';
@@ -26,10 +23,8 @@
 	import {
 		setActiveProject,
 		setVisibility,
-		activeProjectData
 	} from '$lib/contexts/activeProject.svelte';
 	import { dragProgress } from '$lib/contexts/dragProgress.svelte';
-	import { DimensionalEffect } from '$lib/shaders/DimensionalEffect';
 
 	const HEX = {
 		radius: 0.06,
@@ -49,7 +44,7 @@
 	// ---------------------------------------------------------------------------
 	// State
 	// ---------------------------------------------------------------------------
-	const { renderer, scene, camera, renderStage } = useThrelte();
+	const { renderer, renderStage } = useThrelte();
 
 	let progress = $derived(dragProgress.works);
 	let isOnWorks = $derived(routeData.current === AppRoute.works);
@@ -432,42 +427,10 @@
 		}
 	});
 
-	// ---------------------------------------------------------------------------
-	// Post-processing
-	// ---------------------------------------------------------------------------
-	const invertEffect = new DimensionalEffect({ progress: 0, time: 0 });
-	let composer: EffectComposer | null = null;
-
-	$effect(() => {
-		const cam = camera.current;
-
-		composer?.dispose();
-		composer = new EffectComposer(renderer, { frameBufferType: HalfFloatType });
-
-		composer.setSize(window.innerWidth, window.innerHeight);
-		composer.addPass(new RenderPass(scene, cam));
-		composer.addPass(new EffectPass(cam, invertEffect));
-		return () => {
-			composer?.dispose();
-			composer = null;
-		};
-	});
-
-	$effect(() => {
-		gsap.to(invertEffect, {
-			progress: activeProjectData.isVisible ? 1 : -0.01,
-			duration: 1.2,
-			ease: 'circ.inOut'
-		});
-	});
-
 	useTask(
 		(delta) => {
-			if (!composer || !imgMaterial || !edgeMaterial) return;
-
 			imgMaterial.uniforms.uTime.value += delta;
 			edgeMaterial.uniforms.uTime.value += delta;
-			composer.render(delta);
 		},
 		{ stage: renderStage, autoInvalidate: true }
 	);
