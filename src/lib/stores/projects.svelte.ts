@@ -1,36 +1,41 @@
 import type { Project, ProjectDetails } from '$lib/types/Project';
 
-class ProjectStore {
-	isLoading = $state(false);
-	projects = $state<ProjectDetails[]>([]);
-	isLoaded = $state(false);
+class ProjectsStore {
+	private readonly API_URL = 'https://personal-app-533799590019.us-central1.run.app/api';
 
-	async fetchProjects(fetcher: typeof fetch = fetch) {
+	public data = $state<ProjectDetails[]>([]);
+	public isLoading = $state<boolean>(false);
+	public isLoaded = $state<boolean>(false);
+
+	/**
+	 * Fetches project list and details from API
+	 *
+	 * Must be called once in runtime before accessing the data property
+	 */
+	async init(fetcher: typeof fetch = fetch) {
 		if (this.isLoaded) return;
 		this.isLoading = true;
 
-		const API_URL = 'https://personal-app-533799590019.us-central1.run.app/api';
-
 		try {
 			// Fetch project list
-			const res = await fetcher(`${API_URL}/project`);
-			const projectData = await res.json();
-			const list = Array.isArray(projectData.data) ? projectData.data : [];
+			const res = await fetcher(`${this.API_URL}/project`).then((res) => res.json());
+			const list = Array.isArray(res.data) ? res.data : [];
 
 			// Fetch details for each project
-			const detailPromises = list.map(async (p: Project) => {
-				const detailRes = await fetcher(`${API_URL}/project/${p.id}`);
-				const detailData = await detailRes.json();
-				return detailData.data;
+			const detailPromises: Promise<ProjectDetails>[] = list.map(async (p: Project) => {
+				const detailRes = await fetcher(`${this.API_URL}/project/${p.id}`).then((res) =>
+					res.json()
+				);
+				return detailRes.data;
 			});
 
-			const projects = (await Promise.all(detailPromises)) as ProjectDetails[];
+			const projects: ProjectDetails[] = await Promise.all(detailPromises);
 
-			this.projects = projects;
+			this.data = projects;
 			this.isLoaded = true;
 		} catch (e) {
 			console.error(e);
-			this.projects = [];
+			this.data = [];
 			this.isLoaded = true;
 		} finally {
 			this.isLoading = false;
@@ -38,4 +43,4 @@ class ProjectStore {
 	}
 }
 
-export const projectStore = new ProjectStore();
+export const projects = new ProjectsStore();

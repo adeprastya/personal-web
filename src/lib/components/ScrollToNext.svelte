@@ -3,7 +3,7 @@
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { dragProgress, resetProgress } from '$lib/contexts/dragProgress.svelte';
+	import { drag } from '$lib/state/dragProgress.svelte';
 
 	let { routes } = $props<{ routes: string[] }>();
 
@@ -14,7 +14,7 @@
 
 	const curIdx = $derived(routes.findIndex((l: string) => l === page.url.pathname));
 	const nextIdx = $derived((curIdx + 1) % routes.length);
-	const progressRatio = $derived(dragProgress.value);
+	const progressRatio = $derived(drag.value);
 	const show = $derived(progressRatio > 0.01);
 
 	$effect(() => {
@@ -22,7 +22,7 @@
 		if (pathname !== lockedPathname) {
 			isNavigating = false;
 			lockedPathname = pathname;
-			resetProgress();
+			drag.reset();
 		}
 
 		if (isNavigating) return;

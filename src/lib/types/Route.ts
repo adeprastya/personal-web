@@ -1,7 +1,7 @@
 export const AppRoute = {
-	home: '/',
-	about: '/about',
-	works: '/works'
+	Home: '/',
+	About: '/about',
+	Works: '/works'
 } as const;
 
-export type Route = (typeof AppRoute)[keyof typeof AppRoute];
+export type AppRouteType = (typeof AppRoute)[keyof typeof AppRoute];

@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { dragProgress } from '$lib/contexts/dragProgress.svelte';
+	import { AppRoute } from '$lib/types/Route';
+	import { drag } from '$lib/state/dragProgress.svelte';
 	import { MathUtils } from 'three';
 	import { trapezoid } from '$lib/utils/progressManipulation';
 
 	let { projects } = $props();
 
 	const total = (() => projects.length)();
-	const rawProgress = $derived(dragProgress.works * total);
+	const rawProgress = $derived(drag.is(AppRoute.Works) * total);
 	let progresses: number[] = $derived.by(() => {
 		return Array.from({ length: total }).map((_, i) => {
 			const chunk = MathUtils.clamp(MathUtils.mapLinear(rawProgress, i, i + 1, 0, 1), 0, 1);
@@ -16,14 +17,14 @@
 	let itemActiveProgress = $derived(progresses.reduce((a, b) => a + b, 0));
 </script>
 
-<nav class="fixed bottom-18 sm:bottom-1/2 left-10 sm:left-20 sm:translate-y-1/2 select-none">
+<nav class="fixed bottom-18 left-10 select-none sm:bottom-1/2 sm:left-20 sm:translate-y-1/2">
 	<!-- Vertical line -->
 	<div class="absolute top-0 left-0 h-full w-px bg-zinc-500/30"></div>
 
 	<!-- Diamond marker -->
 	<div
 		class="absolute size-3 -translate-x-1/2 -translate-y-1/2 rotate-45 border border-zinc-50/60 will-change-[top]"
-		style:top="{dragProgress.works * 100}%"
+		style:top="{drag.is(AppRoute.Works) * 100}%"
 	>
 		<div
 			class="absolute inset-[2px] bg-red-500 will-change-[opacity]"
@@ -35,9 +36,9 @@
 		{#each projects as p, i (projects[i].id)}
 			<button
 				onclick={() => {
-					dragProgress.setValue((i + 0.5) / total, 1);
+					drag.set((i + 0.5) / total, 1);
 				}}
-				class="relative flex cursor-pointer items-center gap-4 overflow-hidden py-3 px-8"
+				class="relative flex cursor-pointer items-center gap-4 overflow-hidden px-8 py-3"
 			>
 				<!-- Hover line -->
 				<div
@@ -47,7 +48,9 @@
 
 				<!-- Overlay bg -->
 				<div
-					class="absolute inset-0 -z-10 bg-zinc-900 will-change-[opacity] {progresses[i] === 0 ? 'opacity-40' : 'opacity-80'} transition-all ease-linear duration-500"
+					class="absolute inset-0 -z-10 bg-zinc-900 will-change-[opacity] {progresses[i] === 0
+						? 'opacity-40'
+						: 'opacity-80'} transition-all duration-500 ease-linear"
 				></div>
 
 				<!-- Number -->
@@ -61,7 +64,9 @@
 				<!-- Title -->
 				<span
 					style="transform:translateX({progresses[i] * 6}px);"
-					class="font-mono text-xs tracking-widest uppercase {progresses[i] === 0 ? 'opacity-70' : 'opacity-100'} transition-all duration-300"
+					class="font-mono text-xs tracking-widest uppercase {progresses[i] === 0
+						? 'opacity-70'
+						: 'opacity-100'} transition-all duration-300"
 				>
 					{p.title}
 				</span>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { gsap } from 'gsap';
-	import { pointerData } from '$lib/contexts/pointer.svelte';
+	import { pointer } from '$lib/state/pointer.svelte';
 
 	const CFG = {
 		tickCount: 40, // Total of tick slots across the ruler (minor + major combined)
@@ -37,7 +37,7 @@
 			if (!trackWidth) return;
 
 			// normalization [-1, 1]
-			const norm = gsap.utils.mapRange(0, window.innerWidth, -1, 1)(pointerData.x);
+			const norm = gsap.utils.mapRange(0, window.innerWidth, -1, 1)(pointer.x);
 
 			xMarker(norm * trackWidth * CFG.markerShiftRatio);
 			xTicks(-norm * CFG.tickShiftTravel);

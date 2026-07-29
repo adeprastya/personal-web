@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { MathUtils } from 'three';
-	import { T } from '@threlte/core';
-	import { deviceData } from '$lib/contexts/device.svelte';
-	import { routeData } from '$lib/contexts/route.svelte';
-	import { dragProgress } from '$lib/contexts/dragProgress.svelte';
 	import { AppRoute } from '$lib/types/Route';
+	import { T } from '@threlte/core';
+	import { device } from '$lib/state/device.svelte';
+	import { route } from '$lib/state/route.svelte';
+	import { drag } from '$lib/state/dragProgress.svelte';
 	import DiamondText from './DiamondText.svelte';
 	import ButterflyColony from './ButterflyColony.svelte';
 
 	let progress = $derived.by(() => {
-		const raw = dragProgress.about * 3;
+		const raw = drag.is(AppRoute.About) * 3;
 		return [
 			MathUtils.mapLinear(raw, 0, 1, 0, 1),
 			MathUtils.mapLinear(raw, 1, 2, 0, 1),
@@ -17,8 +17,8 @@
 		];
 	});
 
-	const isMobile = $derived(deviceData.isMatchMediaMobile);
-	const isAboutPage = $derived(routeData.current === AppRoute.about);
+	const isMobile = $derived(device.isMatchMediaMobile);
+	const isAboutPage = $derived(route.current === AppRoute.About);
 	const textWidth = $derived(isMobile ? 1.6 : 2.0);
 	const fontSize = $derived(isMobile ? 0.18 : 0.16);
 

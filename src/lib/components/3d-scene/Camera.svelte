@@ -2,8 +2,8 @@
 	import { afterNavigate } from '$app/navigation';
 	import { Vector3, PerspectiveCamera } from 'three';
 	import { useThrelte, useTask } from '@threlte/core';
-	import { deviceData } from '$lib/contexts/device.svelte';
-	import { pointerData } from '$lib/contexts/pointer.svelte';
+	import { device } from '$lib/state/device.svelte';
+	import { pointer } from '$lib/state/pointer.svelte';
 	import { AppRoute } from '$lib/types/Route';
 
 	const FOV = 60;
@@ -15,20 +15,20 @@
 	type Vec3 = { x: number; y: number; z: number };
 
 	const ROUTE_CONFIG: Record<string, { pos: Vec3; look: Vec3 }> = {
-		[AppRoute.home]: {
+		[AppRoute.Home]: {
 			pos: { x: 0, y: 0, z: 2.5 },
 			look: { x: 0, y: 0, z: 0 }
 		},
-		[AppRoute.about]: {
+		[AppRoute.About]: {
 			pos: { x: 0, y: 1.0, z: 2.5 },
 			look: { x: 0, y: 0, z: 0 }
 		},
-		[AppRoute.works]: {
+		[AppRoute.Works]: {
 			pos: { x: 0, y: -0.5, z: 2.5 },
 			look: { x: 0, y: 0, z: 0 }
 		}
 	};
-	const DEFAULT_ROUTE = ROUTE_CONFIG[AppRoute.home];
+	const DEFAULT_ROUTE = ROUTE_CONFIG[AppRoute.Home];
 
 	const isCam = (c: unknown): c is PerspectiveCamera => c instanceof PerspectiveCamera;
 
@@ -44,7 +44,7 @@
 	function updateCameraParams(cam: PerspectiveCamera) {
 		cam.near = NEAR;
 		cam.far = FAR;
-		cam.fov = FOV * (deviceData.isMobile ? 1.25 : 1.0);
+		cam.fov = FOV * (device.isMobile ? 1.25 : 1.0);
 		cam.updateProjectionMatrix();
 	}
 
@@ -54,7 +54,7 @@
 
 	afterNavigate(({ to }) => {
 		const cam = camera.current;
-		const path = to?.url.pathname ?? AppRoute.home;
+		const path = to?.url.pathname ?? AppRoute.Home;
 
 		const config = ROUTE_CONFIG[path] ?? DEFAULT_ROUTE;
 		posBase = { ...config.pos };
@@ -64,8 +64,8 @@
 	});
 
 	function updateSmoothedMouse() {
-		const rawX = (pointerData.x / window.innerWidth) * 2 - 1;
-		const rawY = -(pointerData.y / window.innerHeight) * 2 + 1;
+		const rawX = (pointer.x / window.innerWidth) * 2 - 1;
+		const rawY = -(pointer.y / window.innerHeight) * 2 + 1;
 		smoothedMouse.x += (rawX - smoothedMouse.x) * MOUSE_SMOOTH;
 		smoothedMouse.y += (rawY - smoothedMouse.y) * MOUSE_SMOOTH;
 	}

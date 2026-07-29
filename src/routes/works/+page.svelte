@@ -2,16 +2,16 @@
 	import type { PageData } from './$types';
 	import gsap from 'gsap';
 	import { AppRoute } from '$lib/types/Route';
-	import { routeData } from '$lib/contexts/route.svelte';
+	import { route } from '$lib/state/route.svelte';
 	import { SplitText } from 'gsap/SplitText';
-	import { activeProjectData, setVisibility } from '$lib/contexts/activeProject.svelte';
+	import { activeProject } from '$lib/state/activeProject.svelte';
 	import ProjectNav from './ProjectNav.svelte';
 
 	let { data }: { data: PageData } = $props();
 
-	let isOnWorks = $derived(routeData.current === AppRoute.works);
+	let isOnWorks = $derived(route.current === AppRoute.Works);
 	let projects = $derived(data.projects);
-	let cachedData = $state(activeProjectData.data);
+	let cachedData = $state(activeProject.data);
 
 	// Refs
 	let sectionEl = $state<HTMLElement>();
@@ -83,18 +83,18 @@
 	}
 
 	$effect(() => {
-		if (activeProjectData.index !== -1) {
-			cachedData = $state.snapshot(activeProjectData.data);
+		if (activeProject.index !== -1) {
+			cachedData = $state.snapshot(activeProject.data);
 		}
 	});
 
 	$effect(() => {
-		const _visible = activeProjectData.isVisible;
+		const visible = activeProject.isVisible;
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const _ = cachedData;
 
 		Promise.resolve().then(() => {
-			if (_visible) animateIn();
+			if (visible) animateIn();
 			else animateOut();
 		});
 	});
@@ -107,10 +107,10 @@
 <section
 	bind:this={sectionEl}
 	class="fixed top-0 left-0 flex h-screen w-full items-center justify-center px-9 backdrop-blur-xs text-shadow-md sm:px-14 md:px-20"
-	style={`pointer-events: ${activeProjectData.isVisible ? 'auto' : 'none'};`}
+	style={`pointer-events: ${activeProject.isVisible ? 'auto' : 'none'};`}
 >
 	<button
-		onclick={() => setVisibility(false)}
+		onclick={() => activeProject.hide()}
 		class="flex w-full max-w-3xl flex-col items-start gap-3 text-left"
 	>
 		<h1

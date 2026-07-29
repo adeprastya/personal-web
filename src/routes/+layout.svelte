@@ -7,12 +7,13 @@
 	import { SplitText } from 'gsap/SplitText';
 
 	import { typingAnimation } from '$lib/utils/typingAnimation';
-	import { projectStore } from '$lib/stores/projects.svelte';
-	import { initRoute, routeData } from '$lib/contexts/route.svelte';
-	import { initDevice } from '$lib/contexts/device.svelte';
-	import { initPointer, pointerData } from '$lib/contexts/pointer.svelte';
-	import { initDragProgress } from '$lib/contexts/dragProgress.svelte';
+	import { projects } from '$lib/stores/projects.svelte';
+	import { route } from '$lib/state/route.svelte';
+	import { device } from '$lib/state/device.svelte';
+	import { pointer } from '$lib/state/pointer.svelte';
+	import { drag } from '$lib/state/dragProgress.svelte';
 	import { AppRoute } from '$lib/types/Route';
+	import { activeProject } from '$lib/state/activeProject.svelte';
 
 	import Intro from '$lib/components/Intro.svelte';
 	import AppFrame from '$lib/components/frame/AppFrame.svelte';
@@ -29,16 +30,16 @@
 	const LANG = 'en';
 
 	const routesDetail: Record<string, string> = {
-		[AppRoute.home]: 'Ade Prastya',
-		[AppRoute.about]: "Don't know me?",
-		[AppRoute.works]: 'Hope you like it!'
+		[AppRoute.Home]: 'Ade Prastya',
+		[AppRoute.About]: "Don't know me?",
+		[AppRoute.Works]: 'Hope you like it!'
 	};
 	const routes = Object.keys(routesDetail);
 
 	$effect(() => {
 		typingAnimation(
-			routesDetail[routeData.from || AppRoute.home],
-			routesDetail[routeData.to || AppRoute.home],
+			routesDetail[route.from],
+			routesDetail[route.to],
 			(s: string) => (document.title = s || '|'),
 			{ delay: 100 }
 		);
@@ -46,17 +47,20 @@
 
 	onMount(() => {
 		// Preload fetching projects data on initial load, used in works page
-		projectStore.fetchProjects();
-		// Registering runtime plugins
+		projects.init();
+		// Register runtime state
+		route.init();
+		device.init();
+		pointer.init();
+		drag.init(() => pointer.dy);
+		activeProject.reset();
+		// Register plugins
 		gsap.registerPlugin(SplitText);
-		const cleanups = [
-			initRoute(),
-			initDevice(),
-			initPointer(),
-			initDragProgress(() => pointerData.dy)
-		];
+
 		return () => {
-			cleanups.forEach((fn) => typeof fn === 'function' && fn());
+			device.destroy();
+			pointer.destroy();
+			drag.destroy();
 		};
 	});
 </script>

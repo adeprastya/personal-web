@@ -12,9 +12,9 @@
 	import { Color } from 'three';
 
 	import { AppRoute } from '$lib/types/Route';
-	import { deviceData } from '$lib/contexts/device.svelte';
-	import { routeData } from '$lib/contexts/route.svelte';
-	import { dragProgress } from '$lib/contexts/dragProgress.svelte';
+	import { route } from '$lib/state/route.svelte';
+	import { device } from '$lib/state/device.svelte';
+	import { drag } from '$lib/state/dragProgress.svelte';
 
 	import CircleLine from './CircleLine.svelte';
 	import BracketText from './BracketText.svelte';
@@ -25,8 +25,8 @@
 	const viewport = useViewport();
 	const { camera } = useThrelte();
 
-	let isHomePage = $derived(routeData.current === AppRoute.home);
-	let progress = $derived(dragProgress.home);
+	let isHomePage = $derived(route.current === AppRoute.Home);
+	let progress = $derived(drag.is(AppRoute.Home));
 
 	const dragTransform = {
 		rotation: {
@@ -61,8 +61,8 @@
 		};
 	});
 	let textStyle = $derived({
-		fontSize: deviceData.isMatchMediaMobile ? 0.05 : 0.038,
-		maxWidth: deviceData.isMatchMediaMobile ? 1.0 : 0.7
+		fontSize: device.isMatchMediaMobile ? 0.05 : 0.038,
+		maxWidth: device.isMatchMediaMobile ? 1.0 : 0.7
 	});
 
 	// Camera distance calculation for bracket text animation

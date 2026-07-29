@@ -6,13 +6,13 @@
 	import { Draggable } from 'gsap/Draggable';
 	import { InertiaPlugin } from 'gsap/InertiaPlugin';
 
-	import { activeProjectData } from '$lib/contexts/activeProject.svelte';
+	import { activeProject } from '$lib/state/activeProject.svelte';
 	import { AppRoute } from '$lib/types/Route';
 
 	const links = [
-		{ href: AppRoute.works, label: 'Works', tick: '16' },
-		{ href: AppRoute.home, label: 'Home', tick: '48' },
-		{ href: AppRoute.about, label: 'About', tick: '80' }
+		{ href: AppRoute.Works, label: 'Works', tick: '16' },
+		{ href: AppRoute.Home, label: 'Home', tick: '48' },
+		{ href: AppRoute.About, label: 'About', tick: '80' }
 	];
 
 	const TICK_COUNT = 15;
@@ -195,7 +195,7 @@
 		bind:this={containerEl}
 		aria-label="Primary Navigation"
 		class="relative h-36 touch-none overflow-hidden select-none"
-		style={`pointer-events: ${activeProjectData.isVisible ? 'none' : 'auto'}`}
+		style={`pointer-events: ${activeProject.isVisible ? 'none' : 'auto'}`}
 	>
 		<div bind:this={wrapperEl}>
 			<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->

@@ -16,15 +16,12 @@
 	import { T, useThrelte, useTask } from '@threlte/core';
 	import { Text } from '@threlte/extras';
 
-	import { deviceData } from '$lib/contexts/device.svelte';
+	import { device } from '$lib/state/device.svelte';
 	import { AppRoute } from '$lib/types/Route';
-	import { projectStore } from '$lib/stores/projects.svelte';
-	import { routeData } from '$lib/contexts/route.svelte';
-	import {
-		setActiveProject,
-		setVisibility,
-	} from '$lib/contexts/activeProject.svelte';
-	import { dragProgress } from '$lib/contexts/dragProgress.svelte';
+	import { projects } from '$lib/stores/projects.svelte';
+	import { route } from '$lib/state/route.svelte';
+	import { activeProject } from '$lib/state/activeProject.svelte';
+	import { drag } from '$lib/state/dragProgress.svelte';
 
 	const HEX = {
 		radius: 0.06,
@@ -46,9 +43,9 @@
 	// ---------------------------------------------------------------------------
 	const { renderer, renderStage } = useThrelte();
 
-	let progress = $derived(dragProgress.works);
-	let isOnWorks = $derived(routeData.current === AppRoute.works);
-	let totalProjects = $derived(projectStore.projects.length);
+	let progress = $derived(drag.is(AppRoute.Works));
+	let isOnWorks = $derived(route.current === AppRoute.Works);
+	let totalProjects = $derived(projects.data.length);
 	let currentIndex = $state(0);
 	let isHovered = $state(false);
 
@@ -144,8 +141,8 @@
 		if (totalProjects === 0 || isTexturesLoaded) return;
 
 		const loadAll = async () => {
-			const promises = projectStore.projects.map((project) => {
-				const url = project?.image_thumbnail_url;
+			const promises = projects.data.map((p) => {
+				const url = p?.image_thumbnail_url;
 				return url ? preloadTexture(url) : Promise.resolve(null);
 			});
 
@@ -382,7 +379,7 @@
 
 	function getProjectTexture(index: number): Texture | null {
 		if (index < 0 || index >= totalProjects) return null;
-		const url = projectStore.projects[index]?.image_thumbnail_url;
+		const url = projects.data[index]?.image_thumbnail_url;
 		return url ? (textureCache.get(url) ?? null) : null;
 	}
 	function setBlend(fromIdx: number, toIdx: number, blend: number) {
@@ -439,7 +436,7 @@
 	// Cleanup
 	// ---------------------------------------------------------------------------
 	$effect(() => {
-		if (!isOnWorks) setVisibility(false);
+		if (!isOnWorks) activeProject.hide();
 	});
 
 	$effect(() => () => {
@@ -463,25 +460,31 @@
 	function handleClick() {
 		if (!isOnWorks) return;
 
-		const project = projectStore.projects[currentIndex];
+		const project = projects.data[currentIndex];
 		if (!project) return;
-		setActiveProject(currentIndex, project);
-		setVisibility(true);
+
+		activeProject.set(currentIndex, project);
+		activeProject.show();
 	}
 </script>
 
 {#if imgMesh && edgeMesh}
-	<T.Group position={[0, 0, 0]} onclick={handleClick} onpointerenter={() => (isHovered = true)}
-			onpointerleave={() => (isHovered = false)} visible={isOnWorks}>
+	<T.Group
+		position={[0, 0, 0]}
+		onclick={handleClick}
+		onpointerenter={() => (isHovered = true)}
+		onpointerleave={() => (isHovered = false)}
+		visible={isOnWorks}
+	>
 		<!-- Honeycomb decoration -->
 		<T is={imgMesh} />
 		<T is={edgeMesh} />
 
 		<Text
-			text={projectStore.projects[currentIndex]?.title ?? ''}
+			text={projects.data[currentIndex]?.title ?? ''}
 			position={[0, 0, 0.1]}
 			font="/fonts/Canterbury/Canterbury.ttf"
-			fontSize={deviceData.isMobile ? 0.14 : 0.2}
+			fontSize={device.isMobile ? 0.14 : 0.2}
 			anchorX="center"
 			anchorY="middle"
 			color="#eeeeee"
