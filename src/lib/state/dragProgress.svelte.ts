@@ -1,4 +1,4 @@
-import type { AppRouteType } from '$lib/types/Route';
+import type { AppRouteType } from '$lib/types/AppRoute';
 import { page } from '$app/state';
 import gsap from 'gsap';
 import { device } from '$lib/state/device.svelte';

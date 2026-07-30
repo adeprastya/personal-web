@@ -1,5 +1,5 @@
 import { afterNavigate } from '$app/navigation';
-import { type AppRouteType, AppRoute } from '$lib/types/Route';
+import { type AppRouteType, AppRoute } from '$lib/types/AppRoute';
 
 class RouteState {
 	private initialized = false;
@@ -13,7 +13,7 @@ class RouteState {
 	 *
 	 * Must be called once in runtime before accessing the property
 	 */
-	init() {
+	init(): void {
 		if (this.initialized) return;
 		this.initialized = true;
 
@@ -23,6 +23,15 @@ class RouteState {
 			this.to = (to?.url.pathname ?? AppRoute.Home) as AppRouteType;
 			this.current = (to?.url.pathname ?? AppRoute.Home) as AppRouteType;
 		});
+	}
+
+	/**
+	 * Returns the current progress only when the given route is active.
+	 *
+	 * @param route Target application route.
+	 */
+	is(route: AppRouteType): boolean {
+		return this.current === route;
 	}
 }
 

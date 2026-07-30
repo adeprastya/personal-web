@@ -7,7 +7,7 @@
 	import { InertiaPlugin } from 'gsap/InertiaPlugin';
 
 	import { activeProject } from '$lib/state/activeProject.svelte';
-	import { AppRoute } from '$lib/types/Route';
+	import { AppRoute } from '$lib/types/AppRoute';
 
 	const links = [
 		{ href: AppRoute.Works, label: 'Works', tick: '16' },

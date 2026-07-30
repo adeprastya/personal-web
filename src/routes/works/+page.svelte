@@ -1,68 +1,74 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import { tick } from 'svelte';
 	import gsap from 'gsap';
-	import { AppRoute } from '$lib/types/Route';
-	import { route } from '$lib/state/route.svelte';
 	import { SplitText } from 'gsap/SplitText';
+
+	import type { PageData } from './$types';
+	import { AppRoute } from '$lib/types/AppRoute';
+	import { route } from '$lib/state/route.svelte';
 	import { activeProject } from '$lib/state/activeProject.svelte';
+
+	import WorksSEO from './WorksSEO.svelte';
 	import ProjectNav from './ProjectNav.svelte';
 
 	let { data }: { data: PageData } = $props();
 
-	let isOnWorks = $derived(route.current === AppRoute.Works);
 	let projects = $derived(data.projects);
 	let cachedData = $state(activeProject.data);
+	let isVisible = $derived(activeProject.isVisible);
 
-	// Refs
-	let sectionEl = $state<HTMLElement>();
-	let taglineEl = $state<HTMLElement>();
-	let metaEl = $state<HTMLElement>();
-	let descEl = $state<HTMLElement>();
-	let linksEl = $state<HTMLElement>();
+	type Refs = { [key: string]: HTMLElement | null };
+	const refs: Refs = {
+		section: null,
+		tagline: null,
+		meta: null,
+		desc: null,
+		links: null
+	};
 
-	let tl: gsap.core.Timeline | null = null;
-	let taglineSplit: SplitText | null = null;
-	let descSplit: SplitText | null = null;
+	const animation = {
+		tl: null as gsap.core.Timeline | null,
+		taglineSplit: null as SplitText | null,
+		descSplit: null as SplitText | null
+	};
 
 	function animateIn() {
-		if (!sectionEl || !taglineEl || !metaEl || !descEl || !linksEl) return;
+		if (!refs.section || !refs.tagline || !refs.meta || !refs.desc || !refs.links) return;
 
-		tl?.kill();
+		animation.tl?.kill();
 
-		taglineSplit?.revert();
-		descSplit?.revert();
+		animation.taglineSplit?.revert();
+		animation.descSplit?.revert();
 
-		// eslint-disable-next-line svelte/no-dom-manipulating
-		taglineEl.textContent = cachedData?.tagline ?? '';
-		// eslint-disable-next-line svelte/no-dom-manipulating
-		descEl.textContent = cachedData?.description ?? '';
+		refs.tagline.textContent = cachedData?.tagline ?? '';
+		refs.desc.textContent = cachedData?.description ?? '';
 
-		taglineSplit = new SplitText(taglineEl, { type: 'words' });
-		descSplit = new SplitText(descEl, { type: 'words' });
+		animation.taglineSplit = new SplitText(refs.tagline, { type: 'words' });
+		animation.descSplit = new SplitText(refs.desc, { type: 'words' });
 
-		tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+		animation.tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-		tl.fromTo(sectionEl, { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0);
-		tl.fromTo(
-			taglineSplit.words,
+		animation.tl.fromTo(refs.section, { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0);
+		animation.tl.fromTo(
+			animation.taglineSplit.words,
 			{ x: -40, skewX: -25, opacity: 0 },
 			{ x: 0, skewX: 0, opacity: 1, duration: 0.8, stagger: 0.08 },
 			0.1
 		);
-		tl.fromTo(
-			metaEl,
+		animation.tl.fromTo(
+			refs.meta,
 			{ x: -40, skewX: -25, opacity: 0 },
 			{ x: 0, skewX: 0, opacity: 1, duration: 0.8 },
 			0.8
 		);
-		tl.fromTo(
-			descSplit.words,
+		animation.tl.fromTo(
+			animation.descSplit.words,
 			{ x: -40, skewX: -25, opacity: 0 },
 			{ x: 0, skewX: 0, opacity: 1, duration: 0.4, stagger: 0.005 },
 			0.8
 		);
-		tl.fromTo(
-			linksEl.children,
+		animation.tl.fromTo(
+			refs.links.children,
 			{ x: -40, skewX: -25, opacity: 0 },
 			{ x: 0, skewX: 0, opacity: 1, duration: 0.8, stagger: 0.2 },
 			1.2
@@ -70,58 +76,58 @@
 	}
 
 	function animateOut() {
-		if (!sectionEl) return;
+		if (!refs.section) return;
 
-		tl?.kill();
-		tl = gsap.timeline({
+		animation.tl?.kill();
+		animation.tl = gsap.timeline({
 			onComplete: () => {
-				taglineSplit?.revert();
-				descSplit?.revert();
+				animation.taglineSplit?.revert();
+				animation.descSplit?.revert();
 			}
 		});
-		tl.to(sectionEl, { opacity: 0, duration: 0.25, ease: 'power2.in' });
+		animation.tl.to(refs.section, { opacity: 0, duration: 0.25, ease: 'power2.in' });
 	}
 
-	$effect(() => {
+	$effect(function updateCache() {
 		if (activeProject.index !== -1) {
 			cachedData = $state.snapshot(activeProject.data);
 		}
 	});
 
-	$effect(() => {
-		const visible = activeProject.isVisible;
+	$effect(function animateVisibility() {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const _ = cachedData;
+		const visible = isVisible;
 
-		Promise.resolve().then(() => {
+		tick().then(() => {
 			if (visible) animateIn();
 			else animateOut();
 		});
 	});
 </script>
 
-{#if isOnWorks}
+{#if route.is(AppRoute.Works)}
 	<ProjectNav {projects} />
 {/if}
 
 <section
-	bind:this={sectionEl}
+	bind:this={refs.section}
 	class="fixed top-0 left-0 flex h-screen w-full items-center justify-center px-9 backdrop-blur-xs text-shadow-md sm:px-14 md:px-20"
-	style={`pointer-events: ${activeProject.isVisible ? 'auto' : 'none'};`}
+	style={`pointer-events: ${isVisible ? 'auto' : 'none'};`}
 >
 	<button
 		onclick={() => activeProject.hide()}
 		class="flex w-full max-w-3xl flex-col items-start gap-3 text-left"
 	>
 		<h1
-			bind:this={taglineEl}
+			bind:this={refs.tagline}
 			class="font-mono text-xl leading-tight tracking-widest text-zinc-600 uppercase sm:text-4xl"
 		>
 			{cachedData?.tagline}
 		</h1>
 
 		<div
-			bind:this={metaEl}
+			bind:this={refs.meta}
 			class="flex flex-wrap gap-2 font-mono text-xs tracking-widest text-zinc-700 uppercase"
 		>
 			<span>{cachedData?.created_at}</span>
@@ -133,13 +139,13 @@
 		</div>
 
 		<p
-			bind:this={descEl}
+			bind:this={refs.desc}
 			class="max-w-xl text-justify font-mono text-xs leading-relaxed text-zinc-700"
 		>
 			{cachedData?.description}
 		</p>
 
-		<div bind:this={linksEl} class="flex gap-4 font-mono text-xs tracking-widest uppercase">
+		<div bind:this={refs.links} class="flex gap-4 font-mono text-xs tracking-widest uppercase">
 			{#if cachedData?.site_url}
 				<a
 					href={cachedData.site_url}
@@ -162,51 +168,4 @@
 	</button>
 </section>
 
-<!-- Hidden projects data for screen readers & search engines -->
-<section class="pointer-events-none absolute -z-50 opacity-0">
-	<h1>Works</h1>
-	<p>
-		Dedicated to writing clean, efficient, and scalable code by harnessing cutting-edge tools and
-		best practices. Drive to solve real problems that make life easier and better.
-	</p>
-
-	{#if projects.length === 0}
-		<div role="alert">Im, sorry. Something went wrong.</div>
-	{:else}
-		<ul>
-			{#each projects as project (project.id)}
-				<li>
-					<article itemscope itemtype="https://schema.org/CreativeWork">
-						<h2 itemprop="name">{project.title}</h2>
-						<p><strong aria-hidden="true">Tagline:</strong> {project.tagline}</p>
-
-						<div role="group" aria-label="Technologies used">
-							{#each project.technologies as tech, i (i)}
-								<span class="badge">{tech}</span>
-							{/each}
-						</div>
-
-						<nav class="links" aria-label="Project links for {project.title}">
-							<a
-								href={project.site_url}
-								target="_blank"
-								rel="noopener noreferrer"
-								aria-label="Visit live demo of {project.title}"
-							>
-								Demo
-							</a>
-							<a
-								href={project.source_code_url}
-								target="_blank"
-								rel="noopener noreferrer"
-								aria-label="View source code of {project.title} on GitHub"
-							>
-								Source Code
-							</a>
-						</nav>
-					</article>
-				</li>
-			{/each}
-		</ul>
-	{/if}
-</section>
+<WorksSEO {projects} />

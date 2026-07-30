@@ -3,11 +3,12 @@
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
+	import { AppRoute } from '$lib/types/AppRoute';
 	import { drag } from '$lib/state/dragProgress.svelte';
 
-	let { routes } = $props<{ routes: string[] }>();
-
 	const TICK_COUNT = 40;
+
+	const routes = Object.values(AppRoute);
 
 	let isNavigating = $state(false);
 	let lockedPathname = $state('');

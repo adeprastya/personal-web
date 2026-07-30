@@ -17,7 +17,7 @@
 	import { Text } from '@threlte/extras';
 
 	import { device } from '$lib/state/device.svelte';
-	import { AppRoute } from '$lib/types/Route';
+	import { AppRoute } from '$lib/types/AppRoute';
 	import { projects } from '$lib/stores/projects.svelte';
 	import { route } from '$lib/state/route.svelte';
 	import { activeProject } from '$lib/state/activeProject.svelte';
@@ -44,7 +44,7 @@
 	const { renderer, renderStage } = useThrelte();
 
 	let progress = $derived(drag.is(AppRoute.Works));
-	let isOnWorks = $derived(route.current === AppRoute.Works);
+	let isOnWorks = $derived(route.is(AppRoute.Works));
 	let totalProjects = $derived(projects.data.length);
 	let currentIndex = $state(0);
 	let isHovered = $state(false);

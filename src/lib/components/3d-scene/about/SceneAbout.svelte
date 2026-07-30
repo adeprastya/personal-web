@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { MathUtils } from 'three';
-	import { AppRoute } from '$lib/types/Route';
+	import { AppRoute } from '$lib/types/AppRoute';
 	import { T } from '@threlte/core';
 	import { device } from '$lib/state/device.svelte';
 	import { route } from '$lib/state/route.svelte';
@@ -18,7 +18,6 @@
 	});
 
 	const isMobile = $derived(device.isMatchMediaMobile);
-	const isAboutPage = $derived(route.current === AppRoute.About);
 	const textWidth = $derived(isMobile ? 1.6 : 2.0);
 	const fontSize = $derived(isMobile ? 0.18 : 0.16);
 
@@ -44,7 +43,7 @@
 	];
 </script>
 
-<T.Group visible={isAboutPage} position={[0, 0, 0]}>
+<T.Group visible={route.is(AppRoute.About)} position={[0, 0, 0]}>
 	{#each texts as text, i (i)}
 		<DiamondText
 			diamondPosition={text.diamondPosition as [number, number, number]}

@@ -4,7 +4,7 @@
 	import { useThrelte, useTask } from '@threlte/core';
 	import { device } from '$lib/state/device.svelte';
 	import { pointer } from '$lib/state/pointer.svelte';
-	import { AppRoute } from '$lib/types/Route';
+	import { AppRoute } from '$lib/types/AppRoute';
 
 	const FOV = 60;
 	const NEAR = 0.1;

@@ -1,4 +1,4 @@
-<section class="opacity-0">
+<section class="sr-only">
 	<div>
 		<h2>Ade Fathoni Prastya</h2>
 		<p>

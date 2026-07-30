@@ -11,7 +11,7 @@
 	import { useViewport } from '@threlte/extras';
 	import { Color } from 'three';
 
-	import { AppRoute } from '$lib/types/Route';
+	import { AppRoute } from '$lib/types/AppRoute';
 	import { route } from '$lib/state/route.svelte';
 	import { device } from '$lib/state/device.svelte';
 	import { drag } from '$lib/state/dragProgress.svelte';
@@ -25,7 +25,7 @@
 	const viewport = useViewport();
 	const { camera } = useThrelte();
 
-	let isHomePage = $derived(route.current === AppRoute.Home);
+	let isOnHome = $derived(route.is(AppRoute.Home));
 	let progress = $derived(drag.is(AppRoute.Home));
 
 	const dragTransform = {
@@ -53,7 +53,7 @@
 	];
 
 	let transform = $derived.by(() => {
-		if (!isHomePage) return { rotY: 0, posY: 0 };
+		if (!isOnHome) return { rotY: 0, posY: 0 };
 
 		return {
 			rotY: dragTransform.rotation.start + progress * dragTransform.rotation.end,
@@ -70,7 +70,7 @@
 	let throttleAcc = 0;
 	const throttleInterval = 1.0;
 	useTask((delta) => {
-		if (!camera.current || !isHomePage) return;
+		if (!camera.current || !isOnHome) return;
 
 		throttleAcc += delta;
 		if (throttleAcc < throttleInterval) return;
@@ -84,7 +84,7 @@
 	});
 </script>
 
-<T.Group visible={isHomePage}>
+<T.Group visible={isOnHome}>
 	{#each circles as setting, i (i)}
 		<CircleLine {...setting} y={0.9} />
 		<CircleLine {...setting} y={-0.9} />
