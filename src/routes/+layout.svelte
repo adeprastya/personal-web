@@ -17,7 +17,7 @@
 	import { activeProject } from '$lib/state/activeProject.svelte';
 
 	import Head from './Head.svelte';
-	import Intro from '$lib/components/Intro.svelte';
+	import Intro from '$lib/components/intro/Intro.svelte';
 	import AppFrame from '$lib/components/frame/AppFrame.svelte';
 	import ScrollToNext from '$lib/components/ScrollToNext.svelte';
 	import WebGLCanvas from '$lib/components/3d-scene/Canvas.svelte';

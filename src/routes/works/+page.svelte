@@ -119,13 +119,15 @@
 		onclick={() => activeProject.hide()}
 		class="flex w-full max-w-3xl flex-col items-start gap-3 text-left"
 	>
-		<h1
+		<!-- Tagline -->
+		<h2
 			bind:this={refs.tagline}
 			class="font-mono text-xl leading-tight tracking-widest text-zinc-600 uppercase sm:text-4xl"
 		>
 			{cachedData?.tagline}
-		</h1>
+		</h2>
 
+		<!-- Date & Technologies -->
 		<div
 			bind:this={refs.meta}
 			class="flex flex-wrap gap-2 font-mono text-xs tracking-widest text-zinc-700 uppercase"
@@ -138,6 +140,7 @@
 			</div>
 		</div>
 
+		<!-- Description -->
 		<p
 			bind:this={refs.desc}
 			class="max-w-xl text-justify font-mono text-xs leading-relaxed text-zinc-700"
@@ -145,6 +148,7 @@
 			{cachedData?.description}
 		</p>
 
+		<!-- Links -->
 		<div bind:this={refs.links} class="flex gap-4 font-mono text-xs tracking-widest uppercase">
 			{#if cachedData?.site_url}
 				<a

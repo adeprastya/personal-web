@@ -1,6 +1,7 @@
 <script lang="ts">
-	let { animate = false } = $props();
+	let animate = $state(false);
 
+	// Width (w) and delay (d) for bars animation
 	const bars = [
 		{ w: 30, d: 0.3 },
 		{ w: 60, d: 1 },
@@ -8,6 +9,7 @@
 		{ w: 60, d: 1 },
 		{ w: 30, d: 0.3 }
 	];
+
 	const totalHeight = 150;
 	const barHeight = 10;
 	const spacing = (totalHeight - bars.length * barHeight) / (bars.length + 1);
@@ -32,8 +34,8 @@
 					transform-origin: center;
 					animation-delay: {d}s;
 				"
-				class="fill-zinc-700 transition-colors group-hover:fill-zinc-500 group-active:fill-zinc-900 {animate &&
-					'animate'}"
+				class="fill-zinc-700 transition-colors group-hover:fill-zinc-500 group-active:fill-zinc-900"
+				class:animate
 			/>
 		{/each}
 	</svg>

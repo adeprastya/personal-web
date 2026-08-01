@@ -1,12 +1,16 @@
 <script lang="ts">
-	/* eslint-disable @typescript-eslint/no-unused-vars */
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { AppRoute } from '$lib/types/AppRoute';
 	import { drag } from '$lib/state/dragProgress.svelte';
 
-	const TICK_COUNT = 40;
+	const config = {
+		tickCount: 40,
+		trackFadeMs: 200, // fade-in duration for the track when it appears
+		showThreshold: 0.01, // minimum drag progress before the bar becomes visible
+		navigateThreshold: 0.98 // drag progress that triggers navigation to the next route
+	};
 
 	const routes = Object.values(AppRoute);
 
@@ -16,10 +20,11 @@
 	const curIdx = $derived(routes.findIndex((l: string) => l === page.url.pathname));
 	const nextIdx = $derived((curIdx + 1) % routes.length);
 	const progressRatio = $derived(drag.value);
-	const show = $derived(progressRatio > 0.01);
+	const show = $derived(progressRatio > config.showThreshold);
 
 	$effect(() => {
 		const pathname = page.url.pathname;
+		// Route changed elsewhere (e.g. clicking a link): reset drag state.
 		if (pathname !== lockedPathname) {
 			isNavigating = false;
 			lockedPathname = pathname;
@@ -27,7 +32,7 @@
 		}
 
 		if (isNavigating) return;
-		if (progressRatio < 0.98) return;
+		if (progressRatio < config.navigateThreshold) return;
 
 		const nextPath = routes[nextIdx];
 		isNavigating = true;
@@ -43,7 +48,7 @@
 		<span class="font-mono text-sm leading-none text-zinc-50/30">[</span>
 
 		<!-- Track -->
-		<div transition:fade={{ duration: 200 }} class="relative w-full">
+		<div transition:fade={{ duration: config.trackFadeMs }} class="relative w-full">
 			<div class="relative h-3 w-full overflow-hidden">
 				<!-- Baseline -->
 				<div class="absolute top-1/2 right-0 h-px w-full -translate-y-1/2 bg-zinc-50/30"></div>
@@ -61,10 +66,11 @@
 			</div>
 
 			<div class="flex w-full justify-between">
-				{#each Array(TICK_COUNT) as _, i (i)}
+				<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
+				{#each Array(config.tickCount) as _, i (i)}
 					<!-- Tick marks -->
 					<div
-						class="h-1.5 w-px transition-colors duration-100 {i / TICK_COUNT <= progressRatio
+						class="h-1.5 w-px transition-colors duration-100 {i / config.tickCount <= progressRatio
 							? 'bg-zinc-50/60'
 							: 'bg-zinc-50/15'}"
 					></div>

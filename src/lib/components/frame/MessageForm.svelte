@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PUBLIC_WEB3FORMS_KEY } from '$env/static/public';
+	import { web3Send } from '$lib/utils/messageForm';
 	import SvgSend from '$lib/assets/icons/PaperPlane.svg?component';
 	import SvgCross from '$lib/assets/icons/Cross1.svg?component';
 	import Trapezoid from '$lib/components/shared/Trapezoid.svelte';
@@ -8,39 +8,41 @@
 
 	let isOpen = $state(false);
 
-	let isSubmitting = $state(false);
-	let formStatus = $state<'idle' | 'success' | 'error'>('idle');
-	let statusMessage = $state('');
+	const StatusType = {
+		Idle: 'idle',
+		Error: 'error',
+		Success: 'success'
+	} as const;
+	type Status = {
+		type: (typeof StatusType)[keyof typeof StatusType];
+		message: string;
+		sending: boolean;
+	};
+	let status: Status = $state({ type: StatusType.Idle, message: '', sending: false });
 
-	async function handleSubmit(event: SubmitEvent) {
-		event.preventDefault();
-		isSubmitting = true;
-		formStatus = 'idle';
+	let values = $state({
+		name: '',
+		email: '',
+		message: ''
+	});
 
-		const formData = new FormData(event.currentTarget as HTMLFormElement);
-		formData.append('access_key', PUBLIC_WEB3FORMS_KEY);
+	async function handleSubmit(e: SubmitEvent) {
+		e.preventDefault();
+		status.sending = true;
+		status.type = StatusType.Idle;
 
 		try {
-			const response = await fetch('https://api.web3forms.com/submit', {
-				method: 'POST',
-				body: formData
-			});
+			await web3Send(values.name, values.email, values.message);
 
-			const data = await response.json();
+			values = { name: '', email: '', message: '' };
 
-			if (data.success) {
-				formStatus = 'success';
-				statusMessage = 'Thanks for reaching out!';
-				(event.target as HTMLFormElement).reset();
-			} else {
-				formStatus = 'error';
-				statusMessage = 'Sorry, Something went wrong.';
-			}
+			status.type = StatusType.Success;
+			status.message = 'Thanks for reaching out!';
 		} catch {
-			formStatus = 'error';
-			statusMessage = 'Network error. Please try again later.';
+			status.type = StatusType.Error;
+			status.message = 'Something wrong. Try again later.';
 		} finally {
-			isSubmitting = false;
+			status.sending = false;
 		}
 	}
 </script>
@@ -55,8 +57,11 @@
 
 	<input type="checkbox" name="botcheck" class="hidden" style="display: none;" />
 
+	<!-- Name -->
 	<InputField
+		bind:value={values.name}
 		name="name"
+		class="outline-zinc-400"
 		wClass="font-body text-sm text-zinc-800"
 		label="Name"
 		lClass="font-mono text-sm text-zinc-800 tracking-wider"
@@ -65,9 +70,12 @@
 		required
 	/>
 
+	<!-- Email -->
 	<InputField
+		bind:value={values.email}
 		name="email"
 		type="email"
+		class="outline-zinc-400"
 		wClass="font-body text-sm text-zinc-800"
 		label="Email"
 		lClass="font-mono text-sm text-zinc-800 tracking-wider"
@@ -76,10 +84,12 @@
 		required
 	/>
 
+	<!-- Message -->
 	<TextareaField
+		bind:value={values.message}
 		name="message"
 		rows={3}
-		class="max-h-[25vh] min-h-8"
+		class="max-h-[25vh] min-h-8 outline-zinc-400"
 		wClass="font-body text-sm text-zinc-800"
 		label="Message"
 		lClass="font-mono text-sm text-zinc-800 tracking-wider"
@@ -88,28 +98,31 @@
 		required
 	/>
 
-	{#if formStatus !== 'idle'}
+	<!-- Submit status -->
+	{#if status.type === 'success' || status.type === 'error'}
 		<p
-			class="text-center font-mono text-xs {formStatus === 'success'
-				? 'text-green-600'
-				: 'text-red-500'}"
+			class="text-center font-mono text-xs"
+			class:text-green-600={status.type === 'success'}
+			class:text-red-600={status.type === 'error'}
 		>
-			{statusMessage}
+			{status.message}
 		</p>
 	{/if}
 
+	<!-- Send button -->
 	<button
 		aria-label="Send Message"
 		type="submit"
-		disabled={isSubmitting}
+		disabled={status.sending}
 		class="flex w-full items-center justify-between gap-2 rounded-sm bg-zinc-700 px-4 py-2 transition-colors duration-300 hover:bg-zinc-600 active:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
 	>
 		<span class="font-mono text-sm tracking-widest text-zinc-200">
-			{isSubmitting ? 'Sending...' : 'Send Message'}
+			{status.sending ? 'Sending...' : 'Send Message'}
 		</span>
 		<SvgSend class="fill-zinc-300" />
 	</button>
 
+	<!-- Form toggle -->
 	<Trapezoid
 		variant="L"
 		slant="2rem"

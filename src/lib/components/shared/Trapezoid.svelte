@@ -1,15 +1,16 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import type { TrapezoidVariant } from '$lib/types/TrapezoidVariants';
 
-	interface ITrapezoid extends HTMLAttributes<HTMLDivElement> {
-		variant: keyof typeof pathVariants;
+	interface Props extends HTMLAttributes<HTMLDivElement> {
+		variant: TrapezoidVariant;
 		slant: string;
 		children: Snippet;
 	}
+	let { variant = 'TL', slant = '25%', children, ...props }: Props = $props();
 
-	let { variant = 'TL', slant = '25%', children, ...props }: ITrapezoid = $props();
-
+	// Clip path presets
 	const pathVariants = {
 		TL: (s: string) => `polygon(0 0, 100% 0, calc(100% - ${s}) 100%, 0 100%)`,
 		TC: (s: string) => `polygon(0 0, 100% 0, calc(100% - ${s}) 100%, ${s} 100%)`,

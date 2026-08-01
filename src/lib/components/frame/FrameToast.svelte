@@ -1,19 +1,22 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	let { text, href }: { text?: string; href?: string } = $props();
+	const content = {
+		text: 'Dive into my resume',
+		href: '/docs/cv.pdf'
+	};
 
 	let isOpen = $state(false);
 
-	function handleClick(e: MouseEvent) {
+	function handleWrapperClick(e: MouseEvent) {
 		e.stopPropagation();
 
 		if (!isOpen) return (isOpen = true);
 
-		window.open(href, '_blank', 'noopener,noreferrer');
+		window.open(content.href, '_blank', 'noopener,noreferrer');
 	}
 
-	onMount(() => {
+	onMount(function createWindowClickListener() {
 		const close = () => (isOpen = false);
 
 		window.addEventListener('click', close);
@@ -21,11 +24,11 @@
 	});
 </script>
 
-{#if text && href}
+{#if content.text && content.href}
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		onclick={(e) => handleClick(e)}
+		onclick={(e) => handleWrapperClick(e)}
 		aria-expanded={isOpen}
 		aria-label="Toggle CTA"
 		class="group relative flex size-full items-center justify-center px-3.5 py-2.5 sm:px-4 sm:py-3"
@@ -42,11 +45,11 @@
 				: 'max-w-0'}"
 		>
 			<a
-				{href}
+				href={content.href}
 				target="_blank"
 				class="text-2xs pointer-events-auto inline-block cursor-pointer font-mono tracking-widest text-zinc-200 uppercase sm:text-xs"
 			>
-				{text}
+				{content.text}
 			</a>
 		</span>
 

@@ -1,18 +1,20 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	let windowWidth: number;
-	let time: string;
+	let time = $state<string>('');
 
+	// Time format based on Jakarta, Indonesia
 	function updateTime() {
-		time = new Date().toLocaleTimeString([], {
+		time = new Date().toLocaleTimeString('id-ID', {
+			timeZone: 'Asia/Jakarta',
+			hour12: false,
 			hour: '2-digit',
 			minute: '2-digit',
 			second: '2-digit'
 		});
 	}
 
-	onMount(() => {
+	onMount(function updateEverySecond() {
 		updateTime();
 
 		const interval = setInterval(updateTime, 1000);
@@ -20,11 +22,7 @@
 	});
 </script>
 
-<svelte:window bind:innerWidth={windowWidth} />
-
 <p class="font-mono text-xs text-zinc-800 sm:text-sm">
-	{time}
-	{#if windowWidth > 640}
-		[ID]
-	{/if}
+	<span>{time}</span>
+	<span class="hidden sm:inline">[ID]</span>
 </p>

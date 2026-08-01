@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { HTMLInputAttributes } from 'svelte/elements';
-	import { cn } from '$lib/utils/tailwindUtil';
+	import { cn } from '$lib/utils/tailwindHelpers';
 
-	interface IInputFieldProps extends HTMLInputAttributes {
+	interface Props extends HTMLInputAttributes {
 		value?: string | number;
 		name: string;
 		wClass?: string;
@@ -24,14 +24,14 @@
 		errorMessage = '',
 		eClass,
 		...props
-	}: IInputFieldProps = $props();
+	}: Props = $props();
 
 	let filled = $derived(!!value);
 	let focused = $state(false);
 </script>
 
 <div class={cn('relative h-fit w-full', wClass)}>
-	<!-- floating label -->
+	<!-- Floating label -->
 	<label
 		for={name}
 		class={cn(
@@ -41,7 +41,7 @@
 		)}>{label}</label
 	>
 
-	<!-- char counter -->
+	<!-- Char counter -->
 	{#if showCounter && typeof value === 'string'}
 		<p class={cn('pointer-events-none absolute top-0 right-0.5 text-xs text-zinc-500', cClass)}>
 			{value.length}
@@ -52,10 +52,9 @@
 		</p>
 	{/if}
 
-	<!-- main input -->
+	<!-- Main input -->
 	<input
 		{...props}
-		{name}
 		id={name}
 		type={props.type ?? 'text'}
 		class={cn('w-full border-b px-2 py-1', props.class)}
@@ -64,7 +63,7 @@
 		bind:value
 	/>
 
-	<!-- error message -->
+	<!-- Error message -->
 	{#if errorMessage}
 		<p
 			role="alert"

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { PUBLIC_IS_OPEN_TO_WORK } from '$env/static/public';
+	import { booleanCast } from '$lib/utils/envHelpers';
 	import { onMount } from 'svelte';
 	import { gsap } from 'gsap';
 
@@ -12,53 +14,67 @@
 	import FrameToast from './FrameToast.svelte';
 	import GyroCompassHUDEffect from '$lib/components/frame/GyroCompassHUDEffect.svelte';
 
+	const isOpenToWork = booleanCast(PUBLIC_IS_OPEN_TO_WORK);
 	let windowWidth = $state(0);
 	let slant = $derived(windowWidth < 640 ? '2rem' : '2.5rem');
 
-	let isAvailable = $state(true);
-	let isSoundOn = $state(false);
-	let toastCTA = $state({
-		text: 'Dive into my resume',
-		href: '/docs/cv.pdf'
-	});
+	type Refs = {
+		name: HTMLElement | null;
+		logo: HTMLElement | null;
+		clock: HTMLElement | null;
+		social: HTMLElement | null;
+		avail: HTMLElement | null;
+		message: HTMLElement | null;
+		sound: HTMLElement | null;
+		nav: HTMLElement | null;
+		toast: HTMLElement | null;
+		decor: HTMLElement | null;
+	};
+	const refs: Refs = {
+		name: null,
+		logo: null,
+		clock: null,
+		social: null,
+		avail: null,
+		message: null,
+		sound: null,
+		nav: null,
+		toast: null,
+		decor: null
+	};
 
-	let nameEl: HTMLParagraphElement | null = null;
-	let logoEl: HTMLDivElement | null = null;
-	let clockEl: HTMLDivElement | null = null;
-	let socialEl: HTMLDivElement | null = null;
-	let availEl: HTMLDivElement | null = null;
-	let messageEl: HTMLDivElement | null = null;
-	let soundEl: HTMLDivElement | null = null;
-	let navEl: HTMLDivElement | null = null;
-
-	onMount(() => {
-		gsap.set(nameEl, { y: '-100%', x: '-100%', opacity: 0 });
-		gsap.set(logoEl, { y: '-100%', x: '0%', opacity: 0 });
-		gsap.set(clockEl, { y: '-100%', x: '100%', opacity: 0 });
-		gsap.set(socialEl, { y: '100%', x: '-100%', opacity: 0 });
-		gsap.set(availEl, { y: '100%', x: '100%', opacity: 0 });
-		gsap.set(messageEl, { y: '0%', x: '-100%', opacity: 0 });
-		gsap.set(soundEl, { y: '0%', x: '100%', opacity: 0 });
-		gsap.set(navEl, { opacity: 0 });
+	onMount(function animateEnteringRefs() {
+		gsap.set(refs.name, { y: '-100%', x: '-100%', opacity: 0 });
+		gsap.set(refs.logo, { y: '-100%', x: '0%', opacity: 0 });
+		gsap.set(refs.clock, { y: '-100%', x: '100%', opacity: 0 });
+		gsap.set(refs.social, { y: '100%', x: '-100%', opacity: 0 });
+		gsap.set(refs.avail, { y: '100%', x: '100%', opacity: 0 });
+		gsap.set(refs.message, { y: '0%', x: '-100%', opacity: 0 });
+		gsap.set(refs.sound, { y: '0%', x: '100%', opacity: 0 });
+		gsap.set(refs.nav, { opacity: 0 });
+		gsap.set(refs.toast, { opacity: 0 });
+		gsap.set(refs.decor, { opacity: 0 });
 
 		const tl = gsap.timeline({
-			defaults: { duration: 1.8, ease: 'power3.out' },
+			defaults: { duration: 1.4, ease: 'power2.out' },
 			delay: 1.0
 		});
 
-		tl.to(logoEl, { y: 0, x: 0, opacity: 1 })
-			.to([nameEl, clockEl], { y: 0, x: 0, opacity: 1 }, '<0.9')
-			.to([socialEl, availEl], { y: 0, x: 0, opacity: 1 }, '<0.9')
-			.to([socialEl, availEl], { y: 0, x: 0, opacity: 1 }, '<0.9')
-			.to([messageEl, soundEl], { y: 0, x: 0, opacity: 1 }, '<0.9')
-			.to(navEl, { opacity: 1 }, '<0.9');
+		tl.to(refs.logo, { y: 0, x: 0, opacity: 1 })
+			.to([refs.name, refs.clock], { y: 0, x: 0, opacity: 1 }, '<0.6')
+			.to([refs.social, refs.avail], { y: 0, x: 0, opacity: 1 }, '<0.6')
+			.to([refs.social, refs.avail], { y: 0, x: 0, opacity: 1 }, '<0.6')
+			.to([refs.message, refs.sound], { y: 0, x: 0, opacity: 1 }, '<0.6')
+			.to(refs.nav, { opacity: 1 }, '<0.4')
+			.to(refs.toast, { opacity: 1 }, '<0.4')
+			.to(refs.decor, { opacity: 1 }, '<0.4');
 	});
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} />
 
 <header class="pointer-events-none fixed inset-0 size-full text-zinc-800">
-	<!-- borders -->
+	<!-- Borders -->
 	<div class="absolute top-0 left-0 h-2 w-full bg-zinc-200"></div>
 	<!-- [T] -->
 	<div class="absolute bottom-0 left-0 h-2 w-full bg-zinc-200"></div>
@@ -68,101 +84,105 @@
 	<div class="absolute top-0 right-0 h-full w-2 bg-zinc-200"></div>
 	<!-- [R] -->
 
-	<!-- [TL] name -->
+	<!-- Name [TL] -->
 	<Trapezoid
 		variant="TL"
 		{slant}
 		class="pointer-events-auto absolute top-0 left-0 z-10 flex h-[1.8rem] min-w-[8rem] items-center justify-center bg-zinc-200 px-2 pe-[2.2rem] sm:h-[2rem] sm:min-w-[10rem] sm:px-6 sm:pe-[3.5rem]"
 	>
 		<p
-			bind:this={nameEl}
+			bind:this={refs.name}
 			class="font-heading text-[18px] tracking-wide lowercase opacity-0 sm:text-[22px]"
 		>
 			Ade Prastya
 		</p>
 	</Trapezoid>
 
-	<!-- [TC] logo -->
+	<!-- Logo [TC] -->
 	<Trapezoid
 		variant="TC"
 		{slant}
 		class="pointer-events-auto absolute top-0 left-1/2 z-10 flex h-[1.8rem] -translate-x-1/2 items-center justify-center bg-zinc-200 px-[2.2rem] sm:h-[2rem] sm:px-[2.7rem]"
 	>
-		<div bind:this={logoEl} class="opacity-0">
+		<div bind:this={refs.logo} class="opacity-0">
 			<SvgLogo class="size-6 fill-zinc-700 sm:size-7" />
 		</div>
 	</Trapezoid>
 
-	<!-- [TR] time -->
+	<!-- Time [TR] -->
 	<Trapezoid
 		variant="TR"
 		{slant}
 		class="pointer-events-auto absolute top-0 right-0 z-10 flex h-[1.8rem] min-w-[8rem] items-center justify-center bg-zinc-200 px-2 ps-[2.2rem] sm:h-[2rem] sm:min-w-[10rem] sm:px-6 sm:ps-[3.5rem]"
 	>
-		<div bind:this={clockEl} class="opacity-0"><RealtimeClock /></div>
+		<div bind:this={refs.clock} class="opacity-0"><RealtimeClock /></div>
 	</Trapezoid>
 
-	<!-- [BL] social links -->
+	<!-- Social links [BL] -->
 	<Trapezoid
 		variant="BL"
 		{slant}
 		class="pointer-events-auto absolute bottom-0 left-0 z-10 flex h-[1.8rem] min-w-[8rem] items-center bg-zinc-200 px-2 pe-[2.2rem] sm:h-[2rem] sm:min-w-[10rem] sm:px-6 sm:pe-[3.5rem]"
 	>
-		<div bind:this={socialEl} class="opacity-0"><SocialLinks /></div>
+		<div bind:this={refs.social} class="opacity-0"><SocialLinks /></div>
 	</Trapezoid>
 
-	<!-- [BR] avail status -->
+	<!-- Avail status [BR] -->
 	<Trapezoid
 		variant="BR"
 		{slant}
 		class="pointer-events-auto absolute right-0 bottom-0 z-10 flex h-[1.8rem] min-w-[8rem] items-center justify-center bg-zinc-200 px-2 ps-[2.2rem] sm:h-[2rem] sm:min-w-[10rem] sm:px-6 sm:ps-[3.5rem]"
 	>
-		<div bind:this={availEl} class="opacity-0">
+		<div bind:this={refs.avail} class="opacity-0">
 			<p class="flex items-center gap-3 sm:gap-4">
 				<span
-					class="inline-block size-1.5 rotate-45 animate-pulse {isAvailable
+					class="inline-block size-1.5 rotate-45 animate-pulse {isOpenToWork
 						? 'bg-green-600'
 						: 'bg-red-600'}"
 				></span>
 				<span class="font-heading text-[18px] lowercase sm:text-[22px]"
-					>{isAvailable ? 'Open for work' : 'Currently working on'}</span
+					>{isOpenToWork ? 'Open for work' : 'Currently working on'}</span
 				>
 			</p>
 		</div>
 	</Trapezoid>
 
-	<!-- [L1] fast messages -->
+	<!-- Fast messages [L1] -->
 	<div class="pointer-events-auto absolute top-1/2 left-0 z-10 -translate-x-full -translate-y-1/2">
-		<div bind:this={messageEl} class="opacity-0">
+		<div bind:this={refs.message} class="opacity-0">
 			<MessageForm />
 		</div>
 	</div>
 
-	<!-- [R1] sound toggle -->
+	<!-- Sound toggle [R1] -->
 	<Trapezoid
 		variant="R"
 		slant="2rem"
 		class="pointer-events-auto absolute top-1/4 right-0 z-10 -translate-y-1/2 bg-zinc-200 px-1.5 py-[2.2rem]"
 	>
-		<div bind:this={soundEl} class="opacity-0">
-			<SoundToggle animate={isSoundOn} />
+		<div bind:this={refs.sound} class="opacity-0">
+			<SoundToggle />
 		</div>
 	</Trapezoid>
 
-	<!-- [R2] navigation -->
+	<!-- Nnavigation [R2] -->
 	<div class="pointer-events-auto absolute right-0 bottom-1/4 z-10 w-fit translate-y-1/2">
-		<div bind:this={navEl} class="opacity-0">
+		<div bind:this={refs.nav} class="opacity-0">
 			<Navigation />
 		</div>
 	</div>
 
-	<!-- Gyro Compass Decoration -->
-	<div class="pointer-events-none absolute top-10 left-1/2 z-10 -translate-x-1/2">
-		<GyroCompassHUDEffect />
+	<!-- CTA toast [TL] -->
+	<div class="pointer-events-auto absolute top-18 left-6 z-50 sm:top-14 sm:left-8">
+		<div bind:this={refs.toast} class="opacity-0">
+			<FrameToast />
+		</div>
 	</div>
 
-	<!-- CTA toast -->
-	<div class="pointer-events-auto absolute top-18 left-6 z-50 sm:top-14 sm:left-8">
-		<FrameToast {...toastCTA} />
+	<!-- Gyro compass decoration [TC] -->
+	<div class="pointer-events-none absolute top-10 left-1/2 z-10 -translate-x-1/2">
+		<div bind:this={refs.decor} class="opacity-0">
+			<GyroCompassHUDEffect />
+		</div>
 	</div>
 </header>

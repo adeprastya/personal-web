@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ProjectDetails } from '$lib/types/Project';
-  let { projects }: { projects: ProjectDetails[] } = $props();
+	let { projects }: { projects: ProjectDetails[] } = $props();
 </script>
 
 <!-- Visually hidden duplicate data for screen readers & search engines -->
@@ -48,6 +48,6 @@
 			{/each}
 		</ul>
 	{:else}
-    <div role="alert">Im, sorry. Something went wrong.</div>
+		<div role="alert">Im, sorry. Something went wrong.</div>
 	{/if}
 </section>
