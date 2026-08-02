@@ -6,7 +6,7 @@
 	import { Draggable } from 'gsap/Draggable';
 	import { InertiaPlugin } from 'gsap/InertiaPlugin';
 
-	import { activeProject } from '$lib/state/activeProject.svelte';
+	import { projectControl } from '$lib/state/projectControl.svelte';
 	import { AppRoute } from '$lib/types/AppRoute';
 
 	// --- Data & constants -----------------------------------------------
@@ -254,7 +254,7 @@
 		bind:this={refs.container}
 		aria-label="Primary Navigation"
 		class="relative h-36 touch-none overflow-hidden select-none"
-		style={`pointer-events: ${activeProject.isVisible ? 'none' : 'auto'}`}
+		style={`pointer-events: ${projectControl.isVisible ? 'none' : 'auto'}`}
 	>
 		<div bind:this={refs.wrapper}>
 			<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->

@@ -14,7 +14,7 @@
 	import { AppRoute } from '$lib/types/AppRoute';
 	import { route } from '$lib/state/route.svelte';
 	import { device } from '$lib/state/device.svelte';
-	import { drag } from '$lib/state/dragProgress.svelte';
+	import { drag } from '$lib/state/dragControl.svelte';
 
 	import CircleLine from './CircleLine.svelte';
 	import BracketText from './BracketText.svelte';

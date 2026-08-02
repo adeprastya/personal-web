@@ -13,8 +13,8 @@
 	import { route } from '$lib/state/route.svelte';
 	import { device } from '$lib/state/device.svelte';
 	import { pointer } from '$lib/state/pointer.svelte';
-	import { drag } from '$lib/state/dragProgress.svelte';
-	import { activeProject } from '$lib/state/activeProject.svelte';
+	import { drag } from '$lib/state/dragControl.svelte';
+	import { projectControl } from '$lib/state/projectControl.svelte';
 
 	import Head from './Head.svelte';
 	import Intro from '$lib/components/intro/Intro.svelte';
@@ -49,7 +49,7 @@
 		device.init();
 		pointer.init();
 		drag.init(() => pointer.dy);
-		activeProject.reset();
+		projectControl.reset();
 
 		// Register plugins.
 		gsap.registerPlugin(SplitText);

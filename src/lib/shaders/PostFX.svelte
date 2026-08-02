@@ -12,7 +12,7 @@
 	} from 'postprocessing';
 	import { ChromaticAberrationEffect } from './chromaticAberration';
 	import { InvertedDimensionalEffect } from './invertedDimensional';
-	import { activeProject } from '$lib/state/activeProject.svelte';
+	import { projectControl } from '$lib/state/projectControl.svelte';
 
 	const { scene, camera, renderer, size, renderStage } = useThrelte();
 	const composer = new EffectComposer(renderer);
@@ -53,7 +53,7 @@
 	);
 
 	$effect(() => {
-		if (activeProject.isVisible) {
+		if (projectControl.isVisible) {
 			gsap.fromTo(
 				dimensionalEffect,
 				{ progress: 0 },

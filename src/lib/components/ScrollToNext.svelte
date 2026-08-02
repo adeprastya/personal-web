@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { AppRoute } from '$lib/types/AppRoute';
-	import { drag } from '$lib/state/dragProgress.svelte';
+	import { drag } from '$lib/state/dragControl.svelte';
 
 	const config = {
 		tickCount: 40,

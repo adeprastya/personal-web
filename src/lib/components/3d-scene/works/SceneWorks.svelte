@@ -20,8 +20,8 @@
 	import { AppRoute } from '$lib/types/AppRoute';
 	import { projects } from '$lib/stores/projects.svelte';
 	import { route } from '$lib/state/route.svelte';
-	import { activeProject } from '$lib/state/activeProject.svelte';
-	import { drag } from '$lib/state/dragProgress.svelte';
+	import { projectControl } from '$lib/state/projectControl.svelte';
+	import { drag } from '$lib/state/dragControl.svelte';
 
 	const HEX = {
 		radius: 0.06,
@@ -436,7 +436,7 @@
 	// Cleanup
 	// ---------------------------------------------------------------------------
 	$effect(() => {
-		if (!isOnWorks) activeProject.hide();
+		if (!isOnWorks) projectControl.hide();
 	});
 
 	$effect(() => () => {
@@ -463,8 +463,8 @@
 		const project = projects.data[currentIndex];
 		if (!project) return;
 
-		activeProject.set(currentIndex, project);
-		activeProject.show();
+		projectControl.set(currentIndex, project);
+		projectControl.show();
 	}
 </script>
 

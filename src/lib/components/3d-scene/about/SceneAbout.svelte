@@ -4,7 +4,7 @@
 	import { T } from '@threlte/core';
 	import { device } from '$lib/state/device.svelte';
 	import { route } from '$lib/state/route.svelte';
-	import { drag } from '$lib/state/dragProgress.svelte';
+	import { drag } from '$lib/state/dragControl.svelte';
 	import DiamondText from './DiamondText.svelte';
 	import ButterflyColony from './ButterflyColony.svelte';
 

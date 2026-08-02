@@ -3,7 +3,7 @@ import { page } from '$app/state';
 import gsap from 'gsap';
 import { device } from '$lib/state/device.svelte';
 
-class DragProgressState {
+class DragControlState {
 	/** Base drag distance required to reach 100% progress. */
 	private readonly DRAG_NEEDED = 1000;
 	/** Multiplier applied to desktop devices. */
@@ -121,4 +121,4 @@ class DragProgressState {
 	}
 }
 
-export const drag = new DragProgressState();
+export const drag = new DragControlState();

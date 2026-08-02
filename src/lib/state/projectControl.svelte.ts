@@ -1,6 +1,6 @@
 import type { ProjectDetails } from '$lib/types/Project';
 
-class ActiveProjectState {
+class ProjectControlState {
 	/** Whether the project detail is currently visible. */
 	public isVisible = $state<boolean>(false);
 	/** Index of the active project. */
@@ -41,4 +41,4 @@ class ActiveProjectState {
 	}
 }
 
-export const activeProject = new ActiveProjectState();
+export const projectControl = new ProjectControlState();

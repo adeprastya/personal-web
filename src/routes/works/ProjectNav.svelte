@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { AppRoute } from '$lib/types/AppRoute';
-	import { drag } from '$lib/state/dragProgress.svelte';
+	import { drag } from '$lib/state/dragControl.svelte';
 	import { MathUtils } from 'three';
 	import { trapezoid } from '$lib/utils/progressManipulation';
 

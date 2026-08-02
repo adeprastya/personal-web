@@ -6,7 +6,7 @@
 	import type { PageData } from './$types';
 	import { AppRoute } from '$lib/types/AppRoute';
 	import { route } from '$lib/state/route.svelte';
-	import { activeProject } from '$lib/state/activeProject.svelte';
+	import { projectControl } from '$lib/state/projectControl.svelte';
 
 	import WorksSEO from './WorksSEO.svelte';
 	import ProjectNav from './ProjectNav.svelte';
@@ -14,8 +14,8 @@
 	let { data }: { data: PageData } = $props();
 
 	let projects = $derived(data.projects);
-	let cachedData = $state(activeProject.data);
-	let isVisible = $derived(activeProject.isVisible);
+	let cachedData = $state(projectControl.data);
+	let isVisible = $derived(projectControl.isVisible);
 
 	type Refs = { [key: string]: HTMLElement | null };
 	const refs: Refs = {
@@ -89,8 +89,8 @@
 	}
 
 	$effect(function updateCache() {
-		if (activeProject.index !== -1) {
-			cachedData = $state.snapshot(activeProject.data);
+		if (projectControl.index !== -1) {
+			cachedData = $state.snapshot(projectControl.data);
 		}
 	});
 
@@ -116,7 +116,7 @@
 	style={`pointer-events: ${isVisible ? 'auto' : 'none'};`}
 >
 	<button
-		onclick={() => activeProject.hide()}
+		onclick={() => projectControl.hide()}
 		class="flex w-full max-w-3xl flex-col items-start gap-3 text-left"
 	>
 		<!-- Tagline -->
