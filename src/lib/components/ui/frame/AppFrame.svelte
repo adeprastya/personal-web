@@ -5,14 +5,14 @@
 	import { gsap } from 'gsap';
 
 	import SvgLogo from '$lib/assets/icons/logo.svg?component';
-	import Trapezoid from '$lib/components/shared/Trapezoid.svelte';
+	import Trapezoid from '$lib/components/ui/shared/Trapezoid.svelte';
 	import RealtimeClock from './RealtimeClock.svelte';
 	import MessageForm from './MessageForm.svelte';
 	import SoundToggle from './SoundToggle.svelte';
 	import Navigation from './Navigation.svelte';
 	import SocialLinks from './SocialLinks.svelte';
 	import FrameToast from './FrameToast.svelte';
-	import GyroCompassHUDEffect from '$lib/components/frame/GyroCompassHUDEffect.svelte';
+	import GyroCompassHUDEffect from './GyroCompassHUDEffect.svelte';
 
 	const isOpenToWork = booleanCast(PUBLIC_IS_OPEN_TO_WORK);
 	let windowWidth = $state(0);

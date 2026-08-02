@@ -18,7 +18,6 @@
 	let lockedPathname = $state('');
 
 	const curIdx = $derived(routes.findIndex((l: string) => l === page.url.pathname));
-	const nextIdx = $derived((curIdx + 1) % routes.length);
 	const progressRatio = $derived(drag.value);
 	const show = $derived(progressRatio > config.showThreshold);
 
@@ -34,9 +33,9 @@
 		if (isNavigating) return;
 		if (progressRatio < config.navigateThreshold) return;
 
-		const nextPath = routes[nextIdx];
 		isNavigating = true;
-		goto(nextPath);
+		const nextIdx = (curIdx + 1) % routes.length;
+		goto(routes[nextIdx]);
 	});
 </script>
 

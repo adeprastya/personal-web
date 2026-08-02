@@ -2,9 +2,9 @@
 	import { web3Send } from '$lib/utils/messageForm';
 	import SvgSend from '$lib/assets/icons/PaperPlane.svg?component';
 	import SvgCross from '$lib/assets/icons/Cross1.svg?component';
-	import Trapezoid from '$lib/components/shared/Trapezoid.svelte';
-	import InputField from '$lib/components/shared/form-minimalist/InputField.svelte';
-	import TextareaField from '$lib/components/shared/form-minimalist/TextareaField.svelte';
+	import Trapezoid from '$lib/components/ui/shared/Trapezoid.svelte';
+	import InputField from '$lib/components/ui/shared/form-minimalist/InputField.svelte';
+	import TextareaField from '$lib/components/ui/shared/form-minimalist/TextareaField.svelte';
 
 	let isOpen = $state(false);
 

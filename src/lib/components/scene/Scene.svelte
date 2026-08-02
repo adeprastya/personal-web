@@ -7,7 +7,7 @@
 	import Camera from './Camera.svelte';
 	import PostFX from '$lib/shaders/PostFX.svelte';
 
-	import SceneGlobal from '$lib/components/3d-scene/global/SceneGlobal.svelte';
+	import SceneGlobal from './global/SceneGlobal.svelte';
 	import SceneHome from './home/SceneHome.svelte';
 	import SceneAbout from './about/SceneAbout.svelte';
 	import SceneWorks from './works/SceneWorks.svelte';

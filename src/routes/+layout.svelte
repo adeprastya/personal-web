@@ -17,10 +17,10 @@
 	import { projectControl } from '$lib/state/projectControl.svelte';
 
 	import Head from './Head.svelte';
-	import Intro from '$lib/components/intro/Intro.svelte';
-	import AppFrame from '$lib/components/frame/AppFrame.svelte';
-	import ScrollToNext from '$lib/components/ScrollToNext.svelte';
-	import WebGLCanvas from '$lib/components/3d-scene/Canvas.svelte';
+	import Intro from '$lib/components/ui/intro/Intro.svelte';
+	import AppFrame from '$lib/components/ui/frame/AppFrame.svelte';
+	import ScrollToNext from '$lib/components/ui/ScrollToNext.svelte';
+	import WebGLCanvas from '$lib/components/scene/Canvas.svelte';
 
 	let { children } = $props();
 
