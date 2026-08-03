@@ -1,8 +1,8 @@
 <script lang="ts">
-	import DarkAmbientEnv from './DarkAmbientEnv.svelte';
+	import Sky from './Sky.svelte';
 </script>
 
-<DarkAmbientEnv
+<Sky
 	turbidity={0.08}
 	rayleigh={0.002}
 	mieCoefficient={0.06}

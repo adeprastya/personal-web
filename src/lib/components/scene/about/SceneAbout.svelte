@@ -8,6 +8,11 @@
 	import DiamondText from './DiamondText.svelte';
 	import ButterflyColony from './ButterflyColony.svelte';
 
+	const isMobile = $derived(device.isMatchMediaMobile);
+	const textWidth = $derived(isMobile ? 1.6 : 2.0);
+	const fontSize = $derived(isMobile ? 0.18 : 0.16);
+
+	// Split the progress for each text element
 	let progress = $derived.by(() => {
 		const raw = drag.is(AppRoute.About) * 3;
 		return [
@@ -16,10 +21,6 @@
 			MathUtils.mapLinear(raw, 2, 3, 0, 1)
 		];
 	});
-
-	const isMobile = $derived(device.isMatchMediaMobile);
-	const textWidth = $derived(isMobile ? 1.6 : 2.0);
-	const fontSize = $derived(isMobile ? 0.18 : 0.16);
 
 	const texts = [
 		{

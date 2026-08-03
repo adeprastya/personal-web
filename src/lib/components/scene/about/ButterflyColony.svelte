@@ -1,6 +1,7 @@
 <script lang="ts">
-	import type { BufferGeometry, InstancedMesh as ThreeInstancedMesh } from 'three';
 	import {
+		type BufferGeometry,
+		type InstancedMesh,
 		DoubleSide,
 		ShaderMaterial,
 		MathUtils,
@@ -13,28 +14,47 @@
 	import { T, useTask } from '@threlte/core';
 	import { useGltf } from '@threlte/extras';
 
-	const PLANE: {
+	import vert from '$lib/shaders/butterflyColony/vert.glsl?raw';
+	import frag from '$lib/shaders/butterflyColony/frag.glsl?raw';
+
+	/** Invisible raycast plane used to translate pointer movement into a 3D world position. */
+	type Plane = {
 		pos: [number, number, number];
 		rot: [number, number, number];
 		size: number;
 		debug: boolean;
-	} = {
+	};
+	const plane: Plane = {
 		pos: [0, 0, 0],
 		rot: [Math.PI / 2 + Math.PI / 10, 0, 0],
 		size: 5,
 		debug: false
 	};
-	const FLAP: { baseSpeed: number; speedFromVelocity: number; maxSpeed: number } = {
+	/** Wing-flap animation parameters, driven by per-instance velocity. */
+	type Flap = {
+		baseSpeed: number;
+		speedFromVelocity: number;
+		maxSpeed: number;
+	};
+	const flap: Flap = {
 		baseSpeed: 4,
 		speedFromVelocity: 8,
 		maxSpeed: 10
 	};
-	const MOVE_ROT: { rotSmoothing: number; bankStrength: number; maxBank: number } = {
+	/** Parameters controlling heading smoothing and banking during turns. */
+	type Orientation = {
+		rotSmoothing: number;
+		bankStrength: number;
+		maxBank: number;
+	};
+	const orientation: Orientation = {
 		rotSmoothing: 5.0,
 		bankStrength: 15,
 		maxBank: 70
 	};
-	const COLONY: {
+
+	/** Flocking/boid parameters shared by every butterfly in the colony. */
+	type Colony = {
 		count: number;
 		radius: number;
 		wanderStrength: number;
@@ -46,7 +66,8 @@
 		minSpeed: number;
 		damping: number;
 		eachSize: number;
-	} = {
+	};
+	const colony: Colony = {
 		count: 50,
 		radius: 0.4,
 		wanderStrength: 1.2,
@@ -60,131 +81,211 @@
 		eachSize: 0.025
 	};
 
-	// -------------------------------------
-	// Butterfly Colony (instanced)
-	// -------------------------------------
+	const butterflyUp = new Vector3(0, 1, 0);
+	const origin = new Vector3(0, 0, 0);
+	// Applied after lookAt orientation to correct for the source model's default facing axis.
+	const modelCorrection = new Quaternion();
+
+	// =====================================
+	// Per-instance state
+	// =====================================
+
+	/**
+	 * Encapsulates the simulation state for a single butterfly instance.
+	 * Replaces the previous parallel-array approach to avoid index-sync bugs
+	 * and make it straightforward to add or remove per-instance fields.
+	 */
+	class Butterfly {
+		position: Vector3;
+		velocity: Vector3;
+		lastDirection: Vector3;
+		quaternion: Quaternion;
+		wanderAngleXZ: number;
+		wanderAngleY: number;
+
+		constructor(center: Vector3) {
+			const angle = Math.random() * Math.PI * 2;
+			const r = Math.random() * colony.radius;
+
+			this.position = new Vector3(
+				center.x + Math.cos(angle) * r,
+				center.y + (Math.random() - 0.5) * colony.spawnHeightJitter,
+				center.z + Math.sin(angle) * r
+			);
+			this.velocity = new Vector3((Math.random() - 0.5) * 0.2, 0, (Math.random() - 0.5) * 0.2);
+			this.lastDirection = new Vector3(0, 0, 1);
+			this.quaternion = new Quaternion();
+			this.wanderAngleXZ = Math.random() * Math.PI * 2;
+			this.wanderAngleY = Math.random() * Math.PI * 2;
+		}
+	}
+
+	// Pre-allocated scratch objects reused across frames and instances to avoid per-frame garbage collection.
+	const scratch = {
+		wanderDir: new Vector3(),
+		steer: new Vector3(),
+		offset: new Vector3(),
+		toCenter: new Vector3(),
+		lastDir: new Vector3(),
+		lookMatrix: new Matrix4(),
+		tmpQuat: new Quaternion(),
+		rightVec: new Vector3(),
+		forwardVec: new Vector3(),
+		bankQuat: new Quaternion(),
+		finalQuat: new Quaternion(),
+		dummy: new Object3D()
+	};
+
+	// =====================================
+	// Simulation steps
+	// =====================================
+
+	// Advances the wander angles by a random increment and returns the resulting wander direction.
+	function stepWander(b: Butterfly, delta: number): Vector3 {
+		b.wanderAngleXZ += (Math.random() - 0.5) * colony.wanderJitter * delta;
+		b.wanderAngleY += (Math.random() - 0.5) * colony.wanderJitter * 0.5 * delta;
+
+		return scratch.wanderDir
+			.set(Math.cos(b.wanderAngleXZ), Math.sin(b.wanderAngleY) * 0.6, Math.sin(b.wanderAngleXZ))
+			.normalize();
+	}
+
+	// Computes the combined steering force for this frame: random wander
+	function computeSteering(b: Butterfly, colonyCenter: Vector3, delta: number): Vector3 {
+		const wanderDir = stepWander(b, delta);
+		scratch.steer.copy(wanderDir).multiplyScalar(colony.wanderStrength);
+
+		scratch.offset.subVectors(b.position, colonyCenter);
+		const distFromCenter = scratch.offset.length();
+
+		if (distFromCenter > colony.radius) {
+			const over = distFromCenter - colony.radius;
+			scratch.toCenter.copy(scratch.offset).normalize().multiplyScalar(-1);
+			scratch.steer.addScaledVector(
+				scratch.toCenter,
+				colony.seekStrength * MathUtils.clamp(over / colony.radius, 0, 1.5)
+			);
+		}
+
+		return scratch.steer;
+	}
+
+	// Integrates the steering force into velocity, applies damping and speed clamping, then advances position for this frame.
+	function integrateMotion(b: Butterfly, steer: Vector3, delta: number) {
+		b.velocity.addScaledVector(steer, delta);
+
+		// Frame-rate independent exponential damping.
+		const dampFactor = Math.pow(colony.damping, delta * 60);
+		b.velocity.multiplyScalar(dampFactor);
+
+		const speed = b.velocity.length();
+		if (speed > colony.maxSpeed) {
+			b.velocity.multiplyScalar(colony.maxSpeed / speed);
+		} else if (speed > 1e-5 && speed < colony.minSpeed) {
+			b.velocity.multiplyScalar(colony.minSpeed / speed);
+		}
+
+		b.position.addScaledVector(b.velocity, delta);
+	}
+
+	/**
+	 * Derives a heading quaternion from the current direction of travel,
+	 * applies a banking rotation proportional to lateral (turning) speed,
+	 * and smoothly slerps the instance's stored quaternion toward it.
+	 *
+	 * Returns the current speed so callers can reuse it (e.g. for flap speed)
+	 * without recomputing velocity.length().
+	 */
+	function updateOrientation(b: Butterfly, delta: number): number {
+		const currSpeed = b.velocity.length();
+
+		// Fall back to the last known direction when nearly stationary,
+		// to avoid orientation snapping/flickering at very low speeds.
+		if (currSpeed > 1e-4) {
+			scratch.lastDir.copy(b.velocity).normalize();
+			b.lastDirection.copy(scratch.lastDir);
+		} else {
+			scratch.lastDir.copy(b.lastDirection);
+		}
+
+		scratch.lookMatrix.lookAt(origin, scratch.lastDir, butterflyUp);
+		scratch.tmpQuat.setFromRotationMatrix(scratch.lookMatrix);
+		scratch.tmpQuat.multiply(modelCorrection);
+
+		// Bank angle is proportional to how much velocity points sideways
+		// relative to the current heading (i.e. how sharply the instance is turning).
+		scratch.rightVec.set(1, 0, 0).applyQuaternion(scratch.tmpQuat);
+		const lateralSpeed = b.velocity.dot(scratch.rightVec);
+		const bankAngleDeg = MathUtils.clamp(
+			-lateralSpeed * orientation.bankStrength,
+			-orientation.maxBank,
+			orientation.maxBank
+		);
+
+		scratch.forwardVec.set(0, 0, -1).applyQuaternion(scratch.tmpQuat);
+		scratch.bankQuat.setFromAxisAngle(scratch.forwardVec, MathUtils.degToRad(bankAngleDeg));
+		scratch.finalQuat.copy(scratch.tmpQuat).multiply(scratch.bankQuat);
+
+		// Frame-rate independent exponential smoothing toward the target orientation.
+		const rt = 1 - Math.exp(-orientation.rotSmoothing * delta);
+		b.quaternion.slerp(scratch.finalQuat, rt);
+
+		return currSpeed;
+	}
+
+	/** Writes the instance's transform into the InstancedMesh at the given index. */
+	function writeInstanceMatrix(mesh: InstancedMesh, index: number, b: Butterfly) {
+		scratch.dummy.position.copy(b.position);
+		scratch.dummy.quaternion.copy(b.quaternion);
+		scratch.dummy.scale.setScalar(colony.eachSize);
+		scratch.dummy.updateMatrix();
+		mesh.setMatrixAt(index, scratch.dummy.matrix);
+	}
+
+	// =====================================
+	// Component state & lifecycle
+	// =====================================
+
 	const gltf = useGltf('/models/Butterfly-low.glb');
 
-	let instancedMesh = $state<ThreeInstancedMesh>();
+	let instancedMesh = $state<InstancedMesh>();
 	let butterflyGeometry = $state<BufferGeometry>();
+
+	let butterflies: Butterfly[] = [];
+	let flapPhase: Float32Array = new Float32Array(0);
 	let flapTimeAttr: InstancedBufferAttribute | undefined;
 
 	const mat = new ShaderMaterial({
 		side: DoubleSide,
 		transparent: false,
-		vertexShader: /* glsl */ `
-      attribute float aFlapTime;
-
-      vec3 rotateZ(vec3 pos, vec3 center, float angle) {
-        float s = sin(angle);
-        float c = cos(angle);
-        vec3 p = pos - center;
-        vec3 rotated = vec3(
-          p.x * c - p.y * s,
-          p.x * s + p.y * c,
-          p.z
-        );
-        return rotated + center;
-      }
-
-      void main() {
-        vec3 post = position;
-
-        vec3 scaledPos = post * vec3(1.0, 1.5, 1.0);
-        float dist = length(scaledPos + vec3(0.0, 1.5, 0.0));
-        float distanceBranch = dist * 0.3;
-
-        float waveInput = aFlapTime - distanceBranch;
-        float wave = sin(waveInput) * 1.0;
-
-        float sideMultiplier = (post.x > 0.0) ? 1.0 : -1.0;
-        float finalAngle = wave * sideMultiplier;
-
-        vec3 center = vec3(0.0, 0.0, -1.6);
-        vec3 rotatedPosition = rotateZ(post, center, finalAngle);
-
-        #ifdef USE_INSTANCING
-          vec4 worldPos = instanceMatrix * vec4(rotatedPosition, 1.0);
-        #else
-          vec4 worldPos = vec4(rotatedPosition, 1.0);
-        #endif
-
-        gl_Position = projectionMatrix * modelViewMatrix * worldPos;
-      }
-    `,
-		fragmentShader: /* glsl */ `
-      void main() {
-        gl_FragColor = vec4(1.0, 0.06, 0.06, 1.0);
-      }
-    `
+		vertexShader: vert,
+		fragmentShader: frag
 	});
 
-	const BUTTERFLY_UP = new Vector3(0, 1, 0);
-	const ORIGIN = new Vector3(0, 0, 0);
-
-	const MODEL_CORRECTION = new Quaternion();
-
+	// Target the colony steers toward (updated by pointer movement) and its smoothed current position (updated once per frame in the task loop).
 	const pointerTarget = new Vector3(0, 0.2, 0.2);
 	const colonyCenter = pointerTarget.clone();
 
-	let positions: Vector3[] = [];
-	let velocities: Vector3[] = [];
-	let lastDirections: Vector3[] = [];
-	let instanceQuats: Quaternion[] = [];
-	let wanderAngleXZ: number[] = [];
-	let wanderAngleY: number[] = [];
-	let flapPhase: Float32Array = new Float32Array(0);
-
-	const dummy = new Object3D();
-	const wanderDir = new Vector3();
-	const steer = new Vector3();
-	const offsetFromCenter = new Vector3();
-	const toCenter = new Vector3();
-	const lookMatrix = new Matrix4();
-	const tmpQuat = new Quaternion();
-	const rightVec = new Vector3();
-	const forwardVec = new Vector3();
-	const bankQuat = new Quaternion();
-	const finalQuat = new Quaternion();
-	const lastDir = new Vector3();
-
 	const handlePointerMove = (e: { point: Vector3 }) => pointerTarget.copy(e.point);
 
+	/** Initializes the colony's instance state and per-instance flap phase buffer. */
+	function spawnColony(center: Vector3) {
+		butterflies = Array.from({ length: colony.count }, () => new Butterfly(center));
+		flapPhase = new Float32Array(colony.count);
+		for (let i = 0; i < colony.count; i++) {
+			flapPhase[i] = Math.random() * Math.PI * 2;
+		}
+	}
+
+	// Loads the butterfly geometry once the GLTF asset is available and (re)initializes the colony.
 	$effect(() => {
 		if (!$gltf) return;
 
 		const geo = ($gltf.nodes.Butterfly.geometry as BufferGeometry).clone();
-		const flapArray = new Float32Array(COLONY.count);
-		geo.setAttribute('aFlapTime', new InstancedBufferAttribute(flapArray, 1));
+		spawnColony(colonyCenter);
 
+		geo.setAttribute('aFlapTime', new InstancedBufferAttribute(flapPhase, 1));
 		flapTimeAttr = geo.getAttribute('aFlapTime') as InstancedBufferAttribute;
-		flapPhase = flapArray;
-
-		positions = [];
-		velocities = [];
-		lastDirections = [];
-		instanceQuats = [];
-		wanderAngleXZ = [];
-		wanderAngleY = [];
-
-		for (let i = 0; i < COLONY.count; i++) {
-			const angle = Math.random() * Math.PI * 2;
-			const r = Math.random() * COLONY.radius;
-
-			positions.push(
-				new Vector3(
-					colonyCenter.x + Math.cos(angle) * r,
-					colonyCenter.y + (Math.random() - 0.5) * COLONY.spawnHeightJitter,
-					colonyCenter.z + Math.sin(angle) * r
-				)
-			);
-			velocities.push(new Vector3((Math.random() - 0.5) * 0.2, 0, (Math.random() - 0.5) * 0.2));
-			lastDirections.push(new Vector3(0, 0, 1));
-			instanceQuats.push(new Quaternion());
-			wanderAngleXZ.push(Math.random() * Math.PI * 2);
-			wanderAngleY.push(Math.random() * Math.PI * 2);
-			flapArray[i] = Math.random() * Math.PI * 2;
-		}
 
 		butterflyGeometry = geo;
 
@@ -193,99 +294,31 @@
 		};
 	});
 
-	// -------------------------------------
-	// Task
-	// -------------------------------------
+	// =====================================
+	// Main simulation loop
+	// =====================================
+
 	useTask((delta) => {
-		if (!instancedMesh || positions.length === 0) return;
+		if (!instancedMesh || butterflies.length === 0) return;
 
-		// Raycast pointer
-		const ct = 1 - Math.exp(-COLONY.centerSmoothing * delta);
-		colonyCenter.lerp(pointerTarget, ct);
+		// Smoothly move the colony's effective center toward the pointer target,
+		// rather than snapping to it, for a more natural following behavior.
+		const centerT = 1 - Math.exp(-colony.centerSmoothing * delta);
+		colonyCenter.lerp(pointerTarget, centerT);
 
-		for (let i = 0; i < COLONY.count; i++) {
-			const pos = positions[i];
-			const vel = velocities[i];
+		for (let i = 0; i < butterflies.length; i++) {
+			const b = butterflies[i];
 
-			// Random wandering direction
-			wanderAngleXZ[i] += (Math.random() - 0.5) * COLONY.wanderJitter * delta;
-			wanderAngleY[i] += (Math.random() - 0.5) * COLONY.wanderJitter * 0.5 * delta;
+			const steer = computeSteering(b, colonyCenter, delta);
+			integrateMotion(b, steer, delta);
+			const currSpeed = updateOrientation(b, delta);
 
-			wanderDir
-				.set(
-					Math.cos(wanderAngleXZ[i]),
-					Math.sin(wanderAngleY[i]) * 0.6,
-					Math.sin(wanderAngleXZ[i])
-				)
-				.normalize();
+			writeInstanceMatrix(instancedMesh, i, b);
 
-			steer.copy(wanderDir).multiplyScalar(COLONY.wanderStrength);
-
-			// Wandering boundary
-			offsetFromCenter.subVectors(pos, colonyCenter);
-			const distFromCenter = offsetFromCenter.length();
-			if (distFromCenter > COLONY.radius) {
-				const over = distFromCenter - COLONY.radius;
-				toCenter.copy(offsetFromCenter).normalize().multiplyScalar(-1);
-				steer.addScaledVector(
-					toCenter,
-					COLONY.seekStrength * MathUtils.clamp(over / COLONY.radius, 0, 1.5)
-				);
-			}
-
-			vel.addScaledVector(steer, delta);
-
-			// Damping velocity
-			const dampFactor = Math.pow(COLONY.damping, delta * 60);
-			vel.multiplyScalar(dampFactor);
-
-			const speed = vel.length();
-			if (speed > COLONY.maxSpeed) {
-				vel.multiplyScalar(COLONY.maxSpeed / speed);
-			} else if (speed > 1e-5 && speed < COLONY.minSpeed) {
-				vel.multiplyScalar(COLONY.minSpeed / speed);
-			}
-
-			pos.addScaledVector(vel, delta);
-
-			// Bank steering
-			const currSpeed = vel.length();
-			if (currSpeed > 1e-4) {
-				lastDir.copy(vel).normalize();
-				lastDirections[i].copy(lastDir);
-			} else {
-				lastDir.copy(lastDirections[i]);
-			}
-
-			lookMatrix.lookAt(ORIGIN, lastDir, BUTTERFLY_UP);
-			tmpQuat.setFromRotationMatrix(lookMatrix);
-			tmpQuat.multiply(MODEL_CORRECTION);
-
-			rightVec.set(1, 0, 0).applyQuaternion(tmpQuat);
-			const lateralSpeed = vel.dot(rightVec);
-			const bankAngleDeg = MathUtils.clamp(
-				-lateralSpeed * MOVE_ROT.bankStrength,
-				-MOVE_ROT.maxBank,
-				MOVE_ROT.maxBank
-			);
-
-			forwardVec.set(0, 0, -1).applyQuaternion(tmpQuat);
-			bankQuat.setFromAxisAngle(forwardVec, MathUtils.degToRad(bankAngleDeg));
-			finalQuat.copy(tmpQuat).multiply(bankQuat);
-
-			const rt = 1 - Math.exp(-MOVE_ROT.rotSmoothing * delta);
-			instanceQuats[i].slerp(finalQuat, rt);
-
-			dummy.position.copy(pos);
-			dummy.quaternion.copy(instanceQuats[i]);
-			dummy.scale.setScalar(COLONY.eachSize);
-			dummy.updateMatrix();
-			instancedMesh.setMatrixAt(i, dummy.matrix);
-
-			// Flap animation
+			// Flap speed scales with movement speed, capped at flap.maxSpeed.
 			const flapSpeed = Math.min(
-				FLAP.baseSpeed + currSpeed * FLAP.speedFromVelocity,
-				FLAP.maxSpeed
+				flap.baseSpeed + currSpeed * flap.speedFromVelocity,
+				flap.maxSpeed
 			);
 			flapPhase[i] += delta * flapSpeed;
 		}
@@ -295,23 +328,23 @@
 	});
 </script>
 
-<!-- Hit-target raycast -->
-<T.Mesh position={PLANE.pos} rotation={PLANE.rot} onpointermove={handlePointerMove}>
-	<T.PlaneGeometry args={[PLANE.size, PLANE.size]} />
+<!-- Invisible plane raycasting -->
+<T.Mesh position={plane.pos} rotation={plane.rot} onpointermove={handlePointerMove}>
+	<T.PlaneGeometry args={[plane.size, plane.size]} />
 	<T.MeshBasicMaterial
 		transparent
-		opacity={PLANE.debug ? 0.15 : 0.0}
+		opacity={plane.debug ? 0.15 : 0.0}
 		color={0x0000ff}
 		side={DoubleSide}
 		depthWrite={false}
 	/>
 </T.Mesh>
 
-<!-- Butterfly colony -->
+<!-- Instanced butterfly colony -->
 {#if butterflyGeometry}
 	<T.InstancedMesh
 		bind:ref={instancedMesh}
-		args={[butterflyGeometry, mat, COLONY.count]}
+		args={[butterflyGeometry, mat, colony.count]}
 		frustumCulled={false}
 	/>
 {/if}

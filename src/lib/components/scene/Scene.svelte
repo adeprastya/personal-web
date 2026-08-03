@@ -5,7 +5,7 @@
 	import { interactivity } from '@threlte/extras';
 
 	import Camera from './Camera.svelte';
-	import PostFX from '$lib/shaders/PostFX.svelte';
+	import PostFX from './postFX/PostFX.svelte';
 
 	import SceneGlobal from './global/SceneGlobal.svelte';
 	import SceneHome from './home/SceneHome.svelte';
@@ -13,6 +13,7 @@
 	import SceneWorks from './works/SceneWorks.svelte';
 
 	const { scene } = useThrelte();
+
 	interactivity();
 	onMount(() => {
 		scene.background = new Color('#09090b');

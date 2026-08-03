@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { T, useTask } from '@threlte/core';
 	import {
-		BufferGeometry,
-		BufferAttribute,
 		AdditiveBlending,
+		BufferAttribute,
+		BufferGeometry,
 		DynamicDrawUsage,
-		ShaderMaterial,
 		Points,
+		ShaderMaterial,
 		Vector3
 	} from 'three';
 	import { untrack } from 'svelte';
@@ -19,7 +19,6 @@
 		hotColor?: [number, number, number];
 		coolColor?: [number, number, number];
 	};
-
 	let {
 		count = 50,
 		spread = [6, 0, 2],
@@ -29,29 +28,58 @@
 		coolColor = [1.0, 0.27, 0.0]
 	}: Props = $props();
 
+	/** Base particle drift velocity. */
+	const drift = {
+		xRange: 0.008,
+		yMin: 0.006,
+		yRange: 0.012,
+		zRange: 0.004
+	};
+
+	/** Additional horizontal motion layered on top of the base drift. */
+	const wobble = {
+		xFreq: 8,
+		xAmp: 0.002,
+		zFreq: 6,
+		zAmp: 0.002
+	};
+
+	const fadeAlpha = 0.85;
+
+	/** Indicates whether the particle system has been initialized. */
 	let ready = $state(false);
-	let mat = $state<ShaderMaterial | null>(null);
+
+	let material = $state<ShaderMaterial | null>(null);
+
 	// svelte-ignore non_reactive_update
 	let points: Points | null = null;
 
+	/** Particle simulation buffers. */
 	let positions: Float32Array;
 	let velocities: Float32Array;
 	let lifetimes: Float32Array;
 	let phases: Float32Array;
-	let posAttr: BufferAttribute;
-	let lifeAttr: BufferAttribute;
 
-	const randomize = (i: number) => {
+	/** GPU attributes updated every frame. */
+	let positionAttribute: BufferAttribute;
+	let lifetimeAttribute: BufferAttribute;
+
+	/** Respawns a particle at the emitter origin with a fresh velocity. */
+	function spawnParticle(i: number) {
 		const b = i * 3;
+
 		positions[b] = origin[0] + (Math.random() - 0.5) * spread[0];
 		positions[b + 1] = origin[1] + (Math.random() - 0.5) * spread[1];
 		positions[b + 2] = origin[2] + (Math.random() - 0.5) * spread[2];
-		velocities[b] = (Math.random() - 0.5) * 0.008;
-		velocities[b + 1] = Math.random() * 0.012 + 0.006;
-		velocities[b + 2] = (Math.random() - 0.5) * 0.004;
-		lifetimes[i] = Math.random();
-	};
 
+		velocities[b] = (Math.random() - 0.5) * drift.xRange;
+		velocities[b + 1] = drift.yMin + Math.random() * drift.yRange;
+		velocities[b + 2] = (Math.random() - 0.5) * drift.zRange;
+
+		lifetimes[i] = Math.random();
+	}
+
+	/** Create particle buffers and rendering resources. */
 	$effect(() => {
 		ready = false;
 
@@ -61,43 +89,52 @@
 		phases = new Float32Array(count);
 
 		for (let i = 0; i < count; i++) {
-			randomize(i);
+			spawnParticle(i);
 			phases[i] = Math.random() * Math.PI * 2;
 		}
 
-		const geo = new BufferGeometry();
-		posAttr = new BufferAttribute(positions, 3);
-		lifeAttr = new BufferAttribute(lifetimes, 1);
+		const geometry = new BufferGeometry();
 
-		posAttr.usage = DynamicDrawUsage;
-		lifeAttr.usage = DynamicDrawUsage;
+		positionAttribute = new BufferAttribute(positions, 3);
+		lifetimeAttribute = new BufferAttribute(lifetimes, 1);
 
-		geo.setAttribute('position', posAttr);
-		geo.setAttribute('aLife', lifeAttr);
+		positionAttribute.usage = DynamicDrawUsage;
+		lifetimeAttribute.usage = DynamicDrawUsage;
+
+		geometry.setAttribute('position', positionAttribute);
+		geometry.setAttribute('aLife', lifetimeAttribute);
 
 		const [hR, hG, hB] = untrack(() => hotColor);
 		const [cR, cG, cB] = untrack(() => coolColor);
 
-		const newMat = new ShaderMaterial({
-			vertexShader: /* gsls */ `
+		const newMaterial = new ShaderMaterial({
+			vertexShader: /* glsl */ `
 				attribute float aLife;
 				varying float vLife;
+
 				void main() {
 					vLife = aLife;
+
 					vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+
 					gl_PointSize = (1.0 - aLife) * 4.0 + 1.0;
 					gl_Position = projectionMatrix * mvPos;
 				}
 			`,
-			fragmentShader: /* gsls */ `
+			fragmentShader: /* glsl */ `
 				uniform vec3 uHot;
 				uniform vec3 uCool;
+
 				varying float vLife;
+
 				void main() {
 					vec2 uv = gl_PointCoord - vec2(0.5);
+
 					if (length(uv) > 0.5) discard;
+
 					vec3 col = mix(uHot, uCool, vLife);
-					float alpha = (1.0 - vLife) * 0.85;
+					float alpha = (1.0 - vLife) * ${fadeAlpha.toFixed(2)};
+
 					gl_FragColor = vec4(col, alpha);
 				}
 			`,
@@ -110,47 +147,52 @@
 			depthWrite: true
 		});
 
-		points = new Points(geo, newMat);
-		mat = newMat;
+		points = new Points(geometry, newMaterial);
+		material = newMaterial;
 		ready = true;
 
 		return () => {
 			ready = false;
-			mat = null;
+			material = null;
 			points = null;
-			geo.dispose();
-			newMat.dispose();
+
+			geometry.dispose();
+			newMaterial.dispose();
 		};
 	});
 
-	$effect(() => {
-		if (!mat) return;
-		mat.uniforms.uHot.value.set(...hotColor);
-		mat.uniforms.uCool.value.set(...coolColor);
+	$effect(function syncUniforms() {
+		if (!material) return;
+
+		material.uniforms.uHot.value.set(...hotColor);
+		material.uniforms.uCool.value.set(...coolColor);
 	});
 
-	useTask(() => {
+	useTask(function runAnimation() {
 		if (!ready) return;
 
-		const oy = origin[1];
-		const invH = 1 / height;
-		const maxY = oy + height;
+		const originY = origin[1];
+		const maxY = originY + height;
+		const invHeight = 1 / height;
 
 		for (let i = 0; i < count; i++) {
 			const b = i * 3;
 			const life = lifetimes[i];
 
-			positions[b] += velocities[b] + Math.sin(life * 8 + phases[i]) * 0.002;
+			positions[b] += velocities[b] + Math.sin(life * wobble.xFreq + phases[i]) * wobble.xAmp;
 			positions[b + 1] += velocities[b + 1];
-			positions[b + 2] += velocities[b + 2] + Math.cos(life * 6 + phases[i]) * 0.002;
+			positions[b + 2] +=
+				velocities[b + 2] + Math.cos(life * wobble.zFreq + phases[i]) * wobble.zAmp;
 
-			lifetimes[i] = (positions[b + 1] - oy) * invH;
+			lifetimes[i] = (positions[b + 1] - originY) * invHeight;
 
-			if (positions[b + 1] > maxY) randomize(i);
+			if (positions[b + 1] > maxY) {
+				spawnParticle(i);
+			}
 		}
 
-		posAttr.needsUpdate = true;
-		lifeAttr.needsUpdate = true;
+		positionAttribute.needsUpdate = true;
+		lifetimeAttribute.needsUpdate = true;
 	});
 </script>
 

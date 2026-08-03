@@ -1,11 +1,3 @@
-<script lang="ts" module>
-	function getCircPos(i: number, y: number, radius: number): [number, number, number] {
-		const startAngle = 0.1;
-		const angle = startAngle + (i * Math.PI * 2) / 3;
-		return [radius * Math.cos(angle), y, radius * Math.sin(angle)];
-	}
-</script>
-
 <script lang="ts">
 	import { T, useThrelte, useTask } from '@threlte/core';
 	import { useViewport } from '@threlte/extras';
@@ -15,6 +7,7 @@
 	import { route } from '$lib/state/route.svelte';
 	import { device } from '$lib/state/device.svelte';
 	import { drag } from '$lib/state/dragControl.svelte';
+	import { CircularItems } from '$lib/utils/math/CircularItems';
 
 	import CircleLine from './CircleLine.svelte';
 	import BracketText from './BracketText.svelte';
@@ -40,19 +33,49 @@
 		worldCenterOffset: 0.2,
 		textRadius: 1.25
 	};
+
+	/** Concentric ring settings; each is mirrored above and below the origin (see circleYOffsets). */
 	const circles = [
 		{ radius: 0.5, segments: 32, color: new Color('#fff'), opacity: 0.4 },
 		{ radius: 0.9, segments: 44, color: new Color('#fff'), opacity: 0.3 },
 		{ radius: 1.4, segments: 60, color: new Color('#fff'), opacity: 0.2 },
 		{ radius: 2.0, segments: 64, color: new Color('#fff'), opacity: 0.1 }
 	];
+
+	/** Vertical offsets each ring is duplicated at. */
+	const circleYOffsets = [0.9, -0.9];
+
 	const textItems = [
 		{ text: 'DESIGNING IDEAS THAT RESONATE BEYOND VISION', index: 1, y: 1 },
 		{ text: 'BLENDING LOGIC AND INTUITION WITH FUNCTION AND BEAUTY', index: 2, y: 0 },
 		{ text: 'A PURSUIT OF KNOWLEDGE FUELLED BY ENDLESS CURIOUSITY', index: 3, y: -1 }
 	];
 
-	let transform = $derived.by(() => {
+	/** Ring used to position each text item around the hero. */
+	const textRing = new CircularItems(textItems, dragTransform.textRadius);
+
+	const particles = {
+		origin: [0, -2.5, 0] as [number, number, number],
+		spread: [3, 1, 3] as [number, number, number],
+		height: 6,
+		count: 80,
+		hotColor: [0.8, 0.4, 0.2] as [number, number, number],
+		coolColor: [1.0, 0.0, 0.0] as [number, number, number]
+	};
+
+	const firefly = {
+		fireflyCount: 5,
+		fireflyColor: 0xff0000,
+		fireflySize: 0.015,
+		wanderRadius: 0.15,
+		wanderSpeed: 3.0,
+		followSmooth: 0.1,
+		burstEnergy: 1.2,
+		burstDuration: 1.5,
+		debug: false
+	};
+
+	let transform = $derived.by(function calcTransform() {
 		if (!isOnHome) return { rotY: 0, posY: 0 };
 
 		return {
@@ -64,12 +87,12 @@
 		fontSize: device.isMatchMediaMobile ? 0.05 : 0.038,
 		maxWidth: device.isMatchMediaMobile ? 1.0 : 0.7
 	});
+	let fireflyPlaneSize = $derived<[number, number]>([viewport.current.width, viewport.current.height]);
 
-	// Camera distance calculation for bracket text animation
 	let bracText = $state({ nearDistance: 1, farDistance: 1 });
 	let throttleAcc = 0;
 	const throttleInterval = 1.0;
-	useTask((delta) => {
+	useTask(function animateTextDistance(delta) {
 		if (!camera.current || !isOnHome) return;
 
 		throttleAcc += delta;
@@ -86,26 +109,22 @@
 
 <T.Group visible={isOnHome}>
 	{#each circles as setting, i (i)}
-		<CircleLine {...setting} y={0.9} />
-		<CircleLine {...setting} y={-0.9} />
+		{#each circleYOffsets as y (y)}
+			<CircleLine {...setting} color={setting.color.clone()} {y} />
+		{/each}
 	{/each}
 
-	<Particles
-		origin={[0, -2.5, 0]}
-		spread={[3, 1, 3]}
-		height={6}
-		count={80}
-		hotColor={[0.8, 0.4, 0.2]}
-		coolColor={[1.0, 0.0, 0.0]}
-	/>
+	<Particles {...particles} />
 
 	<ButterflyHero />
+
+	<FireFly size={fireflyPlaneSize} {...firefly} />
 
 	<T.Group rotation.y={transform.rotY} position.y={transform.posY}>
 		{#each textItems as item, i (i)}
 			<BracketText
 				text={item.text}
-				position={getCircPos(item.index, item.y, dragTransform.textRadius)}
+				position={textRing.positionOf(item.index, item.y)}
 				{...textStyle}
 				{...bracText}
 				plateauWidth={0.1}
@@ -115,17 +134,4 @@
 			/>
 		{/each}
 	</T.Group>
-
-	<FireFly
-		size={[viewport.current.width, viewport.current.height]}
-		fireflyCount={5}
-		fireflyColor={0xff0000}
-		fireflySize={0.015}
-		wanderRadius={0.15}
-		wanderSpeed={3.0}
-		followSmooth={0.1}
-		burstEnergy={1.2}
-		burstDuration={1.5}
-		debug={false}
-	/>
 </T.Group>

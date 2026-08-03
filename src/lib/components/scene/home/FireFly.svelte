@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { AdditiveBlending, FrontSide, MathUtils, Object3D } from 'three';
+	import { type ComponentProps } from 'svelte';
 	import { T, useTask } from '@threlte/core';
 	import { Instance, InstancedMesh } from '@threlte/extras';
 	import { gsap } from 'gsap';
+	import { AdditiveBlending, FrontSide, MathUtils } from 'three';
 
-	type Props = {
+	interface Props {
 		debug?: boolean;
 		position?: [number, number, number];
 		size?: [number, number];
@@ -31,21 +32,43 @@
 		burstDuration = 2
 	}: Props = $props();
 
+	type Firefly = {
+		freqX: number;
+		freqY: number;
+		phaseX: number;
+		phaseY: number;
+		flickerFreq1: number;
+		flickerFreq2: number;
+		flickerPhase: number;
+		localElapsed: number;
+		energy: { value: number };
+		ref?: ComponentProps<typeof Instance>['ref'];
+	};
+
+	const [px, py, pz] = (() => position)();
+
+	/** Pointer interaction state. */
 	let hovering = $state(false);
 	const hoverPoint = { x: 0, y: 0 };
+
+	/** Smoothed swarm target. */
 	let followX = 0;
 	let followY = 0;
+
+	/** Shared animation timer. */
 	let elapsed = 0;
 
-	let baseR = $derived(((fireflyColor >> 16) & 255) / 255);
-	let baseG = $derived(((fireflyColor >> 8) & 255) / 255);
-	let baseB = $derived((fireflyColor & 255) / 255);
+	/** Base firefly color converted to normalized RGB. */
+	const baseR = $derived(((fireflyColor >> 16) & 255) / 255);
+	const baseG = $derived(((fireflyColor >> 8) & 255) / 255);
+	const baseB = $derived((fireflyColor & 255) / 255);
 
-	const fireflies = $state(
+	/** Per-firefly animation state. */
+	const fireflies = $state<Firefly[]>(
 		// eslint-disable-next-line svelte/no-unused-svelte-ignore
 		// svelte-ignore state_referenced_locally
 		Array.from({ length: fireflyCount }, () => ({
-			freqX: 1.2 + Math.random() * 1.0,
+			freqX: 1.2 + Math.random(),
 			freqY: 0.9 + Math.random() * 1.1,
 			phaseX: Math.random() * Math.PI * 2,
 			phaseY: Math.random() * Math.PI * 2,
@@ -54,83 +77,102 @@
 			flickerPhase: Math.random() * Math.PI * 2,
 			localElapsed: Math.random() * 100,
 			energy: { value: 1 },
-			ref: undefined as Object3D | undefined
+			ref: undefined
 		}))
 	);
 
-	const goWild = () => {
-		for (const f of fireflies) {
-			gsap.killTweensOf(f.energy);
-			f.energy.value = burstEnergy;
+	/** Temporarily boosts the swarm's movement energy. */
+	function triggerBurst() {
+		for (const firefly of fireflies) {
+			gsap.killTweensOf(firefly.energy);
 
-			gsap.to(f.energy, {
-				value: 1.0,
+			firefly.energy.value = burstEnergy;
+
+			gsap.to(firefly.energy, {
+				value: 1,
 				duration: burstDuration,
 				ease: 'power2.out'
 			});
 		}
-	};
+	}
 
-	const handleClick = (e: { point: { x: number; y: number } }) => {
-		hoverPoint.x = e.point.x - position[0];
-		hoverPoint.y = e.point.y - position[1];
+	/** Updates the swarm target. */
+	function updateTarget(x: number, y: number) {
+		hoverPoint.x = x - px;
+		hoverPoint.y = y - py;
 		hovering = true;
-		goWild();
-	};
+	}
 
-	const handlePointerMove = (e: { point: { x: number; y: number } }) => {
-		hoverPoint.x = e.point.x - position[0];
-		hoverPoint.y = e.point.y - position[1];
-		hovering = true;
-	};
+	/** Starts a burst and moves the swarm toward the pointer. */
+	function handleClick(e: { point: { x: number; y: number } }) {
+		updateTarget(e.point.x, e.point.y);
+		triggerBurst();
+	}
 
-	const handlePointerLeave = () => {
+	/** Updates the swarm target while the pointer moves. */
+	function handlePointerMove(e: { point: { x: number; y: number } }) {
+		updateTarget(e.point.x, e.point.y);
+	}
+
+	/** Stops following the pointer. */
+	function handlePointerLeave() {
 		hovering = false;
-	};
+	}
 
-	useTask((delta) => {
+	/** Updates firefly movement, color, and flicker every frame. */
+	useTask(function runAnimation(delta) {
 		elapsed += delta;
 
 		if (hovering) {
 			const t = 1 - Math.exp(-delta / followSmooth);
+
 			followX = MathUtils.lerp(followX, hoverPoint.x, t);
 			followY = MathUtils.lerp(followY, hoverPoint.y, t);
 		}
 
-		fireflies.forEach((f) => {
-			if (!f.ref) return;
+		for (const firefly of fireflies) {
+			if (!firefly.ref) continue;
 
-			const energy = f.energy.value;
-			const speedMul = 1.0 + (energy - 1.0) * 0.8;
-			const radiusMul = 1.0 + (energy - 1.0) * 1.2;
+			const energy = firefly.energy.value;
+			const speedMul = 1 + (energy - 1) * 0.8;
+			const radiusMul = 1 + (energy - 1) * 1.2;
 
-			f.localElapsed += delta * wanderSpeed * speedMul;
+			firefly.localElapsed += delta * wanderSpeed * speedMul;
 
 			const wx =
-				Math.sin(f.localElapsed * f.freqX * speedMul + f.phaseX) * wanderRadius * radiusMul;
+				Math.sin(firefly.localElapsed * firefly.freqX * speedMul + firefly.phaseX) *
+				wanderRadius *
+				radiusMul;
+
 			const wy =
-				Math.cos(f.localElapsed * f.freqY * speedMul + f.phaseY) * wanderRadius * radiusMul;
+				Math.cos(firefly.localElapsed * firefly.freqY * speedMul + firefly.phaseY) *
+				wanderRadius *
+				radiusMul;
 
-			f.ref.position.set(
-				position[0] + followX + wx,
-				position[1] + followY + wy,
-				position[2] + 0.02
+			firefly.ref.position.set(
+				px + followX + wx,
+				py + followY + wy,
+				pz + 0.02
 			);
 
-			const flicker = MathUtils.clamp(
-				0.5 +
-					Math.sin(elapsed * f.flickerFreq1 + f.flickerPhase) * 0.3 +
-					Math.sin(elapsed * f.flickerFreq2 + f.flickerPhase * 1.7) * 0.2,
-				0.15,
-				1
-			);
-			const brightness = flicker * (0.7 + energy * 0.3);
+			const brightness =
+				MathUtils.clamp(
+					0.5 +
+						Math.sin(elapsed * firefly.flickerFreq1 + firefly.flickerPhase) * 0.3 +
+						Math.sin(elapsed * firefly.flickerFreq2 + firefly.flickerPhase * 1.7) * 0.2,
+					0.15,
+					1
+				) *
+				(0.7 + energy * 0.3);
 
-			const c = (
-				f.ref as unknown as { color?: { setRGB: (r: number, g: number, b: number) => void } }
+			const color = (
+				firefly.ref as unknown as {
+					color?: { setRGB: (r: number, g: number, b: number) => void };
+				}
 			).color;
-			c?.setRGB(baseR * brightness, baseG * brightness, baseB * brightness);
-		});
+
+			color?.setRGB(baseR * brightness, baseG * brightness, baseB * brightness);
+		}
 	});
 </script>
 
@@ -152,8 +194,13 @@
 
 <InstancedMesh>
 	<T.SphereGeometry args={[fireflySize, 4, 4]} />
-	<T.MeshBasicMaterial transparent opacity={0.95} blending={AdditiveBlending} depthWrite={false} />
-	{#each fireflies as f, i (i)}
-		<Instance bind:ref={f.ref} color={fireflyColor} />
+	<T.MeshBasicMaterial
+		transparent
+		opacity={0.95}
+		blending={AdditiveBlending}
+		depthWrite={false}
+	/>
+	{#each fireflies as firefly, i (i)}
+		<Instance bind:ref={firefly.ref} color={fireflyColor} />
 	{/each}
 </InstancedMesh>

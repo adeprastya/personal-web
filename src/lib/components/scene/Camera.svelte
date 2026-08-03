@@ -1,98 +1,110 @@
 <script lang="ts">
-	import { afterNavigate } from '$app/navigation';
-	import { Vector3, PerspectiveCamera } from 'three';
-	import { useThrelte, useTask } from '@threlte/core';
+	import { useTask, useThrelte } from '@threlte/core';
+	import { PerspectiveCamera, Vector3 } from 'three';
+
+	import { route } from '$lib/state/route.svelte';
 	import { device } from '$lib/state/device.svelte';
 	import { pointer } from '$lib/state/pointer.svelte';
-	import { AppRoute } from '$lib/types/AppRoute';
+	import { type AppRouteType, AppRoute } from '$lib/types/AppRoute';
 
-	const FOV = 60;
-	const NEAR = 0.1;
-	const FAR = 10;
-	const LERP_SPEED = 0.025;
-	const MOUSE_SMOOTH = 0.1;
+	type Vec3 = {
+		x: number;
+		y: number;
+		z: number;
+	};
 
-	type Vec3 = { x: number; y: number; z: number };
+	const cameraConfig = {
+		fov: 60,
+		near: 0.1,
+		far: 10,
+		lerp: 0.025,
+		mouseSmooth: 0.1
+	} as const;
 
-	const ROUTE_CONFIG: Record<string, { pos: Vec3; look: Vec3 }> = {
+	const routesConfig = {
 		[AppRoute.Home]: {
-			pos: { x: 0, y: 0, z: 2.5 },
-			look: { x: 0, y: 0, z: 0 }
+			position: { x: 0, y: 0, z: 2.5 },
+			lookAt: { x: 0, y: 0, z: 0 }
 		},
 		[AppRoute.About]: {
-			pos: { x: 0, y: 1.0, z: 2.5 },
-			look: { x: 0, y: 0, z: 0 }
+			position: { x: 0, y: 1, z: 2.5 },
+			lookAt: { x: 0, y: 0, z: 0 }
 		},
 		[AppRoute.Works]: {
-			pos: { x: 0, y: -0.5, z: 2.5 },
-			look: { x: 0, y: 0, z: 0 }
+			position: { x: 0, y: -0.5, z: 2.5 },
+			lookAt: { x: 0, y: 0, z: 0 }
 		}
-	};
-	const DEFAULT_ROUTE = ROUTE_CONFIG[AppRoute.Home];
-
-	const isCam = (c: unknown): c is PerspectiveCamera => c instanceof PerspectiveCamera;
+	} satisfies Record<AppRouteType, { position: Vec3; lookAt: Vec3 }>;
 
 	const { camera } = useThrelte();
 
-	let posBase = { ...DEFAULT_ROUTE.pos };
-	let lookAtBase = { ...DEFAULT_ROUTE.look };
+	let basePosition = { ...routesConfig[AppRoute.Home].position };
+	let baseLookAt = { ...routesConfig[AppRoute.Home].lookAt };
 
 	const currentLookAt = new Vector3();
-	const smoothedMouse = { x: 0, y: 0 };
-	let t = 0;
+	const targetPosition = new Vector3();
+	const pointerOffset = { x: 0, y: 0 };
+	let elapsed = 0;
 
-	function updateCameraParams(cam: PerspectiveCamera) {
-		cam.near = NEAR;
-		cam.far = FAR;
-		cam.fov = FOV * (device.isMobile ? 1.25 : 1.0);
-		cam.updateProjectionMatrix();
+	function updateProjection(camera: PerspectiveCamera) {
+		camera.near = cameraConfig.near;
+		camera.far = cameraConfig.far;
+		camera.fov = cameraConfig.fov * (device.isMobile ? 1.25 : 1);
+		camera.updateProjectionMatrix();
 	}
 
-	$effect(() => {
-		if (camera.current instanceof PerspectiveCamera) updateCameraParams(camera.current);
-	});
+	function updatePointer() {
+		const x = (pointer.x / window.innerWidth) * 2 - 1;
+		const y = -(pointer.y / window.innerHeight) * 2 + 1;
 
-	afterNavigate(({ to }) => {
-		const cam = camera.current;
-		const path = to?.url.pathname ?? AppRoute.Home;
-
-		const config = ROUTE_CONFIG[path] ?? DEFAULT_ROUTE;
-		posBase = { ...config.pos };
-		lookAtBase = { ...config.look };
-
-		if (isCam(cam)) updateCameraParams(cam);
-	});
-
-	function updateSmoothedMouse() {
-		const rawX = (pointer.x / window.innerWidth) * 2 - 1;
-		const rawY = -(pointer.y / window.innerHeight) * 2 + 1;
-		smoothedMouse.x += (rawX - smoothedMouse.x) * MOUSE_SMOOTH;
-		smoothedMouse.y += (rawY - smoothedMouse.y) * MOUSE_SMOOTH;
+		pointerOffset.x += (x - pointerOffset.x) * cameraConfig.mouseSmooth;
+		pointerOffset.y += (y - pointerOffset.y) * cameraConfig.mouseSmooth;
 	}
-	function handleFloat(cam: PerspectiveCamera, delta: number) {
-		t += delta;
 
-		const targetPos = new Vector3(
-			posBase.x + smoothedMouse.x * 0.3,
-			posBase.y + smoothedMouse.y * 0.2,
-			posBase.z
+	function updateCamera(camera: PerspectiveCamera, delta: number) {
+		elapsed += delta;
+
+		targetPosition.set(
+			basePosition.x + pointerOffset.x * 0.3,
+			basePosition.y + pointerOffset.y * 0.2,
+			basePosition.z
 		);
-		cam.position.lerp(targetPos, LERP_SPEED);
 
-		currentLookAt.x += (lookAtBase.x - currentLookAt.x) * LERP_SPEED;
-		currentLookAt.y += (lookAtBase.y - currentLookAt.y) * LERP_SPEED;
-		currentLookAt.z += (lookAtBase.z - currentLookAt.z) * LERP_SPEED;
+		camera.position.lerp(targetPosition, cameraConfig.lerp);
 
-		const shiftX = Math.sin(t * 0.7) * 0.05;
-		const shiftY = Math.sin(t * 0.9 + 0.4) * 0.03;
+		currentLookAt.lerp(new Vector3(baseLookAt.x, baseLookAt.y, baseLookAt.z), cameraConfig.lerp);
 
-		cam.lookAt(currentLookAt.x + shiftX, currentLookAt.y + shiftY, currentLookAt.z);
+		// Subtle idle movement to avoid a static camera.
+		camera.lookAt(
+			currentLookAt.x + Math.sin(elapsed * 0.7) * 0.05,
+			currentLookAt.y + Math.sin(elapsed * 0.9 + 0.4) * 0.03,
+			currentLookAt.z
+		);
 	}
-	useTask((delta) => {
-		const cam = camera.current;
-		if (!isCam(cam)) return;
 
-		updateSmoothedMouse();
-		handleFloat(cam, delta);
+	$effect(function syncProjection() {
+		const cam = camera.current;
+		if (!(cam instanceof PerspectiveCamera)) return;
+
+		updateProjection(cam);
+	});
+
+	$effect(function syncRouteCamera() {
+		const curConf = routesConfig[route.current];
+		basePosition = { ...curConf.position };
+		baseLookAt = { ...curConf.lookAt };
+
+		const cam = camera.current;
+		if (cam instanceof PerspectiveCamera) {
+			updateProjection(cam);
+		}
+	});
+
+	useTask(function runAnimation(delta) {
+		const cam = camera.current;
+		if (!(cam instanceof PerspectiveCamera)) return;
+
+		updatePointer();
+		updateCamera(cam, delta);
 	});
 </script>

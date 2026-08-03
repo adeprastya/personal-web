@@ -19,16 +19,33 @@
 		opacity = 1
 	}: Props = $props();
 
-	const points: Vector3[] = [];
-	// svelte-ignore state_referenced_locally
-	for (let i = 0; i <= segments; i++) {
-		const theta = (i / segments) * Math.PI * 2;
-		points.push(new Vector3(Math.cos(theta) * radius, 0, Math.sin(theta) * radius));
+	/** Generates the points of a flat circle of the given radius, in the XZ plane. */
+	function createCirclePoints(radius: number, segments: number): Vector3[] {
+		const points: Vector3[] = [];
+		for (let i = 0; i <= segments; i++) {
+			const theta = (i / segments) * Math.PI * 2;
+			points.push(new Vector3(Math.cos(theta) * radius, 0, Math.sin(theta) * radius));
+		}
+		return points;
 	}
-	const geometry = new BufferGeometry().setFromPoints(points);
 
-	// svelte-ignore state_referenced_locally
-	const material = new LineBasicMaterial({ color, opacity, transparent: true, side: FrontSide });
+	const geometry = $derived(new BufferGeometry().setFromPoints(createCirclePoints(radius, segments)));
+
+	$effect(function syncCleanGeometry() {
+		const geo = geometry;
+		return () => geo.dispose();
+	});
+
+	const material = new LineBasicMaterial({ color: (() => color)(), transparent: true, side: FrontSide });
+
+	$effect(function syncMaterial() {
+		material.color.copy(color);
+		material.opacity = opacity;
+	});
+
+	$effect(function cleanupMaterial() {
+		return () => material.dispose();
+	});
 </script>
 
 <T.LineLoop {geometry} {material} position={[0, y, 0]} rotation={[rotation, 0, 0]} />

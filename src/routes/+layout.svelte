@@ -7,8 +7,6 @@
 	import { SplitText } from 'gsap/SplitText';
 
 	import { AppStage } from '$lib/types/AppStage';
-	import { AppRoute } from '$lib/types/AppRoute';
-	import { typingAnimation } from '$lib/utils/typingAnimation';
 	import { projects } from '$lib/stores/projects.svelte';
 	import { route } from '$lib/state/route.svelte';
 	import { device } from '$lib/state/device.svelte';
@@ -16,28 +14,14 @@
 	import { drag } from '$lib/state/dragControl.svelte';
 	import { projectControl } from '$lib/state/projectControl.svelte';
 
+	import TypingTitle from './TypingTitle.svelte';
 	import Head from './Head.svelte';
 	import Intro from '$lib/components/ui/intro/Intro.svelte';
 	import AppFrame from '$lib/components/ui/frame/AppFrame.svelte';
 	import ScrollToNext from '$lib/components/ui/ScrollToNext.svelte';
-	import WebGLCanvas from '$lib/components/scene/Canvas.svelte';
+	import WebGLScene from '$lib/components/scene/Canvas.svelte';
 
 	let { children } = $props();
-
-	// Route title mapping.
-	const routeTitles: Record<string, string> = {
-		[AppRoute.Home]: 'Ade Prastya',
-		[AppRoute.About]: "Don't know me?",
-		[AppRoute.Works]: 'Hope you like it!'
-	};
-	$effect(function animateTitle() {
-		typingAnimation(
-			routeTitles[route.from],
-			routeTitles[route.to],
-			(s: string) => (document.title = s || '|'),
-			{ delay: 100 }
-		);
-	});
 
 	// Global data & state initialization.
 	onMount(() => {
@@ -66,7 +50,7 @@
 
 <div class="fixed z-10 size-full overflow-hidden">
 	{#if browser}
-		<WebGLCanvas />
+		<WebGLScene />
 	{/if}
 
 	{@render children()}
@@ -79,3 +63,7 @@
 
 	<ScrollToNext />
 </div>
+
+{#if browser}
+	<TypingTitle />
+{/if}

@@ -15,8 +15,10 @@
 	import { projectControl } from '$lib/state/projectControl.svelte';
 
 	const { scene, camera, renderer, size, renderStage } = useThrelte();
+
 	const composer = new EffectComposer(renderer);
 
+	/** Adds bloom to bright areas. */
 	const bloomEffect = untrack(
 		() =>
 			new BloomEffect({
@@ -29,6 +31,8 @@
 				mipmapBlur: true
 			})
 	);
+
+	/** Adds subtle film grain. */
 	const noiseEffect = untrack(
 		() =>
 			new NoiseEffect({
@@ -36,6 +40,8 @@
 				premultiply: true
 			})
 	);
+
+	/** Simulates RGB channel separation. */
 	const chromaticEffect = untrack(
 		() =>
 			new ChromaticAberrationEffect({
@@ -43,6 +49,8 @@
 				blendFunction: BlendFunction.SCREEN
 			})
 	);
+
+	/** Drives the dimensional transition effect. */
 	const dimensionalEffect = untrack(
 		() =>
 			new InvertedDimensionalEffect({
@@ -52,7 +60,8 @@
 			})
 	);
 
-	$effect(() => {
+	/** Animate the transition when the project view is shown or hidden. */
+	$effect(function animateDimensional() {
 		if (projectControl.isVisible) {
 			gsap.fromTo(
 				dimensionalEffect,
@@ -76,13 +85,11 @@
 		}
 	});
 
+	/** Initialize the post-processing pipeline. */
 	composer.addPass(new RenderPass(scene, camera.current));
-	composer.addPass(
-		new EffectPass(camera.current, dimensionalEffect, bloomEffect, chromaticEffect, noiseEffect)
-	);
+	composer.addPass(new EffectPass(camera.current, dimensionalEffect, bloomEffect, chromaticEffect, noiseEffect));
 
-	// Sync composer with camera
-	$effect(() => {
+	$effect(function syncPasses() {
 		const cam = camera.current;
 		if (!cam) return;
 
@@ -94,23 +101,18 @@
 		);
 	});
 
-	// Sync composer size
-	$effect(() => {
+	$effect(function syncResolution() {
 		composer.setSize(size.current.width, size.current.height);
 	});
 
-	// Render composer
-	useTask(
-		(delta) => {
-			composer.render(delta);
-		},
+	useTask(function runComposer(delta) { composer.render(delta) },
 		{
 			stage: renderStage,
 			autoInvalidate: false
 		}
 	);
 
-	onDestroy(() => {
+	onDestroy(function cleanupComposer() {
 		composer.dispose();
 	});
 </script>
