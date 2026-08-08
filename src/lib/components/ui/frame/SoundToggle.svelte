@@ -1,5 +1,7 @@
 <script lang="ts">
-	let animate = $state(false);
+	import { audios, audio } from '$lib/audio/sounds';
+
+	let active = $state(true);
 
 	// Width (w) and delay (d) for bars animation
 	const bars = [
@@ -13,11 +15,22 @@
 	const totalHeight = 150;
 	const barHeight = 10;
 	const spacing = (totalHeight - bars.length * barHeight) / (bars.length + 1);
+
+	$effect(function syncAudio() {
+		if (active) {
+			audio.unmuteAll();
+		} else {
+			audio.muteAll();
+		}
+	});
 </script>
 
 <button
 	aria-label="Sound Toggle"
-	onclick={() => (animate = !animate)}
+	onclick={() => {
+		audios.soundClicking();
+		active = !active;
+	}}
 	class="group flex aspect-[2/3] w-4 cursor-pointer sm:w-5"
 >
 	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 {totalHeight}">
@@ -35,7 +48,7 @@
 					animation-delay: {d}s;
 				"
 				class="fill-zinc-700 transition-colors group-hover:fill-zinc-500 group-active:fill-zinc-900"
-				class:animate
+				class:animate={active}
 			/>
 		{/each}
 	</svg>

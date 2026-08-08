@@ -87,7 +87,9 @@
 
 	/** Initialize the post-processing pipeline. */
 	composer.addPass(new RenderPass(scene, camera.current));
-	composer.addPass(new EffectPass(camera.current, dimensionalEffect, bloomEffect, chromaticEffect, noiseEffect));
+	composer.addPass(
+		new EffectPass(camera.current, dimensionalEffect, bloomEffect, chromaticEffect, noiseEffect)
+	);
 
 	$effect(function syncPasses() {
 		const cam = camera.current;
@@ -105,7 +107,10 @@
 		composer.setSize(size.current.width, size.current.height);
 	});
 
-	useTask(function runComposer(delta) { composer.render(delta) },
+	useTask(
+		function runComposer(delta) {
+			composer.render(delta);
+		},
 		{
 			stage: renderStage,
 			autoInvalidate: false

@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { AppRoute } from '$lib/types/AppRoute';
-  import { route } from '$lib/state/route.svelte';
+	import { AppRoute } from '$lib/types/AppRoute';
+	import { route } from '$lib/state/route.svelte';
 	import { typingAnimation } from '$lib/utils/typingAnimation';
 
-	
 	// Route title mapping.
 	const routeTitles: Record<string, string> = {
 		[AppRoute.Home]: 'Ade Prastya',

@@ -2,6 +2,7 @@ import type { AppRouteType } from '$lib/types/AppRoute';
 import { page } from '$app/state';
 import gsap from 'gsap';
 import { device } from '$lib/state/device.svelte';
+import { projectControl } from '$lib/state/projectControl.svelte';
 
 class DragControlState {
 	/** Base drag distance required to reach 100% progress. */
@@ -43,6 +44,8 @@ class DragControlState {
 	 * @param dy Vertical drag delta.
 	 */
 	update(dy: number) {
+		if (projectControl.isVisible) return;
+
 		// Accumulate drag distance and animate the exposed progress.
 		this.accumulated = gsap.utils.clamp(0, this.dragNeeded, this.accumulated - dy);
 

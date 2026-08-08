@@ -8,6 +8,7 @@
 
 	import { projectControl } from '$lib/state/projectControl.svelte';
 	import { AppRoute } from '$lib/types/AppRoute';
+	import { audios } from '$lib/audio/sounds';
 
 	// --- Data & constants -----------------------------------------------
 
@@ -184,6 +185,8 @@
 
 		// Repositions the carousel to match the current route.
 		function syncCarouselToActiveRoute() {
+			audios.navClicking();
+
 			const routeIndex = links.findIndex((link) => link.href === page.url.pathname);
 			if (routeIndex === -1) return;
 

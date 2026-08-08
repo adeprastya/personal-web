@@ -17,7 +17,7 @@
 		followSmooth?: number;
 		burstEnergy?: number;
 		burstDuration?: number;
-	};
+	}
 	let {
 		debug = false,
 		position = [0, 0, 0],
@@ -149,11 +149,7 @@
 				wanderRadius *
 				radiusMul;
 
-			firefly.ref.position.set(
-				px + followX + wx,
-				py + followY + wy,
-				pz + 0.02
-			);
+			firefly.ref.position.set(px + followX + wx, py + followY + wy, pz + 0.02);
 
 			const brightness =
 				MathUtils.clamp(
@@ -194,12 +190,7 @@
 
 <InstancedMesh>
 	<T.SphereGeometry args={[fireflySize, 4, 4]} />
-	<T.MeshBasicMaterial
-		transparent
-		opacity={0.95}
-		blending={AdditiveBlending}
-		depthWrite={false}
-	/>
+	<T.MeshBasicMaterial transparent opacity={0.95} blending={AdditiveBlending} depthWrite={false} />
 	{#each fireflies as firefly, i (i)}
 		<Instance bind:ref={firefly.ref} color={fireflyColor} />
 	{/each}

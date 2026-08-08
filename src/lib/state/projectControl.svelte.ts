@@ -1,4 +1,5 @@
 import type { ProjectDetails } from '$lib/types/Project';
+import { audios } from '$lib/audio/sounds';
 
 class ProjectControlState {
 	/** Whether the project detail is currently visible. */
@@ -26,11 +27,13 @@ class ProjectControlState {
 	 */
 	show(visible = true) {
 		this.isVisible = visible;
+		audios.projectItemVisible();
 	}
 
 	/** Hides the active project. */
 	hide() {
 		this.isVisible = false;
+		audios.projectItemHidden();
 	}
 
 	/** Clears the active project state. */

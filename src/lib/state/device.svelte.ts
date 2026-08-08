@@ -6,6 +6,7 @@ class DeviceState {
 	public isMobile = $state<boolean>(false);
 	public isMatchMediaMobile = $state<boolean>(false);
 	public hasTouch = $state<boolean>(false);
+	public prefersReducedMotion = $state<boolean>(false);
 
 	/**
 	 * Initialize the state
@@ -28,6 +29,10 @@ class DeviceState {
 		} else {
 			this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 		}
+
+		this.prefersReducedMotion = !!(
+			'matchMedia' in window && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+		);
 
 		// Track viewport changes
 		const mediaQuery = window.matchMedia('(max-width: 768px) and (pointer: coarse)');

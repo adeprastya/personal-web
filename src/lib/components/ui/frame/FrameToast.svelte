@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { audios } from '$lib/audio/sounds';
 
 	const content = {
 		text: 'Dive into my resume',
@@ -11,13 +12,17 @@
 	function handleWrapperClick(e: MouseEvent) {
 		e.stopPropagation();
 
+		audios.CTAClicking();
 		if (!isOpen) return (isOpen = true);
 
 		window.open(content.href, '_blank', 'noopener,noreferrer');
 	}
 
-	onMount(function createWindowClickListener() {
-		const close = () => (isOpen = false);
+	onMount(function createOutsiteClickHandler() {
+		const close = () => {
+			if (isOpen) audios.CTAExpanding();
+			isOpen = false;
+		};
 
 		window.addEventListener('click', close);
 		return () => window.removeEventListener('click', close);
@@ -29,6 +34,8 @@
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		onclick={(e) => handleWrapperClick(e)}
+		onpointerenter={audios.CTAHovering}
+		onpointerleave={audios.CTAHovering}
 		aria-expanded={isOpen}
 		aria-label="Toggle CTA"
 		class="group relative flex size-full items-center justify-center px-3.5 py-2.5 sm:px-4 sm:py-3"
@@ -40,7 +47,7 @@
 
 		<!-- Main text -->
 		<span
-			class="overflow-hidden whitespace-nowrap transition-all duration-600 ease-in-out {isOpen
+			class="overflow-hidden whitespace-nowrap transition-all duration-700 ease-in-out {isOpen
 				? 'ml-4 max-w-xl'
 				: 'max-w-0'}"
 		>

@@ -5,6 +5,7 @@
 	import Trapezoid from '$lib/components/ui/shared/Trapezoid.svelte';
 	import InputField from '$lib/components/ui/shared/form-minimalist/InputField.svelte';
 	import TextareaField from '$lib/components/ui/shared/form-minimalist/TextareaField.svelte';
+	import { audios } from '$lib/audio/sounds';
 
 	let isOpen = $state(false);
 
@@ -50,7 +51,7 @@
 <form
 	aria-label="Fast Message Form"
 	onsubmit={handleSubmit}
-	class="relative flex w-full max-w-xs flex-col items-center gap-6 bg-zinc-200 p-6 transition-transform duration-300 will-change-transform"
+	class="relative flex w-full max-w-xs flex-col items-center gap-6 bg-zinc-200 p-6 transition-transform duration-1700 ease-in-out will-change-transform"
 	style:transform={isOpen ? 'translateX(100%)' : 'translateX(0)'}
 >
 	<p class="font-mono text-sm">Let's collaborate, brainstorm, or simply geek out together.</p>
@@ -131,7 +132,10 @@
 		<button
 			aria-label="Toggle Fast Message Form"
 			type="button"
-			onclick={() => (isOpen = !isOpen)}
+			onclick={() => {
+				audios.messageExpanding();
+				isOpen = !isOpen;
+			}}
 			class="group block cursor-pointer"
 		>
 			{#if isOpen}

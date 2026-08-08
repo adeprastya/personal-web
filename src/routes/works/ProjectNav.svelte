@@ -3,11 +3,14 @@
 	import { drag } from '$lib/state/dragControl.svelte';
 	import { MathUtils } from 'three';
 	import { trapezoid } from '$lib/utils/progressManipulation';
+	import { audios } from '$lib/audio/sounds';
+	import { projectControl } from '$lib/state/projectControl.svelte';
 
 	let { projects } = $props();
 
 	const total = (() => projects.length)();
 	const rawProgress = $derived(drag.is(AppRoute.Works) * total);
+
 	let progresses: number[] = $derived.by(() => {
 		return Array.from({ length: total }).map((_, i) => {
 			const chunk = MathUtils.clamp(MathUtils.mapLinear(rawProgress, i, i + 1, 0, 1), 0, 1);
@@ -15,9 +18,16 @@
 		});
 	});
 	let itemActiveProgress = $derived(progresses.reduce((a, b) => a + b, 0));
+
+	let itemActive = $derived(Math.floor(rawProgress));
+	$effect(function itemSwitchSound() {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const _ = itemActive;
+		audios.projectItemSwitching();
+	});
 </script>
 
-<nav class="fixed bottom-18 left-10 select-none sm:bottom-1/2 sm:left-20 sm:translate-y-1/2">
+<nav class:opacity-0={projectControl.isVisible} class="fixed bottom-18 left-10 select-none sm:bottom-1/2 sm:left-20 sm:translate-y-1/2 transition-[opacity] duration-600 ease-in-out">
 	<!-- Vertical line -->
 	<div class="absolute top-0 left-0 h-full w-px bg-zinc-500/30"></div>
 
@@ -35,9 +45,7 @@
 	<div class="flex flex-col gap-0">
 		{#each projects as p, i (projects[i].id)}
 			<button
-				onclick={() => {
-					drag.set((i + 0.5) / total, 1);
-				}}
+				onclick={() => drag.set((i + 0.5) / total, 1)}
 				class="relative flex cursor-pointer items-center gap-4 overflow-hidden px-8 py-3"
 			>
 				<!-- Hover line -->

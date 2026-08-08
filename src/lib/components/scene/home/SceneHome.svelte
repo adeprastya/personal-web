@@ -87,7 +87,10 @@
 		fontSize: device.isMatchMediaMobile ? 0.05 : 0.038,
 		maxWidth: device.isMatchMediaMobile ? 1.0 : 0.7
 	});
-	let fireflyPlaneSize = $derived<[number, number]>([viewport.current.width, viewport.current.height]);
+	let fireflyPlaneSize = $derived<[number, number]>([
+		viewport.current.width,
+		viewport.current.height
+	]);
 
 	let bracText = $state({ nearDistance: 1, farDistance: 1 });
 	let throttleAcc = 0;

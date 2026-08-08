@@ -29,14 +29,20 @@
 		return points;
 	}
 
-	const geometry = $derived(new BufferGeometry().setFromPoints(createCirclePoints(radius, segments)));
+	const geometry = $derived(
+		new BufferGeometry().setFromPoints(createCirclePoints(radius, segments))
+	);
 
 	$effect(function syncCleanGeometry() {
 		const geo = geometry;
 		return () => geo.dispose();
 	});
 
-	const material = new LineBasicMaterial({ color: (() => color)(), transparent: true, side: FrontSide });
+	const material = new LineBasicMaterial({
+		color: (() => color)(),
+		transparent: true,
+		side: FrontSide
+	});
 
 	$effect(function syncMaterial() {
 		material.color.copy(color);

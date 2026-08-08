@@ -19,7 +19,7 @@
 		height?: number;
 		color?: Color;
 		position?: [number, number, number];
-		visible?: boolean; 
+		visible?: boolean;
 		nearDistance: number; // Distance from camera at which reveal begins (fully hidden beyond this).
 		farDistance: number; // Distance from camera at which reveal is fully complete.
 		plateauWidth: number; // Distance range, starting at `nearDistance`, over which reveal stays at 0 before ramping up.

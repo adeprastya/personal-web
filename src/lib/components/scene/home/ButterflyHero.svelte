@@ -235,7 +235,12 @@
 				meshRoll.position.x = Math.sin(theta) * roll.radius;
 				meshRoll.position.y = (1 - Math.cos(theta)) * roll.radius;
 
-				const bell = asymmetricBell(v, roll.flapBellPeak, roll.flapBellSigmaUp, roll.flapBellSigmaDown);
+				const bell = asymmetricBell(
+					v,
+					roll.flapBellPeak,
+					roll.flapBellSigmaUp,
+					roll.flapBellSigmaDown
+				);
 				rollState.flapBoost = bell * roll.flapBoostMax;
 			}
 		});

@@ -1,10 +1,13 @@
 <script lang="ts">
-	import { gsap } from 'gsap';
 	import type { TrapezoidVariant } from '$lib/types/TrapezoidVariants';
+	import { gsap } from 'gsap';
 	import { SplitText } from 'gsap/SplitText';
 	import { onMount } from 'svelte';
 	import Trapezoid from '../shared/Trapezoid.svelte';
 	import CircularLoader from './IntroLoader.svelte';
+	import { audios } from '$lib/audio/sounds';
+	import { cn } from '$lib/utils/tailwindHelpers';
+	import { device } from '$lib/state/device.svelte';
 
 	const progressAnim = {
 		totalMs: 1500, // total time for the progress bar to reach 100
@@ -30,20 +33,17 @@
 	const progressStepCount = progressAnim.totalMs / progressAnim.stepMs;
 	const progressIncrement = 100 / progressStepCount;
 
-	const prefersReducedMotion =
-		typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
 	let isOpen = $state(true);
 	let progress = $state(0);
 	let h1El: HTMLHeadingElement | null = null;
 	let split: SplitText | null = null;
 
-	onMount(() => {
+	onMount(function startIntro() {
 		document.fonts.ready.then(function animateInText() {
 			split = new SplitText(h1El, { type: 'chars' });
 			h1El?.classList.remove('invisible');
 
-			if (prefersReducedMotion) {
+			if (device.prefersReducedMotion) {
 				gsap.set(split.chars, { opacity: 1 });
 			} else {
 				gsap.from(split.chars, {
@@ -55,26 +55,25 @@
 			}
 		});
 
-		const step = prefersReducedMotion ? 100 : progressIncrement;
+		const step = device.prefersReducedMotion ? 100 : progressIncrement;
 		const interval = setInterval(
 			function incrementProgress() {
 				progress = Math.min(progress + step, 100);
 				if (progress >= 100) {
 					clearInterval(interval);
-					isOpen = false;
 				}
 			},
-			prefersReducedMotion ? 0 : progressAnim.stepMs
+			device.prefersReducedMotion ? 0 : progressAnim.stepMs
 		);
 
-		return () => {
+		return function cleanup() {
 			clearInterval(interval);
 			split?.revert();
 		};
 	});
 
 	$effect(function animateOutText() {
-		if (!isOpen && split && !prefersReducedMotion) {
+		if (!isOpen && split && !device.prefersReducedMotion) {
 			gsap.to(split.chars, {
 				opacity: 0,
 				duration: textAnim.duration,
@@ -83,6 +82,11 @@
 			});
 		}
 	});
+
+	function handleStartClick(): void {
+		isOpen = false;
+		audios.introClicking();
+	}
 </script>
 
 <div class="pointer-events-none fixed inset-0 flex size-full items-center justify-center">
@@ -109,10 +113,28 @@
 
 	<!-- Loader -->
 	<div
-		class="absolute bottom-12 left-1/2 -translate-x-1/2 {isOpen
-			? 'opacity-100'
-			: 'opacity-0'} transition-opacity delay-1200 duration-600 motion-reduce:transition-none"
+		class="absolute bottom-12 left-1/2 -translate-x-1/2 transition-opacity duration-800 motion-reduce:transition-none {progress >=
+		100
+			? 'opacity-0'
+			: 'opacity-100'}"
 	>
 		<CircularLoader {progress} size={80} />
+	</div>
+
+	<div
+		class={cn(
+			'group absolute bottom-2/8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1 font-mono transition-opacity duration-1200',
+			progress >= 100 && isOpen ? 'animate-pulse opacity-100' : 'opacity-0',
+			isOpen ? 'pointer-events-auto' : 'pointer-events-none'
+		)}
+	>
+		<button
+			onclick={handleStartClick}
+			class="cursor-pointer text-sm text-neutral-800 uppercase hover:text-neutral-500"
+			>[ Start ]</button
+		>
+		<div
+			class="w-0 border-b-2 border-neutral-400 transition-[width] duration-1000 group-hover:w-3/4"
+		></div>
 	</div>
 </div>
