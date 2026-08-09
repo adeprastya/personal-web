@@ -27,7 +27,10 @@
 	});
 </script>
 
-<nav class:opacity-0={projectControl.isVisible} class="fixed bottom-18 left-10 select-none sm:bottom-1/2 sm:left-20 sm:translate-y-1/2 transition-[opacity] duration-600 ease-in-out">
+<nav
+	class:opacity-0={projectControl.isVisible}
+	class="fixed bottom-18 left-10 transition-[opacity] duration-600 ease-in-out select-none sm:bottom-1/2 sm:left-20 sm:translate-y-1/2"
+>
 	<!-- Vertical line -->
 	<div class="absolute top-0 left-0 h-full w-px bg-zinc-500/30"></div>
 

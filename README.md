@@ -29,8 +29,8 @@
       https://pixabay.com/sound-effects/film-special-effects-ui-sound-14-527823/
       Hover
 
-- u_c3u7ozdc09
-  https://pixabay.com/users/u_c3u7ozdc09-47306618/
-  1.  fmri scanner noise
-      https://pixabay.com/sound-effects/technology-fmri-scanner-noise-269152/
-      Scanner
+- freesound_community
+  https://pixabay.com/users/freesound_community-46691455/
+  1.  Windloop6sec
+      https://pixabay.com/sound-effects/film-special-effects-windloop6sec-90673/
+      Wind

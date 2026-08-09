@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { audios, audio } from '$lib/audio/sounds';
+	import { intro } from '$lib/state/intro.svelte';
 
 	let active = $state(true);
 
@@ -17,7 +18,7 @@
 	const spacing = (totalHeight - bars.length * barHeight) / (bars.length + 1);
 
 	$effect(function syncAudio() {
-		if (active) {
+		if (active && intro.isOpened) {
 			audio.unmuteAll();
 		} else {
 			audio.muteAll();

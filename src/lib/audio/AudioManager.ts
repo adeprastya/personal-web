@@ -9,13 +9,18 @@ interface PlayOptions {
 }
 
 export class AudioManager<T extends Record<string, string>> {
+	private sources: T = {} as T;
 	private sounds = new Map<keyof T, Howl>();
 
 	constructor(sources: T) {
+		this.sources = sources;
+	}
+
+	init(): void {
 		this.sounds = new Map(
-			Object.entries(sources).map(([name, src]) => [
+			Object.entries(this.sources).map(([name, src]) => [
 				name as keyof T,
-				new Howl({ src: [src], preload: true, html5: false })
+				new Howl({ src: [src], preload: true, html5: false, autoplay: false })
 			])
 		);
 	}
@@ -97,15 +102,5 @@ export class AudioManager<T extends Record<string, string>> {
 
 	unmuteAll(): void {
 		this.sounds.forEach((sound) => sound.mute(false));
-	}
-
-	playAll(): void {
-		this.sounds.forEach((sound) => {
-			if (!sound.playing()) sound.play();
-		});
-	}
-
-	stopAll(): void {
-		this.sounds.forEach((sound) => sound.stop());
 	}
 }

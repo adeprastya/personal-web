@@ -5,7 +5,7 @@ import Click from '$lib/assets/sounds/film-special-effects-ui-click-menu-modern-
 import Expand from '$lib/assets/sounds/film-special-effects-ui-movement-menu-modern-interface-hover-large-230487.mp3';
 import SoftClick from '$lib/assets/sounds/juniorsoundays-ui-sound-73-527841.mp3';
 import Hover from '$lib/assets/sounds/juniorsoundays-ui-sound-14-527823.mp3';
-import Scanner from '$lib/assets/sounds/u_c3u7ozdc09-fmri-scanner-noise-269152.mp3';
+import Wind from '$lib/assets/sounds/freesound_community-windloop6sec-90673.mp3';
 
 export const sounds = {
 	AmbientHigh,
@@ -14,9 +14,8 @@ export const sounds = {
 	Click,
 	Expand,
 	Hover,
-	Scanner
+	Wind
 } as const;
-
 export const audio = new AudioManager<typeof sounds>(sounds);
 
 export const audios = {
@@ -59,5 +58,5 @@ export const audios = {
 		audio.playWithFade('AmbientLow', { volume: 0.1, loop: true, duration: 2000 });
 	},
 
-	pointerMove: () => audio.play('Scanner', { volume: 0.0, loop: true })
+	pointerMove: () => audio.play('Wind', { volume: 0.0, loop: true })
 };

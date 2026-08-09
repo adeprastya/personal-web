@@ -9,6 +9,7 @@
 	const radius = () => size / 2;
 	const tickLen = () => size * 0.08;
 	const tickDist = () => radius() - tickLen() - 2;
+	const roundProggress = $derived(Math.round(progress));
 
 	// Calculate the coordinates of a tick mark based on its index and the total number of ticks
 	function tickCoords(
@@ -33,7 +34,7 @@
 			{y1}
 			{x2}
 			{y2}
-			stroke={i / ticks < progress / 100 ? '#18181b' : '#d4d4d8'}
+			stroke={i / ticks < roundProggress / 100 ? '#18181b' : '#18181b22'}
 			stroke-width="2"
 			stroke-linecap="round"
 		/>
@@ -44,6 +45,6 @@
 		text-anchor="middle"
 		font-size={size * 0.18}
 		fill="#18181b"
-		font-family="inherit">{progress}%</text
+		font-family="inherit">{roundProggress}%</text
 	>
 </svg>

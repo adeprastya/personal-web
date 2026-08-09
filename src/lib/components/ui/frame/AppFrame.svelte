@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { PUBLIC_IS_OPEN_TO_WORK } from '$env/static/public';
 	import { booleanCast } from '$lib/utils/envHelpers';
-	import { onMount } from 'svelte';
 	import { gsap } from 'gsap';
 
+	import { intro } from '$lib/state/intro.svelte';
 	import SvgLogo from '$lib/assets/icons/logo.svg?component';
 	import Trapezoid from '$lib/components/ui/shared/Trapezoid.svelte';
 	import RealtimeClock from './RealtimeClock.svelte';
@@ -43,7 +43,9 @@
 		decor: null
 	};
 
-	onMount(function animateEnteringRefs() {
+	$effect(function animateEnteringRefs() {
+		if (!intro.isOpened) return;
+
 		gsap.set(refs.name, { y: '-100%', x: '-100%', opacity: 0 });
 		gsap.set(refs.logo, { y: '-100%', x: '0%', opacity: 0 });
 		gsap.set(refs.clock, { y: '-100%', x: '100%', opacity: 0 });

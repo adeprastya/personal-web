@@ -13,6 +13,7 @@
 	import { drag } from '$lib/state/dragControl.svelte';
 	import { projectControl } from '$lib/state/projectControl.svelte';
 	import { audios, audio } from '$lib/audio/sounds';
+	import { intro } from '$lib/state/intro.svelte';
 
 	import VercelAnalytics from './VercelAnalytics.svelte';
 	import TypingTitle from './TypingTitle.svelte';
@@ -29,17 +30,28 @@
 		// Initialize data.
 		projects.init();
 
-		// Initialize stores.
+		intro.tick(40);
+
+		// Initialize state.
 		route.init();
 		device.init();
+
+		intro.tick(60);
+
 		pointer.init();
 		drag.init(() => pointer.dragDy);
 		projectControl.reset();
 
+		intro.tick(80);
+
+		audio.init();
+
 		// Register plugins.
 		gsap.registerPlugin(SplitText);
 
-		return () => {
+		intro.tick(100);
+
+		return function cleanup() {
 			device.destroy();
 			pointer.destroy();
 			drag.destroy();
@@ -47,18 +59,25 @@
 	});
 
 	onMount(function startSounds() {
-		if (isDev()) audios.introClicking();
+		if (isDev()) {
+			audios.introClicking();
+		}
 
 		audios.pointerMove();
 		$effect(function syncCursorSound() {
-			const volume = Math.min(1, Math.hypot(pointer.hoverDx, pointer.hoverDy) * 0.03);
-			const pitch = Math.hypot(pointer.hoverVx, pointer.hoverVy) * 0.00002 + 0.95;
+			const volume = Math.min(0.2, Math.hypot(pointer.hoverDx, pointer.hoverDy) * 0.0004 + 0.09);
+			const pitch = Math.hypot(pointer.hoverVx, pointer.hoverVy) * 0.00005 + 1;
+			audio.get('Wind')?.volume(volume);
+			audio.get('Wind')?.rate(pitch);
+		});
 
-			audio.get('Scanner')?.volume(volume);
-			audio.get('Scanner')?.rate(pitch);
-		})
-	})
-
+		$effect(function syncDragSound() {
+			const volume = Math.min(0.2, Math.abs(pointer.dragDy) * 0.0003 + 0.09);
+			const pitch = Math.abs(pointer.dragVy) * 0.00005 + 1;
+			audio.get('Wind')?.volume(volume);
+			audio.get('Wind')?.rate(pitch);
+		});
+	});
 </script>
 
 <Head />

@@ -117,7 +117,7 @@
 >
 	<button
 		onclick={() => projectControl.hide()}
-		class="flex w-full max-w-3xl flex-col items-start gap-3 text-left cursor-crosshair"
+		class="flex w-full max-w-3xl cursor-crosshair flex-col items-start gap-3 text-left"
 	>
 		<!-- Tagline -->
 		<h2
