@@ -11,8 +11,8 @@
 	import { intro } from '$lib/state/intro.svelte';
 
 	const textAnim = {
-		duration: 0.8, // seconds
-		stagger: 0.4 // seconds
+		duration: .8, // seconds
+		stagger: .4 // seconds
 	};
 
 	type Curtain = {
@@ -37,13 +37,13 @@
 				h1El?.classList.remove('invisible');
 
 				if (device.prefersReducedMotion) {
-					gsap.set(split.chars, { opacity: 1 });
+					gsap.set(split.words, { opacity: 1 });
 				} else {
 					gsap.from(split.chars, {
 						opacity: 0,
 						duration: textAnim.duration,
 						ease: 'power3.out',
-						stagger: { amount: textAnim.stagger, from: 'random' }
+						stagger: { amount: textAnim.stagger, from: 'center' }
 					});
 				}
 			})
@@ -57,7 +57,11 @@
 	});
 
 	$effect(function animateOutText() {
-		if (intro.isOpened && split && !device.prefersReducedMotion) {
+		if (!intro.isOpened || !split) return;
+
+		if (device.prefersReducedMotion) {
+			gsap.set(split.words, { opacity: 1 });
+		} else {
 			gsap.to(split.chars, {
 				opacity: 0,
 				duration: textAnim.duration,
