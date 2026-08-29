@@ -9,7 +9,7 @@
 	import { drag } from '$lib/state/dragControl.svelte';
 	import { CircularItems } from '$lib/utils/math/CircularItems';
 
-	import CircleLine from './CircleLine.svelte';
+	import CircleLine from '$lib/components/scene/shared/CircleLine.svelte';
 	import BracketText from './BracketText.svelte';
 	import Particles from './Particles.svelte';
 	import ButterflyHero from './ButterflyHero.svelte';
@@ -35,11 +35,12 @@
 	};
 
 	/** Concentric ring settings; each is mirrored above and below the origin (see circleYOffsets). */
+	const circColor = new Color('#fff');
 	const circles = [
-		{ radius: 0.5, segments: 32, color: new Color('#fff'), opacity: 0.4 },
-		{ radius: 0.9, segments: 44, color: new Color('#fff'), opacity: 0.3 },
-		{ radius: 1.4, segments: 60, color: new Color('#fff'), opacity: 0.2 },
-		{ radius: 2.0, segments: 64, color: new Color('#fff'), opacity: 0.1 }
+		{ radius: 0.5, segments: 32, color: circColor, opacity: 0.2 },
+		{ radius: 0.9, segments: 44, color: circColor, opacity: 0.125 },
+		{ radius: 1.4, segments: 60, color: circColor, opacity: 0.05 },
+		{ radius: 2.0, segments: 64, color: circColor, opacity: 0.02 }
 	];
 
 	/** Vertical offsets each ring is duplicated at. */

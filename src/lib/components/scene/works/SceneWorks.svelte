@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Texture, TextureLoader, ClampToEdgeWrapping } from 'three';
+	import { type Texture, TextureLoader, ClampToEdgeWrapping, Color } from 'three';
 	import { T, useThrelte } from '@threlte/core';
 	import { Text } from '@threlte/extras';
 
@@ -10,8 +10,17 @@
 	import { projects } from '$lib/stores/projects.svelte';
 	import { projectControl } from '$lib/state/projectControl.svelte';
 	import HexaWavePlane from './HexaWavePlane.svelte';
+	import CircleLine from '$lib/components/scene/shared/CircleLine.svelte';
 
 	const { renderer } = useThrelte();
+
+	const circColor = new Color('#fff');
+	const circles = [
+		{ radius: 2.6, segments: 64, color: circColor, opacity: 0.08 },
+		{ radius: 3.0, segments: 64, color: circColor, opacity: 0.07 },
+		{ radius: 3.4, segments: 64, color: circColor, opacity: 0.06 },
+		{ radius: 3.8, segments: 64, color: circColor, opacity: 0.05 }
+	];
 
 	let isOnWorks = $derived(route.is(AppRoute.Works));
 	let progress = $derived(drag.is(AppRoute.Works));
@@ -98,6 +107,12 @@
 	onpointerleave={() => (projectState.isHovered = false)}
 	visible={isOnWorks}
 >
+	{#each circles as setting, i (i)}
+		<T.Group rotation.x={Math.PI / 2} position.z={-1}>
+			<CircleLine {...setting} color={setting.color.clone()} y={0} />
+		</T.Group>
+	{/each}
+
 	<HexaWavePlane
 		{progress}
 		totalItems={total}

@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { MathUtils } from 'three';
+	import { MathUtils, Color, Group } from 'three';
 	import { AppRoute } from '$lib/types/AppRoute';
-	import { T } from '@threlte/core';
+	import { T, useTask } from '@threlte/core';
 	import { device } from '$lib/state/device.svelte';
 	import { route } from '$lib/state/route.svelte';
 	import { drag } from '$lib/state/dragControl.svelte';
 	import DiamondText from './DiamondText.svelte';
 	import ButterflyColony from './ButterflyColony.svelte';
+	import CircleLine from '$lib/components/scene/shared/CircleLine.svelte';
 
 	const isMobile = $derived(device.isMatchMediaMobile);
 	const textWidth = $derived(isMobile ? 1.6 : 2.0);
@@ -42,9 +43,32 @@
 				'Always inspired by visual arts, music, and movement while exploring the ways i can positively impact communities and environment.'
 		}
 	];
+
+	const circColor = new Color('#fff');
+	const circles = [
+		{ radius: 0.5, segments: 32, color: circColor, opacity: 0.2 },
+		{ radius: 0.9, segments: 44, color: circColor, opacity: 0.125 },
+		{ radius: 1.4, segments: 60, color: circColor, opacity: 0.05 },
+		{ radius: 2.0, segments: 64, color: circColor, opacity: 0.02 },
+		{ radius: 2.7, segments: 64, color: circColor, opacity: 0.01 }
+	];
+
+	let circleRefs = $state<(Group | undefined)[]>([]);
+	useTask((delta) => {
+		for (const circ of circleRefs) {
+			if (!circ) continue;
+			circ.rotation.y += delta * 0.8;
+		}
+	});
 </script>
 
 <T.Group visible={route.is(AppRoute.About)} position={[0, 0, 0]}>
+	{#each circles as setting, i (i)}
+		<T.Group bind:ref={circleRefs[i]} rotation.z={0.05} rotation.y={i * 1.8}>
+			<CircleLine {...setting} color={setting.color.clone()} y={-0.5} />
+		</T.Group>
+	{/each}
+
 	{#each texts as text, i (i)}
 		<DiamondText
 			diamondPosition={text.diamondPosition as [number, number, number]}
