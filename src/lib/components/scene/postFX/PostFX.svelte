@@ -24,9 +24,9 @@
 			new BloomEffect({
 				blendFunction: BlendFunction.SCREEN,
 				luminanceThreshold: 0.1,
-				luminanceSmoothing: 0.2,
-				intensity: 1.4,
-				radius: 0.15,
+				luminanceSmoothing: 0.1,
+				intensity: 1.6,
+				radius: 0.5,
 				levels: 8,
 				mipmapBlur: true
 			})
@@ -45,7 +45,7 @@
 	const chromaticEffect = untrack(
 		() =>
 			new ChromaticAberrationEffect({
-				strength: 0.006,
+				strength: 0.008,
 				blendFunction: BlendFunction.SCREEN
 			})
 	);

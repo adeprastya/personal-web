@@ -16,7 +16,7 @@
 	const cameraConfig = {
 		fov: 60,
 		near: 0.1,
-		far: 10,
+		far: 100,
 		lerp: 0.025,
 		mouseSmooth: 0.1
 	} as const;

@@ -11,8 +11,8 @@
 	import { intro } from '$lib/state/intro.svelte';
 
 	const textAnim = {
-		duration: .8, // seconds
-		stagger: .4 // seconds
+		duration: 0.8, // seconds
+		stagger: 0.4 // seconds
 	};
 
 	type Curtain = {
