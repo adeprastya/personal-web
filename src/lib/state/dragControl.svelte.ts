@@ -6,9 +6,9 @@ import { projectControl } from '$lib/state/projectControl.svelte';
 
 class DragControlState {
 	/** Base drag distance required to reach 100% progress. */
-	private readonly DRAG_NEEDED = 1000;
+	private readonly DRAG_NEEDED = 800;
 	/** Multiplier applied to desktop devices. */
-	private readonly DESKTOP_MULTIPLIER = 6;
+	private readonly DESKTOP_MULTIPLIER = 8;
 
 	/** Smoothed progress value in the range of 0–1. */
 	public value = $state(0);
@@ -110,6 +110,19 @@ class DragControlState {
 			value: progress,
 			duration,
 			ease: 'power2.out',
+			overwrite: true
+		});
+	}
+
+	accumulate(amount: number) {
+		if (projectControl.isVisible) return;
+
+		this.accumulated = gsap.utils.clamp(0, this.dragNeeded, this.accumulated + amount);
+
+		gsap.to(this, {
+			value: this.accumulated / this.dragNeeded,
+			duration: 0.15,
+			ease: 'power1.out',
 			overwrite: true
 		});
 	}

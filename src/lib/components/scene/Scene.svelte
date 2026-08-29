@@ -5,6 +5,7 @@
 	import { interactivity } from '@threlte/extras';
 
 	import Camera from './Camera.svelte';
+	import Control from './Control.svelte';
 	import PostFX from './postFX/PostFX.svelte';
 
 	import SceneGlobal from './global/SceneGlobal.svelte';
@@ -19,6 +20,8 @@
 		scene.background = new Color('#09090b');
 	});
 </script>
+
+<Control />
 
 <Camera />
 <T.AmbientLight intensity={1.0} color="#ffffff" />
