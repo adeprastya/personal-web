@@ -13,9 +13,7 @@
 	} from 'three';
 	import { T, useTask } from '@threlte/core';
 	import { useGltf, useViewport } from '@threlte/extras';
-	import { gsap } from 'gsap';
 
-	import { asymmetricBell } from '$lib/utils/math/curve';
 	import vert from '$lib/shaders/butterflyHero/vert.glsl?raw';
 	import frag from '$lib/shaders/butterflyHero/frag.glsl?raw';
 
@@ -28,7 +26,7 @@
 	// Reactive so the hit-target plane stays sized to the viewport on resize.
 	const planeSize = $derived<[number, number]>([viewport.current.width, viewport.current.height]);
 
-	/** Wing-flap animation parameters, driven by flight speed and click-roll boost. */
+	/** Wing-flap animation parameters, driven by flight speed. */
 	const flap = {
 		baseSpeed: 4,
 		speedFromVelocity: 8,
@@ -43,17 +41,6 @@
 		maxBank: 45,
 		levelOutSmoothing: 4.0,
 		idleSpeedThreshold: 0.2
-	};
-
-	/** Parameters for the click-triggered barrel-roll animation. */
-	const roll = {
-		duration: 4,
-		radius: 0.6,
-		velocityThreshold: 0.05,
-		flapBellPeak: 0.15,
-		flapBellSigmaUp: 0.08,
-		flapBellSigmaDown: 0.35,
-		flapBoostMax: 20
 	};
 
 	const butterflyUp = new Vector3(0, 1, 0);
@@ -72,7 +59,6 @@
 	const gltf = useGltf('/models/Butterfly.glb');
 
 	let meshPost = $state<Group | undefined>();
-	let meshRoll = $state<Group | undefined>();
 	let mesh = $state<Mesh | undefined>();
 
 	const mat = new ShaderMaterial({
@@ -131,16 +117,12 @@
 
 	/**
 	 * Updates the "facing" direction used for orientation. While moving above
-	 * the idle threshold, faces the direction of travel and records lateral
-	 * (X) velocity for roll-direction detection. While idle, gradually levels
-	 * out the vertical component of the last known direction.
+	 * the idle threshold, faces the direction of travel. While idle, gradually
+	 * levels out the vertical component of the last known direction.
 	 */
-	function updateFacingDirection(speed: number, delta: number): number {
-		let currentVelocityX = 0;
-
+	function updateFacingDirection(speed: number, delta: number) {
 		if (speed > flight.idleSpeedThreshold) {
 			lastDirection.copy(scratch.velocity).normalize();
-			currentVelocityX = scratch.velocity.x;
 		} else {
 			const lt = 1 - Math.exp(-flight.levelOutSmoothing * delta);
 			lastDirection.y = MathUtils.lerp(lastDirection.y, 0, lt);
@@ -150,8 +132,6 @@
 				lastDirection.copy(defaultDirection);
 			}
 		}
-
-		return currentVelocityX;
 	}
 
 	/**
@@ -180,75 +160,11 @@
 		target.quaternion.slerp(scratch.finalQuat, rt);
 	}
 
-	/** Advances the flap animation's time uniform based on current speed and roll boost. */
-	function updateFlap(speed: number, flapBoost: number, delta: number) {
-		const flapSpeed = Math.min(
-			flap.baseSpeed + speed * flap.speedFromVelocity + flapBoost,
-			flap.maxSpeed
-		);
+	/** Advances the flap animation's time uniform based on current speed. */
+	function updateFlap(speed: number, delta: number) {
+		const flapSpeed = Math.min(flap.baseSpeed + speed * flap.speedFromVelocity, flap.maxSpeed);
 		mat.uniforms.uTime.value += delta * flapSpeed;
 	}
-
-	// =====================================
-	// Click-triggered barrel roll
-	// =====================================
-
-	const rollState = {
-		progress: { value: 0 },
-		isAnimating: false,
-		direction: 1,
-		flapBoost: 0
-	};
-	let currentVelocityX = 0;
-	let activeTimeline: gsap.core.Timeline | undefined;
-
-	function handlePointerClick() {
-		if (rollState.isAnimating || !meshRoll) return;
-
-		rollState.isAnimating = true;
-		rollState.progress.value = 0;
-		rollState.direction =
-			Math.abs(currentVelocityX) > roll.velocityThreshold
-				? Math.sign(currentVelocityX)
-				: Math.random() > 0.5
-					? 1
-					: -1;
-
-		activeTimeline = gsap.timeline({
-			onComplete: () => {
-				rollState.isAnimating = false;
-				rollState.flapBoost = 0;
-			}
-		});
-
-		activeTimeline.to(rollState.progress, {
-			value: 1,
-			duration: roll.duration,
-			ease: 'sine.inOut',
-			onUpdate: () => {
-				if (!meshRoll) return;
-
-				const v = rollState.progress.value;
-				const theta = v * Math.PI * 2 * rollState.direction;
-
-				meshRoll.rotation.z = theta;
-				meshRoll.position.x = Math.sin(theta) * roll.radius;
-				meshRoll.position.y = (1 - Math.cos(theta)) * roll.radius;
-
-				const bell = asymmetricBell(
-					v,
-					roll.flapBellPeak,
-					roll.flapBellSigmaUp,
-					roll.flapBellSigmaDown
-				);
-				rollState.flapBoost = bell * roll.flapBoostMax;
-			}
-		});
-	}
-
-	$effect(function cleanupTimeline() {
-		return () => activeTimeline?.kill();
-	});
 
 	// =====================================
 	// Main animation loop
@@ -257,27 +173,15 @@
 	useTask(function runFlapAnimation(delta) {
 		if (!mesh || !meshPost) return;
 
-		// While rolling, position/orientation are driven entirely by the GSAP
-		// timeline (see handlePointerClick); only the flap animation continues here.
-		if (rollState.isAnimating) {
-			updateFlap(0, rollState.flapBoost, delta);
-			return;
-		}
-
 		const { speed } = updatePosition(meshPost, delta);
-		currentVelocityX = updateFacingDirection(speed, delta);
+		updateFacingDirection(speed, delta);
 		updateOrientation(mesh, delta);
-		updateFlap(speed, rollState.flapBoost, delta);
+		updateFlap(speed, delta);
 	});
 </script>
 
 <!-- Hit-target raycast -->
-<T.Mesh
-	position={planePosition}
-	rotation={planeRotation}
-	onpointermove={handlePointerMove}
-	onclick={handlePointerClick}
->
+<T.Mesh position={planePosition} rotation={planeRotation} onpointermove={handlePointerMove}>
 	<T.PlaneGeometry args={planeSize} />
 	<T.MeshBasicMaterial
 		transparent
@@ -292,15 +196,13 @@
 {#if $gltf}
 	<!-- Position manipulation -->
 	<T.Group bind:ref={meshPost}>
-		<T.Group bind:ref={meshRoll}>
-			<!-- Wing & look at manipulation -->
-			<T.Mesh
-				bind:ref={mesh}
-				geometry={$gltf.nodes.Butterfly.geometry}
-				material={mat}
-				position={[0, 0.1, 0]}
-				scale={0.16}
-			/>
-		</T.Group>
+		<!-- Wing & look at manipulation -->
+		<T.Mesh
+			bind:ref={mesh}
+			geometry={$gltf.nodes.Butterfly.geometry}
+			material={mat}
+			position={[0, 0.1, 0]}
+			scale={0.16}
+		/>
 	</T.Group>
 {/if}
